@@ -131,7 +131,7 @@ output:
 
 <pre>
 UNIX> <font color=darkred><b>g++ -std=c++98 c_str.cpp</b></font>
-UNIX> <font color=darkred><b>a.out | head -n 2</b></font>
+UNIX> <font color=darkred><b>./a.out | head -n 2</b></font>
 When I print buf with percent s, I get: ABCDEF
 When I print str with percent s, I get: ABCDEF
 UNIX> <font color=darkred><b></b></font>
@@ -158,7 +158,7 @@ where I print out
 <b>buf</b>.
 
 <pre>
-UNIX> <font color=darkred><b>a.out | tail -n 3</b></font>
+UNIX> <font color=darkred><b>./a.out | tail -n 3</b></font>
 This is cpps: AYCDEF
 This is str:  XBCDEF
 This is buf:  XBCDEF
@@ -273,7 +273,7 @@ C-style string changes.  Check it out as it runs (on my linux box):
 
 <pre>
 UNIX> <font color=darkred><b>g++ -std=c++98 buffer_changes.cpp </b></font>
-UNIX> <font color=darkred><b>a.out</b></font>
+UNIX> <font color=darkred><b>./a.out</b></font>
 The underlying buffer changed at size: 1
 The underlying buffer changed at size: 2
 The underlying buffer changed at size: 3
@@ -356,7 +356,7 @@ When I run it (again on my mac), you see some pretty odd behavior:
 
 <pre>
 UNIX> <font color=darkred><b>g++ -std=c++98 bad_c_str.cpp</b></font>
-UNIX> <font color=darkred><b>a.out</b></font>
+UNIX> <font color=darkred><b>./a.out</b></font>
 5
 ACDE
 A
@@ -410,7 +410,7 @@ When we run it, we see that the string <b>s</b> is set to "1 2 3 4 5":
 
 <pre>
 UNIX> <font color=darkred><b>g++ -std=c++98 sprintf1.cpp</b></font>
-UNIX> <font color=darkred><b>echo 1 | a.out</b></font>
+UNIX> <font color=darkred><b>echo 1 | ./a.out</b></font>
 1 2 3 4 5
 UNIX> <font color=darkred><b></b></font>
 </pre>
@@ -463,7 +463,7 @@ Look at what it is before and after the <b>sprintf()</b> statement:
 
 <pre>
 UNIX> <font color=darkred><b>g++ -std=c++98 sprintf2.cpp </b></font>
-UNIX> <font color=darkred><b>echo 1000 | a.out</b></font>
+UNIX> <font color=darkred><b>echo 1000 | ./a.out</b></font>
 Before:
 buf1: 
 buf2: 
@@ -561,7 +561,7 @@ This "reads" the string <b>s</b>, and converts it to an integer <b>i</b>, which 
 
 <pre>
 UNIX> <font color=darkred><b>g++ -std=c++98 sscanf1.cpp</b></font>
-UNIX> <font color=darkred><b>a.out</b></font>
+UNIX> <font color=darkred><b>./a.out</b></font>
 i = 100
 UNIX> <font color=darkred><b></b></font>
 </pre>
@@ -595,19 +595,19 @@ Here it is running on a variety of inputs.  Make sure you understand all of thes
 
 <pre>
 UNIX> <font color=darkred><b>g++ -std=c++98 sscanf2.cpp</b></font>
-UNIX> <font color=darkred><b>echo 10.5 5 | a.out</b></font>
+UNIX> <font color=darkred><b>echo 10.5 5 | ./a.out</b></font>
 n = 2.  d = 10.500000.  i = 5
 
-UNIX> <font color=darkred><b>echo 10.5 Fred | a.out</b></font>
+UNIX> <font color=darkred><b>echo 10.5 Fred | ./a.out</b></font>
 n = 1.  d = 10.500000.  i = 0
 
-UNIX> <font color=darkred><b>echo Fred 5 | a.out</b></font>
+UNIX> <font color=darkred><b>echo Fred 5 | ./a.out</b></font>
 n = 0.  d = 0.000000.  i = 0
 
-UNIX> <font color=darkred><b>echo 10.5xyz 55</b></font>
+UNIX> <font color=darkred><b>echo 10.5xyz 55 | ./a.out</b></font>
 n = 1.  d = 10.500000.  i = 0
 
-UNIX> <font color=darkred><b>echo go vols | a.out</b></font>
+UNIX> <font color=darkred><b>echo go vols | ./a.out</b></font>
 n = 0.  d = 0.000000.  i = 0
 
 UNIX> <font color=darkred><b></b></font>
@@ -641,7 +641,7 @@ That may well be handy for lab 1.....
 
 <pre>
 UNIX> <font color=darkred><b>g++ -std=c++98 sscanf3.cpp</b></font>
-UNIX> <font color=darkred><b>echo '55:33:22' | a.out</b></font>
+UNIX> <font color=darkred><b>echo '55:33:22' | ./a.out</b></font>
 n = 3.  h = 55.  m = 33.  s = 22.
 UNIX> <font color=darkred><b></b></font>
 </pre>
