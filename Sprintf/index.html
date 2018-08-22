@@ -1,0 +1,640 @@
+<title>CS302 Lecture Notes</title>
+<h2>Sprintf, Sscanf, C strings</h2>
+<UL>
+<LI> James S. Plank
+<LI> Directory: <b>/home/plank/cs302/Notes/Sprintf</b>
+<LI> August, 2015
+<LI> Latest revision: 
+Tue Aug 21 13:12:00 EDT 2018
+</UL>
+<hr>
+
+<h3>Topcoder Practice Problems</h3>
+
+<UL>
+<LI> <a href=http://web.eecs.utk.edu/~plank/topcoder-writeups/2016/EllysTimeMachine/index.html>EllysTimeMachine, the 250-point problem from TCO 2016, Round 1A</a>.  You can do this one extremely quickly
+if you use <b>sscanf()</b> and <b>sprintf()</b>.
+</UL>
+
+<hr>
+<h3>Buckle Up -- We're not in CS140 any more</h3>
+
+This lecture drags you through some pretty detailed information about C++ and C-style
+strings.  I urge you to walk through these lecture notes pretty slowly, and run the code
+yourself on your own machine.  I know you're going to glaze over pretty quickly, thinking
+something like the following:
+<p>
+<i>"I'm never going to use this stuff.  I can use <b>cin</b> and <b>cout</b> and stringstreams,
+so why would I want to bother with pointers and arrays, ampersands and null characters?
+Plank's just old and doesn't know how to do modern programming."</i>
+<p>
+
+Now that we've acknowledged what you're thinking, I want you to
+resist the temptation to skip this stuff and work through it.  Yes, I am old.  
+Trust me -- <b>sprintf()</b> and 
+<b>sscanf()</b> are easier and cleaner to use than stringstreams.  Plus, understanding 
+computer memory is one of the most important keys to being a good programmer.  So
+buckle up, and spend an hour or two with these lecture notes.
+
+<hr>
+<h3>Introduction - C Style Strings</h3>
+
+<b>Sprintf()</b> and <b>sscanf()</b> are string conversion procedures from the C Stdio Library.
+The functionality that you get with <b>sprintf()</b> and <b>sscanf()</b> is handled in C++
+with stringstreams.  However, <b>sprintf()</b> and <b>sscanf()</b> are far easier to use,
+so you should learn them.
+<p>
+Both of them work with "C style" strings.  These are arrays of bytes (of type <b>char</b>).
+The convention with C-style strings is that the array contains printable characters, terminated
+with the null character (which you specify as '\0' -- Its actual value is zero).
+Note, I say that this is a "convention."  That's because it is up to anyone using and manipulating
+C-style strings to make sure that the array of bytes is in the proper format -- it is not
+automatically handled for you like strings are in C++.
+<p>
+<table border=3 cellpadding=5><td>
+<i>Slight digression:  I assume that you've had this information before, but a little review
+never hurts -- printable characters
+in C and C++ are simply bytes, which are integers between -128 and 127.  The data type is <b>char</b>.
+You can print them as integers by using <b>printf("%d", ...)</b>.  When you print them as
+characters, you use <b>printf("%c", ...)</b>.  There is a mapping of integers to characters
+called "ASCII."  You don't need to care what this mapping is, except you should know that:
+<UL>
+<LI> Characters '0' through '9' are contiguous integers, and are smaller than 'A'-'Z' and 'a'-'z'.
+<LI> Characters 'A' through 'Z' are contiguous integers, and are smaller than 'a'-'z'.
+<LI> Characters 'a' through 'z' are contiguous integers.
+</UL>
+When you print a string in C or C++, you are printing an array of bytes using the ASCII mapping.
+With <b>printf("%s", s)</b> in particular, you are passing a pointer to bytes, and <b>printf()</b>
+prints the character associated with each byte in succession, until it reaches the null 
+character, specified as <tt>'\0'</tt>, whose integer value is zero.</i></td></table>
+
+<p>
+When you access a C-style string, you use a pointer to its first character.  This  pointer
+will be of type "<b>char *</b>."
+Alternatively, you can use an array of characters (an array, not a C++ vector) 
+that you allocate yourself,
+such as, for example "<b>char buf[10]</b>," which is an array of 10 characters.  
+Let's look at an example, in 
+<b><a href=c_str.cpp>c_str.cpp</a></b>:
+
+
+<p><center><table border=3 cellpadding=3><td><pre>
+<font color=blue>/* Line  1 */</font>    #include &lt;string&gt;
+<font color=blue>/* Line  2 */</font>    #include &lt;cstdio&gt;
+<font color=blue>/* Line  3 */</font>    #include &lt;cstdlib&gt;
+<font color=blue>/* Line  4 */</font>    #include &lt;iostream&gt;
+<font color=blue>/* Line  5 */</font>    using namespace std;
+<font color=blue>/* Line  6 */</font>    
+<font color=blue>/* Line  7 */</font>    int main()
+<font color=blue>/* Line  8 */</font>    {
+<font color=blue>/* Line  9 */</font>      char buf[10];
+<font color=blue>/* Line 10 */</font>      char *str;
+<font color=blue>/* Line 11 */</font>      int i;
+<font color=blue>/* Line 12 */</font>      string cpps;
+<font color=blue>/* Line 13 */</font>    
+<font color=blue>/* Line 14 */</font>      str = buf;
+<font color=blue>/* Line 15 */</font>    
+<font color=blue>/* Line 16 */</font>      for (i = 0; i &lt; 6; i++) buf[i] = 'A'+i;
+<font color=blue>/* Line 17 */</font>      buf[i] = '\0';
+<font color=blue>/* Line 18 */</font>    
+<font color=blue>/* Line 19 */</font>      printf("When I print buf with percent s, I get: %s\n", buf);
+<font color=blue>/* Line 20 */</font>      printf("When I print str with percent s, I get: %s\n", str);
+<font color=blue>/* Line 21 */</font>    
+<font color=blue>/* Line 22 */</font>      cpps = buf;
+<font color=blue>/* Line 23 */</font>      str[0] = 'X';
+<font color=blue>/* Line 24 */</font>      cpps[1] = 'Y';
+<font color=blue>/* Line 25 */</font>    
+<font color=blue>/* Line 26 */</font>      cout &lt;&lt; "This is cpps: " &lt;&lt; cpps &lt;&lt; endl;
+<font color=blue>/* Line 27 */</font>      cout &lt;&lt; "This is str:  " &lt;&lt; str &lt;&lt; endl;
+<font color=blue>/* Line 28 */</font>      cout &lt;&lt; "This is buf:  " &lt;&lt; buf &lt;&lt; endl;
+<font color=blue>/* Line 29 */</font>      return 0;
+<font color=blue>/* Line 30 */</font>    }</pre></td></table></center><p>
+
+On lines 9 and 10 of this program, I declare an array of ten characters called <b>buf</b>, and a character pointer
+called <b>str</b>.  The very first action that I perform (on line 14) 
+is have <b>str</b> point to the first byte of
+<b>buf</b>.  This looks as follows:
+
+<p><center><table border=3><td><img src=c_str1.jpg></td></table></center><p>
+
+
+In other words, I have allocated ten bytes, and I may access them in two ways -- via the
+variable <b>buf</b> and via the variable <b>str</b>.  Next, (lines 16 - 20), 
+I set the first five characters
+to 'A', 'B', 'C', 'D', 'E' and 'F'.  I set the next character to the null character, and I print
+out both <b>buf</b> and <b>str</b>.  At this point, they are:
+
+<p><center><table border=3><td><img src=c_str2.jpg></td></table></center><p>
+
+I can see this when I run the program by taking a look at the first two lines of 
+output:
+
+<pre>
+UNIX> <font color=darkred><b>g++ -std=c++98 c_str.cpp</b></font>
+UNIX> <font color=darkred><b>a.out | head -n 2</b></font>
+When I print buf with percent s, I get: ABCDEF
+When I print str with percent s, I get: ABCDEF
+UNIX> <font color=darkred><b></b></font>
+</pre>
+
+Next, (line 22), I assign the c++ string <b>cpps</b> to equal <b>buf</b>.  This creates a new C++
+string which is a heavier-weight data structure, because it contains more information than simply
+an array of bytes.  It copies the bytes of <b>buf</b> into its own data structure.  Here is a picture after line 22:
+<p><center><table border=3><td><img src=c_str3.jpg></td></table></center><p>
+
+Finally, (lines 23) I change the first byte of <b>str</b> to 'X'.  Because <b>str</b> is pointing
+to the same bytes as <b>buf</b>, that changes the first character of <b>buf</b>.  
+I also change the second byte of <b>cpps</b> to 'Y'.  Although this looks like the previous statement,
+it is a bit different, because the C++ string class overloads the bracket operators so that it finds
+the underlying bytes of the string, and changes the second one.  Here's what they look like
+afterward:
+
+<p><center><table border=3><td><img src=c_str4.jpg></td></table></center><p>
+
+This explains the last three lines of output,
+where I print out 
+<b>cpps</b>,  
+<b>str</b> and 
+<b>buf</b>.
+
+<pre>
+UNIX> <font color=darkred><b>a.out | tail -n 3</b></font>
+This is cpps: AYCDEF
+This is str:  XBCDEF
+This is buf:  XBCDEF
+UNIX> <font color=darkred><b></b></font>
+</pre>
+
+Make sure you understand <i>every</i> line of this program, and in particular, why it is
+that <b>str</b> and <b>buf</b> utilize the same string buffer, and <b>cpps</b> utilizes a
+different string.
+
+<hr>
+<h3>C++ strings</h3>
+
+Strings in C++ are very nicely handled -- you may manipulate them, allocate them, read them
+and write them quite seamlessly.  You may view a C++ string as a class that has, at its core,
+a C style string.  It's something like the following (this is not exactly right, but for the
+purposes of this explanation, it's good enough):
+<pre>
+class string {
+  public:
+    unsigned long long size();
+    char *c_str();
+    ...
+  private:
+    char *underyling_string;
+    unsigned long Size;
+    ...
+};
+</pre>
+When you create a string, for example:
+<pre>
+  int i;
+  string s;
+
+  for (i = 'A'; i < 'F'; i++) s.push_back(i);
+</pre>
+
+Then the string structure does some work to allocate memory for its string buffer, and
+when the loop is done, you'll have <b>Size</b> equaling 5, and <b>underlying_string</b> will
+point to a buffer of <i>at least</i> six bytes, the first 5 of which are 'A', 'B', 'C', 'D' and 'E',
+and the last of which is '\0'.  We can view it as follows:
+
+<p><center><table border=3><td><img src=S1.jpg></td></table></center><p>
+
+You'll note, in the drawing above, the amount of memory that <b>underlying_string</b> is pointing
+to is greater than the six characters required to store 'A' through 'E' and the null character.
+That can happen, and it will be different from machine to machine.  However, let's go with 
+this example.  Let's suppose you do two more "push_back" commands:
+<pre>
+  s.push_back('F');
+  s.push_back('G');
+</pre>
+Our string now looks as follows:
+
+<p><center><table border=3><td><img src=S2.jpg></td></table></center><p>
+
+Now, suppose you do one more "push_back":
+<pre>
+  s.push_back('H');
+</pre>
+
+The pointer to the buffer that holds the string has run out of memory.  So, what the string
+class does is allocate a new buffer, and copy the string there.  The state of our string will
+look something like this:
+
+<p><center><table border=3><td><img src=S3.jpg></td></table></center><p>
+
+What I'm trying to convey here is that the old buffer is discarded and a new one is used.
+The old buffer will be released to the memory management system to be reused, and the string
+uses the new buffer until it fills up.
+
+<hr>
+<h3>The c_str() method of a C++ string</h3>
+
+The <b>c_str()</b> method of a C++ string returns a <b>const char *</b>.  This is a pointer to the
+first byte of the C-style string that is held in the class of the C++ string.  The keyword
+"const" means that you should not try to modify this string, and if you do, the compiler
+will exit with an error.  We can get around this, by the way, which we'll do later.
+As I intimate above, a C++ string will keep filling in its underlying C-style string until
+it runs out of room, at which point it allocates a new string.  We can prove that with the
+following program, in 
+<b><a href=buffer_changes.cpp>buffer_changes.cpp</a></b>:
+
+<p><center><table border=3 cellpadding=3><td><pre>
+#include &lt;string&gt;
+#include &lt;cstdio&gt;
+#include &lt;cstdlib&gt;
+#include &lt;iostream&gt;
+using namespace std;
+
+int main()
+{
+  string s;
+  const char *cs;
+  int i;
+
+  cs = s.c_str();
+
+  for (i = 1; i &lt;= 10000; i++) {
+    s.push_back('A');
+    if (s.c_str() != cs) {
+      printf("The underlying buffer changed at size: %d\n", i);
+      cs = s.c_str();
+    }
+  }
+  return 0;
+}
+</pre></td></table></center><p>
+
+This keeps adding characters to a C++ string, <b>s</b>, and it notes when storage for the underlying
+C-style string changes.  Check it out as it runs (on my mac):
+
+<pre>
+UNIX> <font color=darkred><b>g++ -std=c++98 buffer_changes.cpp </b></font>
+UNIX> <font color=darkred><b>a.out</b></font>
+The underlying buffer changed at size: 1
+The underlying buffer changed at size: 2
+The underlying buffer changed at size: 3
+The underlying buffer changed at size: 5
+The underlying buffer changed at size: 9
+The underlying buffer changed at size: 17
+The underlying buffer changed at size: 33
+The underlying buffer changed at size: 65
+The underlying buffer changed at size: 129
+The underlying buffer changed at size: 257
+The underlying buffer changed at size: 513
+The underlying buffer changed at size: 1025
+The underlying buffer changed at size: 2049
+The underlying buffer changed at size: 8136
+UNIX> <font color=darkred><b></b></font>
+</pre>
+
+I think we can all figure out that the underlying buffers are allocated to be powers of two
+(plus one - you need room for the null character).
+<p>
+One thing that you should get out of this program is that you should not store <b>c_str()</b>
+pointers if you change the C++ string, because the underlying buffer can change.
+
+<hr>
+<h3>Don't mess with the bytes that <b>c_str()</b> returns, #1.</h3>
+
+The <b>const</b> keyword typically keeps you out of danger, but you can get around it.  The
+following program should show you why you shouldn't do that. Here, I "typecast" the return value
+of <b>c_str()</b> to a <b>char *</b> that doesn't have the "const" keyword.  Then I modify
+the C-style string so that it puts the null character after the first character.  Then I 
+print out the C++ string's size, plus I print out the string using both <b>printf()</b> and 
+<b>cout</b>.  The program is in 
+<b><a href=bad_c_str.cpp>bad_c_str.cpp</a></b>:
+
+<p><center><table border=3 cellpadding=3><td><pre>
+#include &lt;string&gt;
+#include &lt;cstdio&gt;
+#include &lt;cstdlib&gt;
+#include &lt;iostream&gt;
+using namespace std;
+
+int main()
+{
+  string s;
+  char *cs;
+
+  s = "ABCDE";
+  cs = (char *) s.c_str();
+  cs[1] = '\0';
+  
+  cout &lt;&lt; s.size() &lt;&lt; endl;
+  cout &lt;&lt; s &lt;&lt; endl;
+  printf("%s\n", s.c_str());
+
+  s.push_back('F');
+
+  cout &lt;&lt; s.size() &lt;&lt; endl;
+  cout &lt;&lt; s &lt;&lt; endl;
+  printf("%s\n", s.c_str());
+  
+  return 0;
+}
+</pre></td></table></center><p>
+
+When I run it (again on my mac), you see some pretty odd behavior:
+
+<pre>
+UNIX> <font color=darkred><b>g++ -std=c++98 bad_c_str.cpp</b></font>
+UNIX> <font color=darkred><b>a.out</b></font>
+5
+ACDE
+A
+6
+ACDEF
+A
+UNIX> <font color=darkred><b></b></font>
+</pre>
+
+You'll note that putting the null character into <b>s</b> turns the C style string into a 
+one-character string, but the C++ string retains its size, and when you print it out with 
+<b>cout</b>, it basically skips over the null character and keeps printing.  When you print out
+the <b>c_str()</b> with <b>printf()</b>, it stops at the null character.  
+<p>
+In other words, this is a program
+itching with bugs.  Don't do what I've done here; however, it's good to see what's happening.
+
+<hr>
+<h3>sprintf()</h3>
+
+<b>Sprintf()</b> does what <b>printf()</b> does, only it takes as its first argument a pointer
+to a buffer of bytes, and instead of printing to the screen, it puts its output into that buffer.
+Here's a very simple example of putting 5 numbers into a string
+(<b><a href=sprintf1.cpp>sprintf1.cpp</a></b>):
+
+<p><center><table border=3 cellpadding=3><td><pre>
+#include &lt;string&gt;
+#include &lt;cstdio&gt;
+#include &lt;cstdlib&gt;
+#include &lt;iostream&gt;
+using namespace std;
+
+int main()
+{
+  char buf[100];
+  string s;
+  int i;
+
+  cin &gt;&gt; i;
+
+  sprintf(buf, "%d %d %d %d %d", i, i+1, i+2, i+3, i+4);
+  s = buf;
+
+  cout &lt;&lt; s &lt;&lt; endl;
+
+  return 0;
+}
+</pre></td></table></center><p>
+
+When we run it, we see that the string <b>s</b> is set to "1 2 3 4 5":
+
+<pre>
+UNIX> <font color=darkred><b>g++ -std=c++98 sprintf1.cpp</b></font>
+UNIX> <font color=darkred><b>echo 1 | a.out</b></font>
+1 2 3 4 5
+UNIX> <font color=darkred><b></b></font>
+</pre>
+
+You want to make sure that you allocate a buffer that is big enough.  If you don't, the 
+<b>sprintf()</b> call will overrun memory, and when you do that, odd things may happen.
+Here's an example, in 
+<b><a href=sprintf2.cpp>sprintf2.cpp</a></b>:
+
+<p><center><table border=3 cellpadding=3><td><pre>
+#include &lt;string&gt;
+#include &lt;cstdio&gt;
+#include &lt;cstdlib&gt;
+#include &lt;iostream&gt;
+using namespace std;
+
+int main()
+{
+  char buf1[8];
+  char buf2[8];
+  char buf3[8];
+  int i;
+
+  buf1[0] = '\0';
+  buf2[0] = '\0';
+  buf3[0] = '\0';
+
+  cin &gt;&gt; i;
+
+  printf("Before:\n");
+  printf("buf1: %s\n", buf1);
+  printf("buf2: %s\n", buf2);
+  printf("buf3: %s\n", buf3);
+
+  sprintf(buf2, "%d %d %d %d %d", i, i+1, i+2, i+3, i+4);
+
+  printf("After:\n");
+  printf("buf1: %s\n", buf1);
+  printf("buf2: %s\n", buf2);
+  printf("buf3: %s\n", buf3);
+
+  return 0;
+}
+</pre></td></table></center><p>
+
+
+If you're lucky, you get a seg-fault.  Here, you're not so lucky (again, this is on my mac --
+results of this program will differ from machine to machine).  The weird behavior is <b>buf1</b>.
+Look at what it is before and after the <b>sprintf()</b> statement:
+
+<pre>
+UNIX> <font color=darkred><b>g++ -std=c++98 sprintf2.cpp </b></font>
+UNIX> <font color=darkred><b>echo 1000 | a.out</b></font>
+Before:
+buf1: 
+buf2: 
+buf3: 
+After:
+buf1: 003 1004
+buf2: 1000 1001 1002 1003 1004
+buf3: 
+Abort
+UNIX> <font color=darkred><b></b></font>
+</pre>
+
+We will explore this phenomenon in great detail in CS360.  For now, just remember to make
+sure that your <b>sprintf()</b> buffers are big enough to hold the final strings.
+
+<hr>
+<h3>Don't mess with the bytes that <b>c_str()</b> returns, #2.</h3>
+
+Students hate memory allocation, because it's a pain, and many languages let them get away without
+doing it.  Therefore, I have seen try to use <b>sprintf()</b> to create a string without
+allocating a buffer for the <b>sprintf()</b> call
+(this is in <b><a href=bad_c_str_2.cpp>bad_c_str_2.cpp</a></b>):
+
+<p><center><table border=3 cellpadding=3><td><pre>
+#include &lt;string&gt;
+#include &lt;cstdio&gt;
+#include &lt;cstdlib&gt;
+#include &lt;iostream&gt;
+using namespace std;
+
+int main()
+{
+  string s;
+
+  sprintf((char *) s.c_str(), "%d", 5);
+  cout &lt;&lt; s &lt;&lt; endl;
+}
+</pre></td></table></center><p>
+
+This is a disaster waiting to happen, because the c++ string doesn't know what's going on:
+It may or may not have allocated enough memory in its underlying string.  Moreover, when you do 
+the <b>sprintf()</b> call, the rest of the c++ string (e.g. the size field) doesn't know 
+what has happened.  When I run this, it prints nothing.  If you want to do the functionality
+above, then simply allocate a buffer
+(this is in <b><a href=good_c_str_2.cpp>good_c_str_2.cpp</a></b>):
+
+<p><center><table border=3 cellpadding=3><td><pre>
+#include &lt;string&gt;
+#include &lt;cstdio&gt;
+#include &lt;cstdlib&gt;
+#include &lt;iostream&gt;
+using namespace std;
+
+int main()
+{
+  string s;
+  char buf[10];
+
+  sprintf(buf, "%d", 5);
+  s = buf;
+  cout &lt;&lt; s &lt;&lt; endl;
+}
+</pre></td></table></center><p>
+
+<hr>
+<h3>sscanf()</h3>
+
+<b>Sscanf()</b> does the opposite of <b>sprintf()</b>.  It takes a C-style string as its first
+argument, and then a format string like <b>sprintf()</b>, and then it attempts to "read" from
+the first string, converting what it has read into the proper data structures.  The variables
+into which it "reads" must be specified as pointers.  Let's look at an example (in
+<b><a href=sscanf1.cpp>sscanf1.cpp</a></b>):
+
+<p><center><table border=3 cellpadding=3><td><pre>
+#include &lt;string&gt;
+#include &lt;cstdio&gt;
+#include &lt;cstdlib&gt;
+#include &lt;iostream&gt;
+using namespace std;
+
+int main()
+{
+  string s;
+  int i;
+
+  s = "100";
+  sscanf(s.c_str(), "%d", &i);
+  printf("i = %d\n", i);
+
+  return 0;
+}
+</pre></td></table></center><p>
+
+This "reads" the string <b>s</b>, and converts it to an integer <b>i</b>, which it then prints:
+
+<pre>
+UNIX> <font color=darkred><b>g++ -std=c++98 sscanf1.cpp</b></font>
+UNIX> <font color=darkred><b>a.out</b></font>
+i = 100
+UNIX> <font color=darkred><b></b></font>
+</pre>
+
+You can specify multiple inputs to read, and <b>sscanf()</b> will return the number of items
+that it read successfully.   The program below
+(<b><a href=sscanf2.cpp>sscanf2.cpp</a></b>) reads a line of text, and then tries to 
+interpret that line as a double, followed by a space, and an int:
+
+<p><center><table border=3 cellpadding=3><td><pre>
+#include &lt;string&gt;
+#include &lt;cstdio&gt;
+#include &lt;cstdlib&gt;
+#include &lt;iostream&gt;
+using namespace std;
+
+int main()
+{
+  string s;
+  int i, n;
+  double d;
+  
+  getline(cin, s);
+  n = sscanf(s.c_str(), "%lf %d", &d, &i);
+  printf("n = %d.  d = %lf.  i = %d\n\n", n, d, i);
+  return 0;
+}
+</pre></td></table></center><p>
+
+Here it is running on a variety of inputs.  Make sure you understand all of these outputs:
+
+<pre>
+UNIX> <font color=darkred><b>g++ -std=c++98 sscanf2.cpp</b></font>
+UNIX> <font color=darkred><b>echo 10.5 5 | a.out</b></font>
+n = 2.  d = 10.500000.  i = 5
+
+UNIX> <font color=darkred><b>echo 10.5 Fred | a.out</b></font>
+n = 1.  d = 10.500000.  i = 0
+
+UNIX> <font color=darkred><b>echo Fred 5 | a.out</b></font>
+n = 0.  d = 0.000000.  i = 0
+
+UNIX> <font color=darkred><b>echo 10.5xyz 55</b></font>
+n = 1.  d = 10.500000.  i = 0
+
+UNIX> <font color=darkred><b>echo go vols | a.out</b></font>
+n = 0.  d = 0.000000.  i = 0
+
+UNIX> <font color=darkred><b></b></font>
+</pre>
+
+Your input fields don't have to be separated by spaces.  The following program reads lines of
+text, which are in the format "h:m:s".
+(in <b><a href=sscanf3.cpp>sscanf3.cpp</a></b>):
+
+<p><center><table border=3 cellpadding=3><td><pre>
+#include &lt;string&gt;
+#include &lt;cstdio&gt;
+#include &lt;cstdlib&gt;
+#include &lt;iostream&gt;
+using namespace std;
+
+int main()
+{
+  string l;
+  int h, m, s, n;
+  double d;
+  
+  getline(cin, l);
+  n = sscanf(l.c_str(), "%d:%d:%d", &h, &m, &s);
+  printf("n = %d.  h = %d.  m = %d.  s = %d.\n", n, h, m, s);
+  return 0;
+}
+</pre></td></table></center><p>
+
+That may well be handy for lab 1.....
+
+<pre>
+UNIX> <font color=darkred><b>g++ -std=c++98 sscanf3.cpp</b></font>
+UNIX> <font color=darkred><b>echo '55:33:22' | a.out</b></font>
+n = 3.  h = 55.  m = 33.  s = 22.
+UNIX> <font color=darkred><b></b></font>
+</pre>
+
+<hr>
+<h3> But Dr. Plank, why is it ok to use c_str() in sscanf(), but not in sprintf()?</h3>
+
+It's ok because <b>sscanf()</b> does not modify the bytes in its first argument.  It 
+merely reads them, so our code is fine.  On the other hand, <b>sprintf()</b> does modify
+the bytes of its first argument, and that's why we shouldn't use it.
