@@ -269,7 +269,7 @@ int main()
 </pre></td></table></center><p>
 
 This keeps adding characters to a C++ string, <b>s</b>, and it notes when storage for the underlying
-C-style string changes.  Check it out as it runs (on my mac):
+C-style string changes.  Check it out as it runs (on my linux box):
 
 <pre>
 UNIX> <font color=darkred><b>g++ -std=c++98 buffer_changes.cpp </b></font>
@@ -291,8 +291,22 @@ The underlying buffer changed at size: 8136
 UNIX> <font color=darkred><b></b></font>
 </pre>
 
-I think we can all figure out that the underlying buffers are allocated to be powers of two
-(plus one - you need room for the null character).
+I think we can all figure out that the underlying buffers are allocated to be powers of two,
+although that last line is pretty odd.  These things change from machine to machine -- on my
+macbook in 2018, I got the following output from this program:
+
+<pre>
+The underlying buffer changed at size: 23
+The underlying buffer changed at size: 48
+The underlying buffer changed at size: 96
+The underlying buffer changed at size: 192
+The underlying buffer changed at size: 384
+The underlying buffer changed at size: 768
+The underlying buffer changed at size: 1536
+The underlying buffer changed at size: 3072
+The underlying buffer changed at size: 6144
+</pre>
+
 <p>
 One thing that you should get out of this program is that you should not store <b>c_str()</b>
 pointers if you change the C++ string, because the underlying buffer can change.
