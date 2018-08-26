@@ -6,3 +6,4 @@ James S. Plank
 
 - [C-Style strings, sprintf() and sscanf()](Sprintf/index.html)
 - [STL Review - Topcoder problems](STL-Review/index.html)
+- [The upper_bound and lower_bound method of maps.  The Keno "Lucky Loser" bet.](Upper_Bound/index.html)

@@ -1,0 +1,618 @@
+<title>CS302 Lecture Notes</title>
+<h2>CS302 Lecture Notes - Using upper_bound and lower_bound with a set or map</h2>
+<UL>
+<LI> Original notes: August, 2011.  Latest modification: August, 2013
+<LI> James S. Plank
+<LI> Directory: <b>/home/plank/cs302/Notes/Upper_Bound</b>
+</UL>
+
+A feature of sets and maps that often gets overlooked is the ability to 
+search for an item that may or may not be present, and return the item that
+is "near" it.  There are two member
+functions of both sets and maps that do this:
+
+<UL>
+<LI> <b>upper_bound</b>: returns an iterator to the smallest item greater
+than a given key.  If there is no item greater, it returns <b>end()</b>
+<p>
+<LI> <b>lower_bound</b>: returns an iterator to the smallest item greater
+than or equal to a given key.  If there is no item greater or equal, it returns <b>end()</b>
+</UL>
+
+<p>
+Are the names counter-intuitive?  Yes.  Whatever.  Let's show an example of a program
+that uses one.  (BTW, if you want more practice, do the 500-point problem from 
+division one of Topcoder SRM 337).
+<p>
+If you took CS140 from me, you may have done the Keno lab.  I'll refresh your memory
+with the preamble to the lab:
+<UL>
+<i>You are in Vegas with your wife and her family.  On morning number 1, they all
+want to go to the "Venetian" hotel and casino to ride the Gondolas.  You have
+the choice of going or staying.  Hmmm, let's see.  You've already overpaid once
+in your life to ride a real gondola in Venice.  It's something like 500 bazillion
+degrees in Vegas, and the gondola rides are in a big concrete
+swimming pool.  You thank the family, but send them on their merry way.
+<p>
+You wander around the casino, and see this game called <i>Keno</i>.  It's a
+bit like a lottery.  There are 80 balls numbered 1 through 80, and they will
+pick 20 of them randomly.  They have a catchy little flier about all the
+Keno bets you can make:
+<p>
+<table border=3>
+<td valign=top> <IMG src=K1.jpg width=350></td>
+<td valign=top> <IMG src=K2.jpg width=200><br>
+                <IMG src=K3.jpg width=200></td>
+<td valign=top> <IMG src=K4.jpg width=200></td>
+</table>
+<p>
+Now, we're talking entertainment!  You know there's no way that these
+tempting little bets are going to make you money in the long run, but
+have a little mathematical problem to solve, and that's better
+than gambling!</i>
+</UL>
+We're not redoing the Keno lab, fun as it is.  Instead, we have another Keno
+problem.  Casino mogul Ronald Thump (BTW, these lecture notes were written well before
+Mr. Thump ran for president...) has contacted you to design a tempting side-bet
+for his Keno rooms.  Of course, he wants it to make him money, but to seem like it
+makes the gambler money.  Here's what you come up with:
+<p><center><table border=3 cellpadding=5><td>
+<h3>The Lucky Loser Bet</h3>
+<UL>
+<LI> You choose one number.  
+<LI> If that number is one of the 20 picked, then you
+simply get your money back.  
+<LI> However, if it is not one of the 20 picked, then
+you look at the closest number picked that is greater than yours, and the closest
+number picked that is less than yours.  (Wrap around if there's no number greater or
+less than yours).  
+<LI> If the higher number is closer to yours than the lower number, you
+win $1.25 on a $1.00 bet.  
+<LI> Otherwise, you lose.</ul></td></table></center><p>
+
+Mr. Thump thinks that this is a catchy game.  People may well take out "insurance"
+on their Keno bets by choosing all of their Keno picks as Lucky Losers.  At a
+very high level, it looks like a good bet for the following reason:
+<p>
+If your number is picked, nothing matters. However, if it is not picked, then
+it would seem as though you have a roughly 50-50 chance of having the closest
+number picked be higher than yours.  You're getting $1.25 instead of $1.00 on
+what seems to be a 50-50 chance.  I'd take those odds!
+<p>
+Now, of course, the odds aren't 50-50.  Why?  Suppose the numbers 4 and 8 are picked, 
+but 5, 6 and 7 are not.  7 is winning bet, but 6 and 5 are not.  In other words,
+when the interval between picked balls is an odd number <i>i</i>, then there are
+<i>(i-1)/2</i> winners and <i>(i+1)/2</i> losers.  
+Of course, if the interval is an even number, then there are an equal number of 
+winners and losers.  
+<p>
+It would take some good math to figure out the closed-form probability of the Lucky Loser
+bet.  However, we can simulate, and that's just as good, at least to Mr. Thump.
+We'll go through a sequence of programs that illustrate a number of points.
+<hr>
+<h3>Program #1 - using upper_bound</h3>
+
+I'm not going through all of this program.  The basic version is in 
+<b><a href=keno-ll.cpp>keno-ll.cpp</a></b>.  Let's first look at 
+our class definition for a <b>Keno_LL</b>:
+
+<p><center><table border=3 cellpadding=3><td><pre>
+class Keno_LL {
+  public:
+    int NB;                       // Initial parameter: Number of balls in play (80 in our example)
+    int NP;                       // Initial parameter: Number of balls picked each time (20 in our example)
+    double Payout;                // This is how much you win in the Lucky Loser bet (1.25 in our example)
+    int Iterations;               // Number of iterations for the simulation. 0 if interactive
+    int Verbose;                  // Output on each iteration, or just at the end?
+
+    set &lt;int&gt; Picked;             // This is used for the balls picked at each iteration
+
+    int Wins, Losses, Ties;       // Stats - total wins, losses and ties
+    double Winnings;              // Total winnings (yes, we could calculate from above)
+    double N;                     // Iteration so far
+
+    void Pick_Balls();            // Creates Picked randomly
+    void Calculate_Payout(int b); // Given a ball b, and set Picked, calculates the payout and updates the stats.
+};
+</pre></td></table></center><p>
+
+All these are straightforward.  At each iteration, we'll call <b>Pick_Balls()</b>, which will put <b>NP</b>
+random numbers from 1 to <b>NB</b> into <b>Picked</b>.  Then we'll get a value of <b>b</b>, either from 
+standard input or randomly, and call <b>Calculate_Payout()</b>, which will determine whether <b>b</b> is a 
+winner, loser or tie, and update all those stats accordingly.  
+I won't show the code for the <b>main()</b> -- it simply parses command line arguments, sets up an instance
+of the <b>Keno_LL</b> class, and makes the appropriate calls to <b>Pick_Balls()</b> and <b>Calculate_Payout()</b>.
+<p>
+Let's take a look at those methods:
+
+<p><center><table border=3 cellpadding=3><td><pre>
+<font color=blue>/* Procedure to pick balls randomly.  The balls are put into the
+   set "Picked," which is sentinelized so that the first ball is  
+   at the end of the set, after the maximum numbered ball, and the  
+   last ball is at the beginning of the set, before ball 1. */</font>
+
+void Keno_LL::Pick_Balls()
+{
+  int i, j, first, last;
+  set &lt;int&gt;::iterator pbit;
+
+  Picked.clear();
+  
+  for (i = 0; i &lt; NP; i++) {
+    do j = random()%NB+1; while (Picked.find(j) != Picked.end());
+    Picked.insert(j);
+  }
+
+  if (Verbose) {
+    cout &lt;&lt; "Balls Picked:";
+    for (pbit = Picked.begin(); pbit != Picked.end(); pbit++) {
+      cout &lt;&lt; " " &lt;&lt; *pbit;
+    }
+    cout &lt;&lt; ".\n";
+  }
+
+  first = *(Picked.begin());       <font color=blue>/* Sentinelize Picked */</font>
+  last = *(Picked.rbegin());
+  Picked.insert(NB+first);
+  Picked.insert(last-NB);
+}
+</pre></td></table></center><p>
+
+<b>Pick_Balls()</b> puts random numbers into a set.   It takes care not to put duplicates into the
+set.  If specified, it prints out the balls picked.  At the end, it sentinelizes the set.  If the 
+smallest element is <i>s</i> and the largest <i>l</i>, then it inserts <i>(l-NB)</i> and
+<i>(NB+s)</i> into the map.  This is to handle the case when the ball that the contestant picks
+is lower than all the picked balls, or higher than all the picked balls.  Then, you don't have to
+have any special case code in <b>Calculate_Payout()</b>.  (<i>I'll go over this in greater detail
+below.</i>)
+<p>
+Here's <b>Calculate_Payout():</b>
+
+<p><center><table border=3 cellpadding=3><td><pre>
+void Keno_LL::Calculate_Payout(int b)
+{
+  set &lt;int&gt;::iterator pbit;
+  int u, l;
+  double win;
+  
+  <font color=blue>/* Determine whether b is picked (a tie), a winner or a loser. */</font>
+
+  pbit = Picked.lower_bound(b);
+  if (*pbit == b) {
+    win = 0;
+    Ties++;
+  } else {
+    u = *pbit;
+    pbit--;
+    l = *pbit;
+    if (u - b &lt; b - l) {
+      win = Payout;
+      Wins++;
+    } else {
+      win = -1;
+      Losses++;
+    }
+  }
+ 
+  <font color=blue>/* Update stats, and print out what happened, if desired. */</font>
+
+  Winnings += win;
+  N++;
+
+  if (Verbose) {
+    if (win == 0) {
+      printf("  Your ball was picked. +0: ");
+    } else {
+      printf("  D to higher: %d.  D to lower: %d.  %+.2lf: ",
+        u-b, b-l, win);
+    }
+    printf("Total = %.2lf.  Avg = %.6lf\n", Winnings, Winnings/N);
+  }
+}
+</pre></td></table></center><p>
+
+I use the <b>lower_bound</b> method to find the smallest element in <b>Picked</b> that is
+greater than or equal to <b>b</b>.  Since we sentinelized <b>Picked</b>, we're guaranteed
+that there will be an element greater than <b>b</b> and an element less than <b>b</b>.
+That's nice, because we don't have to test whether <b>pit</b> is equal to 
+<b>Picked.end()</b> or <b>Picked.begin()</b>.
+<p>
+If we didn't find the element, then we find the balls greater than and less than <b>b</b>
+with "<tt>u = *pbit; pbit--; l = *pbit;</tt>".  This is because you're allowed to increment
+and decrement iterators to move around the set.  
+<p>
+The rest of the code is straightforward.
+<p>
+<hr>
+<h3>A little more detail on the sentinels in <i>Picked</i></h3>
+
+I received a lot of questions in class about the sentinels.  Let me give a concrete example.
+Suppose the balls picked are as follows:
+
+<p><center><table border=3 cellpadding=3><td><pre>
+2 3 5 12 13 26 31 35 36 38 44 45 51 54 60 65 67 68 70 76
+</pre></td></table></center><p>
+
+And suppose that we <i>don't</i> use a sentinel in <b>Picked</b>.
+Let me give three different examples of numbers that the user chooses.  Suppose that
+the user chooses 37.  We'll look that up in <b>Picked</b> using <b>Picked.lower_bound()</b>.
+It will return an iterator to 38, because 38 is the smallest value greater than or equal
+to 37.  We can decrement the iterator to find the greatest value less than 37 -- that is
+36.  Thus, we can determine that the user's pick was a loser quite easily.
+<p>
+In example 2, suppose that the user chooses 1.  When we call <b>Picked.lower_bound()</b>,
+it will return an iterator to 2.  Since 2 is the smallest value in the set, we'll need
+to write special-purpose code to calculate that 76 is the "greatest value less than" 1, and
+that its distance from 1 is 5.  That's a drag.
+<p>
+In example 3, suppose that the user chooses 77.  Now, <b>Picked.lower_bound()</b> is going to 
+return <b>Picked.end()</b>, and we have to write more special-purpose code to determine that
+76 is the lower value and 2 is the "higher" value.  
+<p>
+We use the sentinels to avoid writing all of that special-purpose code.  We insert 82 = 2+80 and
+-4 = 76-80 into the set, which now becomes:
+<p><center><table border=3 cellpadding=3><td><pre>
+-4 2 3 5 12 13 26 31 35 36 38 44 45 51 54 60 65 67 68 70 76 82
+</pre></td></table></center><p>
+We are now guaranteed of two things when we call 
+<b>Picked.lower_bound()</b>:
+<OL>
+<LI> It will never return <b>Picked.end()</b>.  In other words it will always return an iterator
+to an element that equals the user's choice, or that is the smallest element greater than the
+user's choice.
+<LI> It will never return the first element of <b>Picked</b>.  Which means that when you 
+decrement it to find the greatest element smaller than the user's choice, it will point
+to a valid value.
+</OL>
+
+And we don't have to write any special purpose code.  Judicious use of sentinels
+can make your code very clean.  Remember our implementation of 
+<a href=http://web.eecs.utk.edu/~plank/plank/classes/cs140/Notes/Linked/index.html>doubly-linked lists
+in CS140? </a>  Without that header node, the implementation would be really messy.  The
+sentinel (the header node) made for clean and efficient code. 
+<hr>
+
+Let's run it.  The parameters of the program are <b>NB</b>, <b>NP</b>, 
+<b>Payout</b>, <b>Iterations</b> and <b>Verbose</b>:
+
+<pre>
+UNIX> <font color=darkred><b>g++ -o keno-ll keno-ll.cpp</b></font>
+UNIX> <font color=darkred><b>./keno-ll</b></font>
+usage: keno-ll #balls #picked payout iterations-(zero-to-play) verbose(y|n)
+UNIX> <font color=darkred><b>./keno-ll 80 20 1.25 0 y</b></font>
+Pick your ball: <font color=darkred><b>8</b></font>
+Balls Picked: 2 3 5 12 13 26 31 35 36 38 44 45 51 54 60 65 67 68 70 76.
+  D to higher: 4.  D to lower: 3.  -1.00: Total = -1.00.  Avg = -1.000000
+Pick your ball: <font color=darkred><b>8</b></font>
+Balls Picked: 1 2 4 7 8 20 31 35 36 37 39 48 51 58 65 67 70 73 75 80.
+  Your ball was picked. +0: Total = -1.00.  Avg = -0.500000
+Pick your ball: <font color=darkred><b>8</b></font>
+Balls Picked: 3 12 15 26 32 33 35 36 39 40 49 50 54 59 65 66 69 70 72 73.
+  D to higher: 4.  D to lower: 5.  +1.25: Total = 0.25.  Avg = 0.083333
+Pick your ball: <font color=darkred><b>8</b></font>
+Balls Picked: 1 7 8 12 16 22 28 30 35 41 45 46 51 52 62 64 69 71 73 75.
+  Your ball was picked. +0: Total = 0.25.  Avg = 0.062500
+Pick your ball: <font color=darkred><b>8</b></font>
+Balls Picked: 5 11 15 17 20 21 22 27 29 32 35 43 47 50 56 57 61 66 67 68.
+  D to higher: 3.  D to lower: 3.  -1.00: Total = -0.75.  Avg = -0.150000
+UNIX> ./keno-ll 80 20 1.25 0 n
+<font color=darkred><b>8</b></font>
+<font color=darkred><b>8</b></font>
+<font color=darkred><b>8</b></font>
+<font color=darkred><b>8</b></font>
+<font color=darkred><b>8</b></font>
+Total = 4.00.  Avg = 0.800000.  W/L/T: 4 1 0
+UNIX> <font color=darkred><b>./keno-ll 80 20 1.25 5 y</b></font>
+Picked 59
+Balls Picked: 5 8 9 14 15 19 23 24 33 45 54 61 66 69 70 71 75 78 79 80.
+  D to higher: 2.  D to lower: 5.  +1.25: Total = 1.25.  Avg = 1.250000
+Picked 58
+Balls Picked: 1 3 7 10 13 17 31 35 40 42 46 49 57 59 65 68 70 71 75 80.
+  D to higher: 1.  D to lower: 1.  -1.00: Total = 0.25.  Avg = 0.125000
+Picked 34
+Balls Picked: 6 7 8 15 22 23 26 35 39 41 49 55 56 59 64 69 72 75 76 77.
+  D to higher: 1.  D to lower: 8.  +1.25: Total = 1.50.  Avg = 0.500000
+Picked 7
+Balls Picked: 1 7 11 13 24 26 29 33 34 37 46 50 52 54 58 64 66 67 75 79.
+  Your ball was picked. +0: Total = 1.50.  Avg = 0.375000
+Picked 68
+Balls Picked: 4 6 8 10 12 20 23 26 28 31 33 38 43 49 58 67 71 74 76 77.
+  D to higher: 3.  D to lower: 1.  -1.00: Total = 0.50.  Avg = 0.100000
+UNIX> <font color=darkred><b>./keno-ll 80 20 1.25 5 n</b></font>
+Total = -2.00.  Avg = -0.400000.  W/L/T: 0 2 3
+UNIX> <font color=darkred><b></b></font>
+</pre>
+
+If we choose a large number of iterations, we can start to see whether this
+is a good or bad bet over the long run.  I use <b>time</b> to show how long
+each run takes (on my Macintosh):
+
+<pre>
+UNIX> <font color=darkred><b>time ./keno-ll 80 20 1.25 10  n</b></font>
+Total = 3.00.  Avg = 0.300000.  W/L/T: 4 2 4
+0.000u 0.000s 0:00.00 0.0%	0+0k 0+1io 0pf+0w
+UNIX> <font color=darkred><b>time ./keno-ll 80 20 1.25 100 n</b></font>
+Total = -21.00.  Avg = -0.210000.  W/L/T: 24 51 25
+0.003u 0.001s 0:00.00 0.0%	0+0k 0+0io 0pf+0w
+UNIX> <font color=darkred><b>time ./keno-ll 80 20 1.25 1000 n</b></font>
+Total = -31.25.  Avg = -0.031250.  W/L/T: 315 425 260
+0.022u 0.001s 0:00.02 100.0%	0+0k 0+0io 0pf+0w
+UNIX> <font color=darkred><b>time ./keno-ll 80 20 1.25 10000 n</b></font>
+Total = -566.75.  Avg = -0.056675.  W/L/T: 3069 4403 2528
+0.170u 0.001s 0:00.17 100.0%	0+0k 0+0io 0pf+0w
+UNIX> <font color=darkred><b>time ./keno-ll 80 20 1.25 100000 n</b></font>
+Total = -3068.00.  Avg = -0.030680.  W/L/T: 32096 43188 24716
+1.637u 0.001s 0:01.63 100.0%	0+0k 0+0io 0pf+0w
+UNIX> <font color=darkred><b>time ./keno-ll 80 20 1.25 1000000 n</b></font>
+Total = -26723.75.  Avg = -0.026724.  W/L/T: 321273 428315 250412
+16.364u 0.009s 0:16.37 99.9%	0+0k 0+0io 0pf+0w
+UNIX> <font color=darkred><b></b></font>
+</pre>
+
+Well, it appears to be converging slightly, but man, that's slow.  First, let's
+use the optimizer -- that usually speeds things up.  There are four levels of
+optimization, and usually the <b>-O3</b> flag gives you the best bang for the
+buck.  
+
+<pre>
+UNIX> <font color=darkred><b>g++ -o keno-ll -O keno-ll.cpp</b></font>
+UNIX> <font color=darkred><b>time ./keno-ll 80 20 1.25 1000000 n</b></font>
+Total = -28030.00.  Avg = -0.028030.  W/L/T: 321128 429440 249432
+6.415u 0.001s 0:06.41 100.0%	0+0k 0+0io 0pf+0w
+UNIX> <font color=darkred><b>g++ -o keno-ll -O2 keno-ll.cpp</b></font>
+UNIX> <font color=darkred><b>time ./keno-ll 80 20 1.25 1000000 n</b></font>
+Total = -27554.00.  Avg = -0.027554.  W/L/T: 321096 428924 249980
+6.185u 0.003s 0:06.18 100.0%	0+0k 0+0io 0pf+0w
+UNIX> <font color=darkred><b>g++ -o keno-ll -O3 keno-ll.cpp</b></font>
+UNIX> <font color=darkred><b>time ./keno-ll 80 20 1.25 1000000 n</b></font>
+Total = -27053.75.  Avg = -0.027054.  W/L/T: 321521 428955 249524
+6.150u 0.003s 0:06.15 100.0%	0+0k 0+0io 0pf+0w
+UNIX> <font color=darkred><b>g++ -o keno-ll -O4 keno-ll.cpp</b></font>
+UNIX> <font color=darkred><b>time ./keno-ll 80 20 1.25 1000000 n</b></font>
+Total = -27600.75.  Avg = -0.027601.  W/L/T: 320969 428812 250219
+6.150u 0.002s 0:06.15 100.0%	0+0k 0+0io 0pf+0w
+UNIX> <font color=darkred><b></b></font>
+</pre>
+
+(BTW, the makefile compiles with -O3).
+<p>
+There are definitely a few places to work on speeding up.  First is <b>Pick_Balls()</b>.
+That's a poor way to choose random numbers, since you may have to throw numbers away 
+when you choose duplicates.  Think about it -- what if <b>NP</b> is really close to
+<b>NB</b>?  Then when you get to the last balls, you're more likely to have to throw
+away a pick than not.  
+<p>
+A better way is to put all of the numbers from 1 to 80 into an array, and then randomly
+pull them out.  Each time you "pull a number out", you move it to the end of the array,
+and then don't consider it for the next pick.  
+<p>
+The new code is in 
+<b><a href=keno-ll2.cpp>keno-ll2.cpp</a></b>.  I've added a vector <b>Balls</b>
+to the <b>Keno_LL</b> class, and I have initialized it to hold the numbers 1 thorugh <b>NB</b>.
+Then, <b>Pick_Balls()</b> works as follows:
+
+<p><center><table border=3 cellpadding=3><td><pre>
+void Keno_LL::Pick_Balls()
+{
+  int i, j, first, last, tmp;
+  set &lt;int&gt;::iterator pbit;
+
+  Picked.clear();
+  
+  for (i = 0; i &lt; NP; i++) {
+    j = random()%(NB-i);
+    tmp = Balls[j];
+    Balls[j] = Balls[NB-i-1];
+    Balls[NB-i-1] = tmp;
+    Picked.insert(Balls[NB-i-1]);
+  }
+
+  ...
+</pre></td></table></center><p>
+
+It runs faster, but not by a huge amount (9 percent):
+
+<pre>
+UNIX> <font color=darkred><b>make keno-ll2</b></font>
+g++ -O3 -o keno-ll2 keno-ll2.cpp
+UNIX> <font color=darkred><b>time ./keno-ll2 80 20 1.25 1000000 n</b></font>
+Total = -27893.75.  Avg = -0.027894.  W/L/T: 321237 429440 249323
+5.652u 0.005s 0:05.65 100.0%	0+0k 0+0io 0pf+0w
+UNIX> <font color=darkred><b></b></font>
+</pre>
+
+Can we do better?  Well, consider this -- instead of trying one random ball on each 
+iteration, let's just look at all of them.  We'll do this in a method called
+<b>Calculate_All()</b>, which we only call when we're doing multiple iterations.
+Here is a very simple implementation, which simply calls <b>Calculate_Pick()</b>
+for all balls 
+(in <b><a href=keno-ll3.cpp>keno-ll3.cpp</a></b>):
+
+<p><center><table border=3 cellpadding=3><td><pre>
+void Keno_LL::Calculate_All()
+{
+  int b;
+
+  for (b = 1; b &lt;= NB; b++) Calculate_Payout(b);
+}
+</pre></td></table></center><p>
+
+We'll compile with optimization and run it:
+
+<pre>
+UNIX> <font color=darkred><b>make keno-ll3</b></font>
+g++ -O3 -o keno-ll3 keno-ll3.cpp
+UNIX> <font color=darkred><b>time ./keno-ll3 80 20 1.25 1000000 n</b></font>
+Total = -27149.25.  Avg = -0.027149.  W/L/T: 321267 428733 250000
+0.108u 0.001s 0:00.10 100.0%	0+0k 0+0io 0pf+0w
+UNIX> <font color=darkred><b></b></font>
+</pre>
+
+Dang, that was fast!  It's because we're iterating 1000000/80 times instead
+of 1000000.  Granted, we're doing a little more work at each iteration, but
+not much.
+<p>
+We can make it faster still, though.  We don't really need to calculate
+the picks for every ball.  Instead, we can just run through the map and
+check each interval.  If the interval size is <i>x</i>, then there will 
+be <i>x/2</i> winners (integer division) and <i>x - x/2</i> losers.
+<p>
+The code is in 
+<b><a href=keno-ll4.cpp>keno-ll4.cpp</a></b>:
+
+<p><center><table border=3 cellpadding=3><td><pre>
+void Keno_LL::Calculate_All()
+{
+  set &lt;int&gt;::iterator low, high;
+  int x, highest;
+  int nw, nl;
+
+  highest = *Picked.rbegin();
+  low = Picked.begin();
+  high = low;
+  high++;
+  nw = 0;
+  nl = 0;
+
+  while (*high != highest) {
+    x = *high - *low - 1;
+    nw += (x/2);
+    nl += (x - x/2);
+    low++;
+    high++;
+  }
+  Wins += nw;
+  Losses += nl;
+  Ties += NP;
+  Winnings += nw*Payout;
+  Winnings -= nl;
+  N += NB;
+}
+</pre></td></table></center><p>
+
+Note once again how the sentinels help us keep our code clean.  
+It speeds matters up even further:
+
+<pre>
+UNIX> <font color=darkred><b>make keno-ll4</b></font>
+g++ -O3 -o keno-ll4 keno-ll4.cpp
+UNIX> <font color=darkred><b>time ./keno-ll4 80 20 1.25 1000000 n</b></font>
+Total = -27682.50.  Avg = -0.027682.  W/L/T: 321030 428970 250000
+0.076u 0.000s 0:00.07 100.0%	0+0k 0+0io 0pf+0w
+UNIX> 
+</pre>
+
+0.076 vs 0.102 may not seem like much, but it is over 25 percent.
+<p>
+I ended here in class, but I mentioned that you can do this even faster.  How?
+Get rid of the map.  Instead, simply put the picked balls into an array and
+sort the array with the STL procedure <b>sort()</b>.  Then you traverse the
+array in <b>Calculate_All()</b> instead of the map.  
+<p>
+The code is in 
+<b><a href=keno-ll5.cpp>keno-ll5.cpp</a></b>, where we write a separate
+<b>Pick_Balls_Array()</b> which puts the balls into an array <b>PBalls</b>:
+
+<p><center><table border=3 cellpadding=3><td><pre>
+void Keno_LL::Pick_Balls_Array()
+{
+  int i, j, first, last, tmp;
+
+  for (i = 0; i &lt; NP; i++) {
+    j = random()%(NB-i);
+    tmp = Balls[j];
+    Balls[j] = Balls[NB-i-1];
+    Balls[NB-i-1] = tmp;
+    PBalls[i] = Balls[NB-i-1];
+  }
+  PBalls[i] = NB+1;   <font color=blue>/* Make room for the sentinel at the end */</font>
+  sort(PBalls.begin(), PBalls.end());
+  PBalls[NP] = NB+PBalls[0];  <font color=blue>/* Put a sentinel at the end */</font>
+
+  if (Verbose) {
+    cout &lt;&lt; "Balls Picked:";
+    for (i = 0; i &lt; NP; i++) cout &lt;&lt; " " &lt;&lt; PBalls[i];
+    cout &lt;&lt; ".\n";
+  }
+
+}
+
+void Keno_LL::Calculate_All()
+{
+  int i, x;
+  int nw, nl;
+
+  nw = 0;
+  nl = 0;
+
+  for (i = 0; i &lt; NP; i++) {
+    x = PBalls[i+1] - PBalls[i] - 1;
+    nw += (x/2);
+    nl += (x - x/2);
+  }
+  Wins += nw;
+  Losses += nl;
+  Ties += NP;
+  Winnings += nw*Payout;
+  Winnings -= nl;
+  N += NB;
+}
+</pre></td></table></center><p>
+
+Note how the array is again sentinelized.  The array <b>PBalls</b> has <b>NP+1</b> elements.
+After putting the random balls in unsorted order into <b>PBalls</b>, we set 
+<b>PBalls[NP]</b> to equal <b>NB+1</b>, and then we sort it.  That way, we know
+that <b>PBalls[NP]</b> will remain equal to <b>NB+1</b>.  After the sort, we know that
+the minimum element is in <b>PBalls[0]</b>, so we can put <b>PBalls[0]+NB</b> into the last
+<b>PBalls[NP]</b>.  Now we have all the intervals represented easily in <b>PBalls</b>.
+<p>
+When we run it, it's much, much faster -- this is the best code for the problem:
+<pre>
+UNIX> <font color=darkred><b>make keno-ll5</b></font>
+g++ -O3 -o keno-ll5 keno-ll5.cpp
+UNIX> <font color=darkred><b>time ./keno-ll5 80 20 1.25 1000000 n</b></font>
+Total = -28366.50.  Avg = -0.028366.  W/L/T: 320726 429274 250000
+0.015u 0.001s 0:00.01 100.0%	0+0k 0+0io 0pf+0w
+UNIX> <font color=darkred><b>time ./keno-ll5 80 20 1.25 10000000 n</b></font>
+Total = -278195.25.  Avg = -0.027820.  W/L/T: 3209691 4290309 2500000
+0.114u 0.001s 0:00.11 100.0%	0+0k 0+0io 0pf+0w
+UNIX> <font color=darkred><b>time ./keno-ll5 80 20 1.25 100000000 n</b></font>
+Total = -2778566.25.  Avg = -0.027786.  W/L/T: 32098415 42901585 25000000
+1.103u 0.001s 0:01.10 100.0%	0+0k 0+0io 0pf+0w
+UNIX> <font color=darkred><b>time ./keno-ll5 80 20 1.25 1000000000 n</b></font>
+Total = -27759207.00.  Avg = -0.027759.  W/L/T: 320995908 429004092 250000000
+10.999u 0.004s 0:11.00 99.9%	0+0k 0+0io 0pf+0w
+UNIX> <font color=darkred><b></b></font>
+</pre>
+
+We can confidently tell Mr. Thump that this bet will make him 2.78 cents
+on every dollar bet.  My guess is that he'd like a little more.  If you
+make the payout $1.20 instead of $1.25, his profit goes to
+4.38 cents.  How does that compare?  Well, Roulette is a profit of 5 
+cents.  Three card poker goes anywhere from 1.96 cents to about 10,
+depending on the odds.  I'd say you've invented a pretty good game!
+
+<hr>
+<h3>What have we learned?</h3>
+
+Well, my goals here were twofold.  First, I wanted to teach you <b>upper_bound</b>
+and <b>lower_bound</b>.  Second, I wanted to show you how the choice of algorithm
+and data structure impacts performance.  While the code in <b>keno-ll.cpp</b> was
+reasonable to solve the problem, it had three performance deficiencies:
+<p>
+<OL>
+<LI> The random ball-picking algorithm was inefficient.
+<LI> The code for multiple iterations had too much randomness -- calculating the
+probabilities for all 80 balls at each iteration is a much smarter and
+faster way to perform
+the evalution.
+<LI> Performing insertions/finds with a set is slower than using an vector and sorting.
+The code for <b>Pick_Balls()</b> and <b>Calculate_All()</b> is <i>O(<b>NP</b> log(<b>NP</b>))</i>
+in both cases.  However, the vector version is faster, largely because it is more memory-
+efficient.
+</OL>
+<p>
+As a final thought exercise, would you have to change your implementation 
+if <b>NB</b> is huge (say, 500,000,000) and <b>NP</b> is much smaller (say, 1000)?
+Think about it, and if you want your thought process corroborated, ask me in 
+class.
