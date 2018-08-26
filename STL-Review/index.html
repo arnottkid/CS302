@@ -24,11 +24,11 @@ to <b>CarBuyer.cpp</b> and then calling <b>g++ -std=c++98</b> on <b>CB-Main.cpp<
 UNIX> <font color=darkred><b>cp CarBuyer-ss.cpp CarBuyer.cpp</b></font>
 UNIX> <font color=darkred><b>vi CB-Main.cpp</b></font>
 UNIX> <font color=darkred><b>g++ -std=c++98 CB-Main.cpp</b></font>
-UNIX> <font color=darkred><b>a.out 0</b></font>
+UNIX> <font color=darkred><b>./a.out 0</b></font>
 10500.000000
-UNIX> <font color=darkred><b>a.out 1</b></font>
+UNIX> <font color=darkred><b>./a.out 1</b></font>
 45200.000000
-UNIX> <font color=darkred><b>a.out 2</b></font>
+UNIX> <font color=darkred><b>./a.out 2</b></font>
 254122.444444
 UNIX> <font color=darkred><b></b></font>
 </pre>
@@ -165,11 +165,11 @@ To test this, copy it to <b>ColorfulBricks.cpp</b> and compile <b>Colorful-Main.
 <pre>
 UNIX> <font color=darkred><b>cp Colorful-Sort.cpp ColorfulBricks.cpp</b></font>
 UNIX> <font color=darkred><b>g++ -std=c++98 Colorful-Main.cpp </b></font>
-UNIX> <font color=darkred><b>a.out 0</b></font>
+UNIX> <font color=darkred><b>./a.out 0</b></font>
 2
-UNIX> <font color=darkred><b>a.out 1</b></font>
+UNIX> <font color=darkred><b>./a.out 1</b></font>
 1
-UNIX> <font color=darkred><b>a.out 2</b></font>
+UNIX> <font color=darkred><b>./a.out 2</b></font>
 0
 UNIX> <font color=darkred><b></b></font>
 </pre>
@@ -218,8 +218,10 @@ int ColorfulBricks::countLayouts(string bricks)
 </pre></td></table></center><p>
 <p>
 You can instead leverage the fact that there are only
-26 potential values of <b>bricks[i]</b>, to use a vector.  This is in
-<b><a href=Colorful-Vec1.cpp>Colorful-Vec1.cpp</a></b>:
+26 potential values of <b>bricks[i]</b>, to use a vector.
+In the code below, (<b><a href=Colorful-Vec1.cpp>Colorful-Vec1.cpp</a></b>), we have a
+vector <b>s</b>, where we set <b>s[i]</b> to one if <b>('A'+i)</b> is in the string:
+Then you count up the elements of <b>s</b> which equal one:
 
 <p><center><table border=3 cellpadding=3><td><pre>
 int ColorfulBricks::countLayouts(string bricks)
@@ -292,7 +294,8 @@ They all work, so which is the best?  I'll hedge a bit.  First, let's think abou
 time complexity.  Suppose that there are <i>n</i> elements in <b>bricks</b>.  Then
 the first three implementations are <i>O(n log n)</i>, while the remaining three
 are <i>O(n)</i>.  That would argue for one of the last three.  In terms of raw
-speed, the last one will be the fastest.  So is that the best?  
+speed, the last one will be the fastest, because it exits quickly when you see the third
+letter.  So is that the best?  
 <p>Well, I'm hedging
 because you need to consider multiple factors when you ask about the "best."
 Speed is one thing.  Memory is another (the last one wins there too).  
@@ -372,7 +375,7 @@ everything compiles nicely.  When we run it, it works as anticipated:
 <pre>
 UNIX> <font color=darkred><b>cp Glossary-1.cpp Glossary.cpp</b></font>
 UNIX> <font color=darkred><b>g++ -std=c++98 Glossary-Main.cpp</b></font>
-UNIX> <font color=darkred><b>a.out 0</b></font>
+UNIX> <font color=darkred><b>./a.out 0</b></font>
 CANADA Canada
 FRANCE France
 GERMANY Germany
@@ -381,7 +384,7 @@ JAPAN Japan
 RUSSIA Russia
 UNITED KINGDOM United Kingdom
 UNITED STATES United States
-UNIX> <font color=darkred><b>a.out 1</b></font>
+UNIX> <font color=darkred><b>./a.out 1</b></font>
 ALPHA alpha
 BETA beta
 DELTA delta
@@ -525,7 +528,7 @@ to make sure that all of the strings are 19 characters:
 <pre>
 UNIX> <font color=darkred><b>cp Glossary-3.cpp Glossary.cpp</b></font>
 UNIX> <font color=darkred><b>g++ -std=c++98 Glossary-Main.cpp </b></font>
-UNIX> <font color=darkred><b>a.out 0 | cat -A</b></font>
+UNIX> <font color=darkred><b>./a.out 0 | cat -A</b></font>
 C                  $
 -------------------$
   Canada           $
@@ -583,7 +586,7 @@ vector &lt;string&gt; Glossary::buildGlossary(vector &lt;string&gt; I)
 <pre>
 UNIX> <font color=darkred><b>cp Glossary-4.cpp Glossary.cpp</b></font>
 UNIX> <font color=darkred><b>g++ -std=c++98 Glossary-Main.cpp</b></font>
-UNIX> <font color=darkred><b>a.out 0 | cat -A</b></font>
+UNIX> <font color=darkred><b>./a.out 0 | cat -A</b></font>
 C                    R                  $
 -------------------  -------------------$
   Canada               Russia           $
@@ -599,7 +602,7 @@ I                                       $
 J                                       $
 -------------------                     $
   Japan                                 $
-UNIX> <font color=darkred><b>a.out 1 | cat -A</b></font>
+UNIX> <font color=darkred><b>./a.out 1 | cat -A</b></font>
 A                    O                  $
 -------------------  -------------------$
   alpha                omega            $
@@ -612,7 +615,7 @@ D                                       $
 G                                       $
 -------------------                     $
   gamma                                 $
-UNIX> <font color=darkred><b>a.out 2 | cat -A</b></font>
+UNIX> <font color=darkred><b>./a.out 2 | cat -A</b></font>
 A                                       $
 -------------------                     $
   array                                 $
@@ -622,7 +625,7 @@ B                                       $
   backtracking                          $
   balanced tree                         $
   binary search                         $
-UNIX> <font color=darkred><b>a.out 3 | cat -A</b></font>
+UNIX> <font color=darkred><b>./a.out 3 | cat -A</b></font>
                      X                  $
                      -------------------$
                        XXXXXXXXXXXXXXXXX$
@@ -632,7 +635,7 @@ UNIX> <font color=darkred><b>a.out 3 | cat -A</b></font>
                      Z                  $
                      -------------------$
                        ZZZZZZZZZZZZZZZZZ$
-UNIX> <font color=darkred><b>a.out 4 | cat -A</b></font>
+UNIX> <font color=darkred><b>./a.out 4 | cat -A</b></font>
 A                    O                  $
 -------------------  -------------------$
   Asteria              Oceanus          $

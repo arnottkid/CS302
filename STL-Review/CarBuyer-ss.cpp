@@ -18,11 +18,16 @@ double CarBuyer::lowestCost(vector <string> cars, int fuelPrice, int annualDista
 
   double fp, ad, y, price, tax, efficiency, cost, min;
  
+  /* Convert all of those integers to doubles. */
+
   fp = fuelPrice;
   ad = annualDistance; 
   y = years;
-  min = -1;
 
+  /* Use a stringstream to extract the values from each string, 
+     and compute the cost.  Keep track of the minimum cost. */
+
+  min = -1;
   for (i = 0; i < cars.size(); i++) {
     ss.clear();
     ss.str(cars[i]);
