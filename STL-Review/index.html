@@ -334,6 +334,70 @@ There's a temptation to do everything at once -- build a big data structure
 and then traverse it and print.  That really doesn't work well here.
 Instead, it's better to go small, and build up, testing as you go.
 <p>
+Before starting, though, let me summarize the problem:
+<UL>
+<LI> You are given a vector of strings.  We'll call each entry of the vector a "term."
+<LI> You want to print a formatted glossary of the terms.
+<LI> The terms will be sorted alphabetically, <i>ignoring case.</i>
+<LI> The output will have two columns.  The first column is for the A-M terms, and the second is for the N-Z terms.
+<LI> Each column will be exacly 19 characters, padded with spaces.. 
+<LI> The columns are separated by two spaces.
+<LI> If there is a term starting with a letter, then before all of the terms with that letter, there will be a line containing just the upper case letter, and then a line of 19 dashes.
+<LI> The terms are printed with two leading spaces.
+<LI> If the two columns are not the same size, you pad the shorted one with lines of 19 spaces.
+</UL>
+<p>
+
+So, in Topcoder example 0, you have:
+
+<p><center><table border=3 cellpadding=3><td><pre>
+terms = {"Canada", "France", "Germany", "Italy", "Japan", "Russia", 
+         "United Kingdom", "United States"}
+</pre></td></table></center><p>
+
+And the output needs to look like:
+
+
+<p><center><table border=3 cellpadding=3><td><pre>
+{"C                    R                  ",
+ "-------------------  -------------------",
+ "  Canada               Russia           ",
+ "F                    U                  ",
+ "-------------------  -------------------",
+ "  France               United Kingdom   ",
+ "G                      United States    ",
+ "-------------------                     ",
+ "  Germany                               ",
+ "I                                       ",
+ "-------------------                     ",
+ "  Italy                                 ",
+ "J                                       ",
+ "-------------------                     ",
+ "  Japan                                 " }
+</pre></td></table></center><p>
+
+Example two is another good one.  Here, the terms are:
+
+<p><center><table border=3 cellpadding=3><td><pre>
+terms = {"AVL tree", "backtracking", "array", "balanced tree", "binary search"}
+</pre></td></table></center><p>
+and the output is:
+
+<p><center><table border=3 cellpadding=3><td><pre>
+{"A                                       ",
+ "-------------------                     ",
+ "  array                                 ",
+ "  AVL tree                              ",
+ "B                                       ",
+ "-------------------                     ",
+ "  backtracking                          ",
+ "  balanced tree                         ",
+ "  binary search                         " }
+
+</pre></td></table></center><p>
+<p>
+Let's attack the problem:
+<p>
 The first thing to notice is that you have to sort the output, ignoring
 case.  So, the first thing that I'm going to do is read all the terms,
 convert them to uppercase, and then store them in a map.  The key will
