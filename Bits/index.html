@@ -1,0 +1,764 @@
+<title>CS302 Lecture Notes</title>
+<h2>CS302 Lecture Notes - Bit Operations</h2>
+<UL>
+<LI> January, 2017
+<LI> Latest Revision: January, 2017
+<LI> James S. Plank
+<LI> Directory: <b>/home/plank/cs302/Notes/Bits</b>
+</UL>
+<hr>
+
+<h3>Topcoder problems that you can solve with bit arithmetic</h3>
+
+<UL>
+<LI> <a href=https://community.topcoder.com/stat?c=problem_statement&pm=11129&rd=14237>SRM 484 D2 250-pointer (NumberMagicEasy)</a>.  You can solve this with a laundry list of <b>if</b> statements,
+or with a <b>set</b> of integers; however,
+this is a really nice fit with the paradigm of using bits to represent elements of a set.  
+<a href=http://web.eecs.utk.edu/~plank/plank/classes/cs302/Notes/NumberMagicEasy/> I have 
+lecture notes for this problem here, and often go over it in class.</a>
+<LI> <a href=https://community.topcoder.com/stat?c=problem_statement&pm=14396&rd=16803>SRM 699 D1 250-pointer (OthersXor)</a>: This is a nice problem that makes you think about bits.  (<a href=http://web.eecs.utk.edu/~plank/topcoder-writeups/2016/OthersXor/index.html>Hints</a>)
+<LI> <a href=https://community.topcoder.com/stat?c=problem_statement&pm=13714&rd=16432>TCO 2015 Q1A 250-pointer (Similars)</a>: Good practice with bits.  (<a href=http://web.eecs.utk.edu/~plank/topcoder-writeups/2015/Similars/index.html>Here's a writeup that walks you through it.</a>)
+<LI> <a href=http://community.topcoder.com/stat?c=problem_statement&pm=12790&rd=15708>SRM 596 D1 250-pointer (IncrementAndDoubling)</a>: You don't really need bit arithmetic here, but it is a good practice problem for it.  (<a href=http://web.eecs.utk.edu/~plank/plank/classes/cs302/Topcoder/IncrementAndDoubling.html>Hints</a>)
+</UL>
+
+
+<hr>
+I'm assuming that bit operations are review for you, but I'm also assuming that you've
+had very little practice programming with them.  This lecture is to show you a little
+programming with bit operations, and to give you a program 
+(<b><a href=ba_helper.cpp>ba_helper.cpp</a></b>) that can help you practice bit
+operations and hexadecimal.
+
+<p>
+The standard bit operations AND, OR and XOR work on bits, and I'm assume that you 
+learned this in CS130, if not in high school:
+
+<UL>
+<LI> 1 AND 1 equals one.  Anything AND zero equals zero.
+<LI> 0 OR 0 equals zero.  Anything OR one equals one.
+<LI> XOR is equal to addition modulo 2.
+</UL>
+
+Computers implement instructions that allow you to do these operations on multi-bit words,
+where the instructions work on each set of corresponding bits of the operands.  That 
+sentence may be hard to parse, but what happens is:
+
+<UL>
+<LI> Both input numbers are treated as ordered collections of bits.
+<LI> The operation is done on each bit of the input numbers.
+</UL>
+
+So, for example, if you want to do 5 AND 9, what you do is convert them to binary and
+do the operation on each bit.
+<pre>
+5 = 0101
+9 = 1001
+    ----
+    0001 -- The AND of each bit gives you 0001 in binary, which is 1.
+</pre>
+
+If we're doing XOR, then you take the XOR of each bit:
+
+<pre>
+5 = 0101
+9 = 1001
+    ----
+    1100 -- The XOR of each bit gives you 1100 in binary, which is 12.
+</pre>
+
+Other bit operations are NOT (which flips each bit), and the shift operations:
+<UL>
+<LI> If you "left-shift" by <i>n</i>, then you move each bit <i>n</i> binary digits to the left.
+The <i>n</i> right-most bits will be set to zero, and any bits which started out within <i>n</i>
+binary digits of the left end of the word, will be deleted.
+<LI> If you "right-shift" by <i>n</i> bits, that you're doing the same operation, except you
+are moving the bits to the right and not the left.
+</UL>
+
+So, for example, if you left-shift 3 by two digits (and then let's just assume our numbers are 8 bits), 
+then you turn 00000011 into 00011000, which equals 24.  If you right-shift 24 by three digits, you
+get three.  If you right-shift 7 by two digits, then you turn 00000111 into 00000001, which equals one.
+<p>
+In C and C++, the following are the bit arithmetic operators:
+<p>
+<center>
+<table border=3 cellpadding=5>
+<tr><td width=300>AND: this is a single ampersand:</td><td align=center> <tt>&amp;</tt></td></tr>
+<tr><td width=300>OR: this is a single vertical bar:</td><td align=center> <tt>|</tt></td></tr>
+<tr><td width=300>XOR: this is a single carat:</td><td align=center> <tt>^</tt></td></tr>
+<tr><td width=300>NOT: this is a single tilde:</td><td align=center> <tt>~</tt></td></tr>
+<tr><td width=300>Left-shift: this is two less-than signs:</td><td align=center> <tt>&lt;&lt;</tt></td></tr>
+<tr><td width=300>Right-shift: this is two greater-than signs:</td><td align=center> <tt>&gt;&gt;</tt></td></tr>
+</table>
+</center>
+<p>
+
+<hr>
+<h2> ba_helper.cpp</h2>
+
+I've written the program
+<b><a href=ba_helper.cpp>ba_helper.cpp</a></b>
+to help you practice bit arithmetic and hex.  You enter operations in the form:
+<p>
+<center>
+<i>number operator number.</i>
+</center>
+<p>
+The numbers can be represented in any of three ways:
+<OL>
+<LI> Standard decimal, up to 2<sup>64</sup>-1 in value.
+<LI> Hexadecimal, preceded by "0x" and up to 16 digits.
+<LI> Binary, preceded by "B" and up to 64 digits.
+</OL>
+
+The operations are <b>AND</b>,
+<b>OR</b>,
+<b>XOR</b>,
+<b>LS</b>,
+<b>RS</b> and
+<b>ANDNOT</b>.
+
+The program does the operations, and then prints the inputs and the results in all three
+representations.
+(By the way, ANDNOT does a AND (NOT b).)
+<p>
+Here are some examples:
+
+<pre>
+UNIX> <font color=darkred><b>g++ -o ba_helper -std=c++98 ba_helper.cpp</b></font>
+UNIX> <font color=darkred><b>ba_helper</b></font>
+When entering numbers, you can enter:
+  A normal decimal number as big as 2^{64}-1.
+  A number in hex up to 16 digits, starting with 0x.
+  A number in binary up to 64 digits, starting with B.
+Enter a problem: number AND|OR|XOR|LS|RS|ANDNOT number:
+<font color=darkred><b>5 AND 9</b></font>
+
+Operator: AND
+A:                            5   0x0000000000000005  0000000000000000000000000000000000000000000000000000000000000101
+B:                            9   0x0000000000000009  0000000000000000000000000000000000000000000000000000000000001001
+C:                            1   0x0000000000000001  0000000000000000000000000000000000000000000000000000000000000001
+
+Enter a problem: number AND|OR|XOR|LS|RS|ANDNOT number:
+<font color=darkred><b>B101 XOR 0x9</b></font>
+
+Operator: XOR
+A:                            5   0x0000000000000005  0000000000000000000000000000000000000000000000000000000000000101
+B:                            9   0x0000000000000009  0000000000000000000000000000000000000000000000000000000000001001
+C:                           12   0x000000000000000c  0000000000000000000000000000000000000000000000000000000000001100
+
+Enter a problem: number AND|OR|XOR|LS|RS|ANDNOT number:
+<font color=darkred><b>837261 OR 276591827</b></font>
+
+Operator: OR
+A:                       837261   0x00000000000cc68d  0000000000000000000000000000000000000000000011001100011010001101
+B:                    276591827   0x00000000107c74d3  0000000000000000000000000000000000010000011111000111010011010011
+C:                    276625119   0x00000000107cf6df  0000000000000000000000000000000000010000011111001111011011011111
+
+Enter a problem: number AND|OR|XOR|LS|RS|ANDNOT number:
+<font color=darkred><b>&lt;CNTL-D&gt;</b></font>
+UNIX> <font color=darkred><b></b></font>
+</pre>
+
+The first two examples are explained above.  The last one is kind of a pain, but I'm hoping that you see that
+looking at the hex is a nice way to solve the problem.  With hex, each digit corresponds to four bits.  
+So, you can iterate through the hex digits and solve the OR problem for each of those.  Start with the right-most
+one: 0xd is 1101 and 0x3 is 0011.  So (0xd OR 0x3) is equal to 1111 - 0xf.  Moving left: 0x8 is 1000 and 0xd is 1101, 
+so their OR is 0xd.  And so on.  Yes, looking at the bits is easier, but you can do it directly from the hex 
+after a little practice.
+
+<p>
+Left-shifts and right-shifts are easy if the shifting value is a multiple of 4.  When that happens, you can divide by 
+four and shift the hex.  For example, in the first call, since we are left-shifting the bits by eight, that's the
+same as left-shifting the hex by 8/4 = 2.  And in the second call, that's the same as right-shifting the hex by 16/4 = 4:
+
+<pre>
+UNIX> <font color=darkred><b>ba_helper</b></font>
+When entering numbers, you can enter:
+  A normal decimal number as big as 2^{64}-1.
+  A number in hex up to 16 digits, starting with 0x.
+  A number in binary up to 64 digits, starting with B.
+Enter a problem: number AND|OR|XOR|LS|RS|ANDNOT number:
+<font color=darkred><b>0x83726987264 LS 8</b></font>
+
+Operator: LS
+A:                9032963748452   0x0000083726987264  0000000000000000000010000011011100100110100110000111001001100100
+B:                            8   0x0000000000000008  0000000000000000000000000000000000000000000000000000000000001000
+C:             2312438719603712   0x0008372698726400  0000000000001000001101110010011010011000011100100110010000000000
+
+Enter a problem: number AND|OR|XOR|LS|RS|ANDNOT number:
+<font color=darkred><b>0xabcdef123454 RS 16</b></font>
+
+Operator: RS
+A:              188900967593044   0x0000abcdef123454  0000000000000000101010111100110111101111000100100011010001010100
+B:                           16   0x0000000000000010  0000000000000000000000000000000000000000000000000000000000010000
+C:                   2882400018   0x00000000abcdef12  0000000000000000000000000000000010101011110011011110111100010010
+
+Enter a problem: number AND|OR|XOR|LS|RS|ANDNOT number:
+<font color=darkred><b>&lt;CNTL-D&gt;</b></font>
+UNIX> <font color=darkred><b></b></font>
+</pre>
+
+Left-shift and right-shift become a pain when the number of digits is not a multiple of four.  Then the best
+thing to do is convert the hex to binary, do the bit shift, and then partition the binary digits into groups of
+four, and convert back into hex.  Here's an example.  Suppose you want to do:
+<p>
+<center>
+<pre>
+<font color=darkred><b>0x8a7e6c8 LS 7</b></font>
+</pre></center>
+<p>
+
+First, convert the hex to binary, digit by digit:
+
+<p>
+<center>
+<pre>
+8    a    7    e    6    c    8   
+1000 1010 0111 1110 0110 1100 1000
+</pre>
+</center>
+<p>
+
+Now, add seven 0's to the right side, and get rid of the spaces.  In VI, you can do that with "<tt>:s/ //g</tt>".
+
+<p>
+<center>
+<pre>
+1000 1010 0111 1110 0110 1100 1000 0000000
+10001010011111100110110010000000000       
+</pre>
+</center>
+<p>
+Now, add a zero to the beginning, so that the number of digits is a multiple of four, and then group 
+the digits in groups of four.  In VI, you can 
+do that with "<tt>:s/\(....\)/\1 /g</tt>".  And then you can go back to hex:
+<p> <center> <pre>
+010001010011111100110110010000000000        
+0100 0101 0011 1111 0011 0110 0100 0000 0000
+4    5    3    f    3    6    4    0    0   
+</pre> </center> <p>
+
+So the answer is 0x453f36400:
+
+
+<p>
+<pre>
+UNIX> <font color=darkred><b>ba_helper </b></font>
+When entering numbers, you can enter:
+  A normal decimal number as big as 2^{64}-1.
+  A number in hex up to 16 digits, starting with 0x.
+  A number in binary up to 64 digits, starting with B.
+Enter a problem: number AND|OR|XOR|LS|RS|ANDNOT number:
+<font color=darkred><b>0x8a7e6c8 LS 7</b></font>
+
+Operator: LS
+A:                    145221320   0x0000000008a7e6c8  0000000000000000000000000000000000001000101001111110011011001000
+B:                            7   0x0000000000000007  0000000000000000000000000000000000000000000000000000000000000111
+C:                  18588328960   0x0000000453f36400  0000000000000000000000000000010001010011111100110110010000000000
+
+Enter a problem: number AND|OR|XOR|LS|RS|ANDNOT number:
+<font color=darkred><b>&lt;CNTL-D&gt;</b></font>
+UNIX> <font color=darkred><b></b></font>
+</pre>
+
+The nice thing about <b>ba_helper</b> is that you can use it to practice your bit arithmetic.  
+Just try random hex numbers for the inputs, and do all of the operations.
+<hr>
+<h2>Common things that we do with bit operations</h2>
+
+Here are a few common things that we do with bit operations.  When you do them enough times, they become 
+second nature to you, but before that, you have to think about them a little bit.
+<p>
+In this discussion, I'm going to talk about "bit <i>x</i> of a number."  When I say that, I mean the <i>x</i>-th bit
+from the right side of the binary representation of a number.  For example, with the number 12, which is (1100) in
+binary, bits 0 and 1 are equal to zero, and bits 2 and 3 are equal to one.  If the number is a 64-bit number, then
+bits 4 through 63 are also zero.
+
+<h3>Setting a bit</h3>
+
+To make sure that bit <i>x</i> is set in a number, you take the OR of the number with one, left-shifted by <i>x</i>.
+Basically, the left shift moves the one into bit position <i>x</i>, and then the OR makes sure that it is set in 
+the given number.
+<p>
+In C/C++, to set bit <i>x</i> in number <i>v</i>, you do:
+<p> <center> <pre>
+   v |= (1ULL << x);
+</pre> </center> <p>
+
+That operator is "OR-Equals", which is like "+=" and "*=", on with OR instead of addition or multiplication.
+It's a good idea to put the left-shift in parentheses, because operator precedence is a little odd with bit arithmetic.
+The "ULL" is something you need if you are dealing with 64-bit numbers (like <b>unsigned long long</b>).  The ULL
+tells the compiler to treat the number one as a 64-bit number, and that way it knows to do a bit shift on 64-bit numbers.
+If you don't do "ULL", then it will treat one as an integer, and then, for example (1 << 32) will equal zero, 
+because in a 32-bit number, this shifts the one all the way off the number.
+<p>
+Here's an example using <b>ba_helper</b> that shows how you make sure that bit 6 is set in two numbers:  0x83, where
+the bit is not set already, and 0x64, where the bit is set already:
+
+<pre>
+UNIX> <font color=darkred><b>ba_helper</b></font>
+When entering numbers, you can enter:
+  A normal decimal number as big as 2^{64}-1.
+  A number in hex up to 16 digits, starting with 0x.
+  A number in binary up to 64 digits, starting with B.
+Enter a problem: number AND|OR|XOR|LS|RS|ANDNOT number:
+<font color=darkred><b>1 LS 6</b></font>
+
+Operator: LS
+A:                            1   0x0000000000000001  0000000000000000000000000000000000000000000000000000000000000001
+B:                            6   0x0000000000000006  0000000000000000000000000000000000000000000000000000000000000110
+C:                           64   0x0000000000000040  0000000000000000000000000000000000000000000000000000000001000000
+<font color=blue>                                                                                                               ^
+                                           As you can see, this creates a number where only bit six is set     |</font>
+Enter a problem: number AND|OR|XOR|LS|RS|ANDNOT number:
+<font color=darkred><b>0x83 OR 0x40 </b></font>
+
+Operator: OR
+A:                          131   0x0000000000000083  0000000000000000000000000000000000000000000000000000000010000011
+B:                           64   0x0000000000000040  0000000000000000000000000000000000000000000000000000000001000000
+C:                          195   0x00000000000000c3  0000000000000000000000000000000000000000000000000000000011000011
+<font color=blue>                                                                                                               ^
+                                           Now, bit six is set in C                                            |</font>
+
+Enter a problem: number AND|OR|XOR|LS|RS|ANDNOT number:
+<font color=darkred><b>0x64 OR 0x40</b></font>
+
+Operator: OR
+A:                          100   0x0000000000000064  0000000000000000000000000000000000000000000000000000000001100100
+B:                           64   0x0000000000000040  0000000000000000000000000000000000000000000000000000000001000000
+C:                          100   0x0000000000000064  0000000000000000000000000000000000000000000000000000000001100100
+<font color=blue>                                                                                                               ^
+                                           In this example, bit 6 was already set in A, so C equals A.         |</font>
+
+Enter a problem: number AND|OR|XOR|LS|RS|ANDNOT number:
+<font color=darkred><b>&lt;CNTL-D&gt;</b></font>
+UNIX> <font color=darkred><b></b></font>
+</pre>
+
+<h3>Clearing a bit</h3>
+
+To make sure that bit <i>x</i> is not set in a number, you take the AND of the number with the NOT of (one left-shifted by <i>x</i>).   The left-shift sets the one bit, and the NOT flips all of the bits, so that every bit is one, except for bit <i>x</i>.
+Now, when you AND this with the number, it makes sure that all of the numbers bits remain the same, with the exception of
+bit <i>x</i>, which is cleared.  
+In C/C++, to clear bit <i>x</i> in number <i>v</i>, you do:
+<p> <center> <pre>
+   v &= (~(1ULL << x));
+</pre> </center> <p>
+
+In the example below, we are going to clear the 6th bit of 0x64 (where it is set), 
+and 0x83 (where it is not).  As above, (1 << 6) equals 0x40, so we do AND-NOT with 0x40:
+so 
+
+<pre>
+UNIX> <font color=darkred><b>ba_helper</b></font>
+When entering numbers, you can enter:
+  A normal decimal number as big as 2^{64}-1.
+  A number in hex up to 16 digits, starting with 0x.
+  A number in binary up to 64 digits, starting with B.
+Enter a problem: number AND|OR|XOR|LS|RS|ANDNOT number:
+UNIX> <font color=darkred><b>0x64 ANDNOT 0x40</b></font>
+
+Operator: ANDNOT
+A:                          100   0x0000000000000064  0000000000000000000000000000000000000000000000000000000001100100
+B:                           64   0x0000000000000040  0000000000000000000000000000000000000000000000000000000001000000
+C:                           36   0x0000000000000024  0000000000000000000000000000000000000000000000000000000000100100
+<font color=blue>                                                                                                               ^
+                                           In this example, we clear bit 6:                                    |</font>
+Enter a problem: number AND|OR|XOR|LS|RS|ANDNOT number:
+UNIX> <font color=darkred><b>0x83 ANDNOT 0x40</b></font>
+
+Operator: ANDNOT
+A:                          131   0x0000000000000083  0000000000000000000000000000000000000000000000000000000010000011
+B:                           64   0x0000000000000040  0000000000000000000000000000000000000000000000000000000001000000
+C:                          131   0x0000000000000083  0000000000000000000000000000000000000000000000000000000010000011
+<font color=blue>                                                                                                               ^
+                                           In this example, bit 6 is already cleared:                          |</font>
+Enter a problem: number AND|OR|XOR|LS|RS|ANDNOT number:
+<font color=darkred><b>&lt;CNTL-D&gt;</b></font>
+UNIX> <font color=darkred><b></b></font>
+</pre>
+
+To see this a little more clearly, let's use (NOT 0x40).  That is equal to 0xffffffffffffffbf.  You can see the 
+clearing of bit six a little more clearly here, I think:
+
+<pre>
+UNIX> <font color=darkred><b>ba_helper</b></font>
+When entering numbers, you can enter:
+  A normal decimal number as big as 2^{64}-1.
+  A number in hex up to 16 digits, starting with 0x.
+  A number in binary up to 64 digits, starting with B.
+Enter a problem: number AND|OR|XOR|LS|RS|ANDNOT number:
+<font color=darkred><b>0x64 AND 0xffffffffffffffbf</b></font>
+
+Operator: AND
+A:                          100   0x0000000000000064  0000000000000000000000000000000000000000000000000000000001100100
+B:         18446744073709551551   0xffffffffffffffbf  1111111111111111111111111111111111111111111111111111111110111111
+C:                           36   0x0000000000000024  0000000000000000000000000000000000000000000000000000000000100100
+<font color=blue>                                                                                                               ^
+                                           In this example, we clear bit 6:                                    |</font>
+Enter a problem: number AND|OR|XOR|LS|RS|ANDNOT number:
+<font color=darkred><b>0x83 AND 0xffffffffffffffbf</b></font>
+
+Operator: AND
+A:                          131   0x0000000000000083  0000000000000000000000000000000000000000000000000000000010000011
+B:         18446744073709551551   0xffffffffffffffbf  1111111111111111111111111111111111111111111111111111111110111111
+C:                          131   0x0000000000000083  0000000000000000000000000000000000000000000000000000000010000011
+<font color=blue>                                                                                                               ^
+                                           In this example, bit 6 is already cleared:                          |</font>
+Enter a problem: number AND|OR|XOR|LS|RS|ANDNOT number:
+<font color=darkred><b>&lt;CNTL-D&gt;</b></font>
+UNIX> <font color=darkred><b></b></font>
+</pre>
+
+<h3>Checking to see if bit <i>x</i> is set</h3>
+
+To check if bit <i>x</i> is set in number <i>v</i>, you do:
+<p> <center> <pre>
+   if (v & (1ULL << x)) ...
+</pre> </center> <p>
+
+If the bit isn't set, then the AND will result in all zero bits, which is <b>false</b>.  If it is set, then the
+AND will equal <tt>(1 &lt;&lt; x)</tt>, which is not equal to zero.  Boolean expressions that are not equal to zero 
+are <b>true</b>.  
+
+<h3>Extracting the lowest <i>x</i> bits of a number</h3>
+
+To do this, you create a "mask", which is a number where bits 0 through <i>x-1</i> are set, and the rest are not.  
+You then perform an AND of the mask with the number.  The way you create the mask is that you subtract one from 
+<tt>(1 &lt;&lt; x)</tt>.  So, the C/C++ is:
+
+<p> <center> <pre>
+   extracted_bits = v & ( (1ULL << x) - 1);
+</pre> </center> <p>
+
+You may want to do some examples to convince yourself.  Recall that <tt>(1 << 6)</tt> is 0x40, which equals 64.  That means
+that 63, which equals 0x3f, will have bits 0 through 5 set, and the rest clear.  That is our mask.
+In this example, we AND that with
+0x827364, which extracts the lowest six bits from the number:
+
+<pre>
+UNIX> <font color=darkred><b>ba_helper</b></font>
+When entering numbers, you can enter:
+  A normal decimal number as big as 2^{64}-1.
+  A number in hex up to 16 digits, starting with 0x.
+  A number in binary up to 64 digits, starting with B.
+Enter a problem: number AND|OR|XOR|LS|RS|ANDNOT number:
+<font color=darkred><b>0x827364 AND 0x3f  </b></font>
+
+Operator: AND
+A:                      8549220   0x0000000000827364  0000000000000000000000000000000000000000100000100111001101100100
+B:                           63   0x000000000000003f  0000000000000000000000000000000000000000000000000000000000111111
+C:                           36   0x0000000000000024  0000000000000000000000000000000000000000000000000000000000100100
+<font color=blue>                                                                                                                ^^^^^^
+                                           Here we are extracting the lowest six bits of 0x827364:              ||||||</font>
+Enter a problem: number AND|OR|XOR|LS|RS|ANDNOT number:
+UNIX> <font color=darkred><b></b></font>
+<font color=darkred><b>&lt;CNTL-D&gt;</b></font>
+UNIX> <font color=darkred><b></b></font>
+</pre>
+
+<h3>Extracting bits <i>x</i> through <i>y</i> of a number</h3>
+
+You do this in two parts.  First, you extract bits 0 through <i>y</i> using the technique above.  Then you right shift
+by <i>x</i>.  In other words:
+
+<p> <center> <pre>
+   extracted_bits = ( ( v & ( (1ULL << (y+1)) - 1) ) >> x);
+</pre> </center> <p>
+
+Let's use an example of extracting bits 2 through 5 of 0x827364.  As in our previous examples, <tt>(1 << (5+1))</tt> equals
+0x40, so <tt>( (1ULL << (y+1)) - 1)</tt> equals 0x3f.  The last example above shows that 0x827364 AND 0x3f is 0x24 (100100),
+and our final action is to right shift that by two bits, to get (1001) or 9.  Let's just show this in the original
+number 0x827364:
+
+<pre>
+A:                      8549220   0x0000000000827364  0000000000000000000000000000000000000000100000100111001101<font color=blue>1001</font>00
+<font color=blue>                                                                                                                ^^^^
+                                           Below we are extracting bits 2 through 5, which are 1001.             ||||</font>
+</pre>
+
+And below, we'll show the two operations:
+
+<pre>
+Enter a problem: number AND|OR|XOR|LS|RS|ANDNOT number:
+<font color=darkred><b>0x827364 AND 0x3f</b></font>
+
+Operator: AND
+A:                      8549220   0x0000000000827364  0000000000000000000000000000000000000000100000100111001101100100
+B:                           63   0x000000000000003f  0000000000000000000000000000000000000000000000000000000000111111
+C:                           36   0x0000000000000024  0000000000000000000000000000000000000000000000000000000000100100
+
+Enter a problem: number AND|OR|XOR|LS|RS|ANDNOT number:
+<font color=darkred><b>0x24 RS 2</b></font>
+
+Operator: RS
+A:                           36   0x0000000000000024  0000000000000000000000000000000000000000000000000000000000100100
+B:                            2   0x0000000000000002  0000000000000000000000000000000000000000000000000000000000000010
+C:                            9   0x0000000000000009  0000000000000000000000000000000000000000000000000000000000001001
+</pre>
+
+<h3>Representing sets with bits</h3>
+
+If you need to represent sets of integers, where the integers are small, you can use the bits of a number.
+For example, suppose that you are representing sets of integers from 0 to 63.  Then you can use a <b>long long</b>
+to represent the set.  If bit <i>x</i> is set in the <b>long long</b>, then the number <i>x</i> is in the set
+represented by the <b>long long</b>.
+<p>
+For example, you can represent the set { 1, 3, 6, 7 } with the number 0xca.  In binary, that number
+is 11001010, which, as you can see, has bits 1, 3, 6 and 7 set.  When you represent sets in this way,
+you use the methods above to set a bit (adding an element to a set), clear a bit (removing an element from
+a set) and testing to see if a bit is set (testing to see if an element is in the set).  
+<p>
+This is often <i>much</i> faster than using a <b>set</b> to represent the set.  That is because a <b>set</b>
+is implemented with a balanced binary tree data structure, which uses a lot of memory for each element.  With
+bit arithmetic, all it takes is one <b>int</b> or one <b>long long</b>.  That is a big savings!  With bits,
+you can implement set intersection with a simple binary <b>AND</b>, set union with a simple binary <b>OR</b>,
+and take the complement of a set with <b>NOT</b>.
+How cool is that?
+
+<hr>
+<h2><b><a href=ba_helper.cpp>ba_helper.cpp</a></b></h2>
+
+It's not a bad idea to look over the entire program.  I'm going to break the program into parts
+to talk about them.  We start with the <b>Number</b> class, where I hold a number, and two string representations:
+
+<p><center><table border=3 cellpadding=3><td><pre>
+<font color=blue>/* This is how we're holding a number.  The class facilitates printing out the number. */</font>
+
+class Number {
+  public:
+    unsigned long long d;      <font color=blue>/* The number. */</font>
+    string hex;                <font color=blue>/* Its representation in hex (16 hex digits with a 0x in front). */</font>
+    string binary;             <font color=blue>/* Its representation in binary */</font>
+    string To_String();        <font color=blue>/* This creates a bigger string, which is kind of formatted. */</font>
+};
+</pre></td></table></center><p>
+
+Because I want to deal with 64-bit integers, I use the type <b>unsigned long long</b>.  The "unsigned"
+part means that it goes from 0 to 2<sup>64</sup>-1.  I keep two string representations, and I have 
+a method called <b>To_String()</b> which prints out all three representations of the number, formatted.
+When I create a <b>Number</b>, I make sure to set both string representations at that time.  
+<p>
+Let's look at <b>To_String()</b>:
+
+<p><center><table border=3 cellpadding=3><td><pre>
+<font color=blue>/* This returns a "formatted" string for a number. */</font>
+
+string Number::To_String()
+{
+  char buf[200];
+  string s;
+
+  sprintf(buf, "%21llu   %s  %s", d, hex.c_str(), binary.c_str());
+  s = buf;
+  return s;
+}
+</pre></td></table></center><p>
+
+The only thing here that is remotely subtle is the "%21llu" -- this is a way of specifying that you want to 
+print out an <b>unsigned long long</b>, padded to 21 spaces, right justified.  
+<p>
+Now, I've written two procedures that create <b>Number</b> instances.  The first is called
+<b>number_from_ull()</b>, and it creates an instance of <b>Number</b>
+from an <b>unsigned long long</b>.  It calls <b>new</b> to create the instance and
+sets the <b>d</b> field.  Next, 
+it sets the <b>hex</b> string using <b>sprintf()</b>, with a format string
+of "0x%016llx".  That says to start with "0x", then print the <b>unsigned long
+long</b> as a 16-digit hex number with leading zeros.
+<p>
+Finally, it creates the binary string by running through the digits from 0
+to 63, checking to see if the digit is set in <i>v</i> using the same technique
+as I describe above in "<b>Checking to see if bit <i>x</i> is set</b>", and
+if a bit is set, its corresponding character in the string is set to '1':
+
+<p><center><table border=3 cellpadding=3><td><pre>
+Number *number_from_ull(unsigned long long v)
+{
+  Number *n;
+  int i;
+  char buf[200];
+ 
+  <font color=blue>/* Create the Number class instance, and set the strings. */</font>
+
+  n = new Number;
+  n-&gt;d = v;
+
+  <font color=blue>/* Set the hexadecimal using sprintf. */</font>
+
+  sprintf(buf, "0x%016llx", v);
+  n-&gt;hex = buf;
+
+  <font color=blue>/* For the binary, examine each bit by doing AND with one 
+     left-shifted the proper number of bits. "1ULL" forces
+     the compiler to treat one as an unsigned long long.  
+     Otherwise, if you shift it more than 31 bits, it will
+     treat one as an integer, and turn it into zero.  */</font>
+
+  n-&gt;binary.resize(64, '0');
+  for (i = 0; i &lt; 64; i++) if (v & (1ULL &lt;&lt; i)) n-&gt;binary[64-i-1] = '1';
+
+  return n;
+}
+</pre></td></table></center><p>
+
+The second procedure that creates <b>Number</b> instances is
+<b>number_from_string()</b>, and it creates a number from a string that is in any of the three
+formats described above.  It does this by converting the string to an <b>unsigned long long</b>
+named <i>v</i>, and then calling <b>number_from_ull()</b> on <i>v</i>.
+<p>
+I'm showing the code below up to the point where the procedure reads the 
+number from a binary string beginning with 'B':
+
+<p><center><table border=3 cellpadding=3><td><pre>
+<font color=blue>/* This creates a number from a string, which is either decimal,
+   hexadecimal (starting with 0x), or binary (starting with B). 
+   It creates all of the string representations. */</font>
+
+Number *number_from_string(string &s)
+{
+  unsigned long long v;
+  unsigned long long i;
+  int b;
+  Number *n;
+  char buf[100];
+
+  v = 0;
+
+  if (s.size() == 0) return NULL;
+
+  <font color=blue>/* Convert from binary if the string begins with 'B' */</font>
+
+  if (s[0] == 'B') {
+    if (s.size() == 1) return NULL;
+    if (s.size() &gt; 65) return NULL;
+    for (i = 0; i &lt; s.size()-1; i++) {
+      b = s[s.size()-i-1];
+      if (b != '0' && b != '1') return NULL;
+      if (b == '1') v |= (1ULL &lt;&lt; i);     <font color=blue>/* Set bit i, if the corresponding character is '1' */</font>
+    }
+</pre></td></table></center><p>
+
+Take a look at the <b>for</b> loop -- that loops through the digits, where <i>i</i> is the number of the
+digit.  In the binary string, digit 0 is the last digit of the string, so it is <b>s[s.size()-1]</b>.
+Digit 1 is the digit before that one, so it is 
+<b>s[s.size()-2]</b>.  And so on -- this is why we set <b>b</b> to be <b>s[s.size()-i-1]</b>.  
+<p>
+When <b>b</b> is equal to '1', that means that bit <i>i</i> should be set, and I set it exactly as described
+above in "<b>Setting a bit</b>":
+<p><center><table border=3 cellpadding=3><td><pre>
+if (b == '1') v |= (1ULL &lt;&lt; i);     
+</pre></td></table></center><p>
+
+In the <b>for</b> loop, I stop at <b>i &lt; s.size()-1</b> instead of <b>s.size()</b>, because I want to ignore the 
+initial 'B' character.
+<p>
+Now, the next block of code reads the string if it is specified in hex, and if not, it tries to read
+it in decimal.  This code is pretty straightforward, except we use "%llx" to read an <b>unsigned long long</b>
+in hex, and "%llu" to read an <b>unsigned long long</b> as a decimal.  At the end, it calls
+<b>number_from_ull()</b>.
+
+<p><center><table border=3 cellpadding=3><td><pre>
+  <font color=blue>/* Convert from hex if the string begins with "0x" */</font>
+
+  } else if (s.substr(0, 2) == "0x") {
+    if (s.size() == 2 || s.size() &gt; 18) return NULL;
+    if (sscanf(s.c_str(), "0x%llx", &v) != 1) return NULL;
+
+  <font color=blue>/* Attempt to convert from decimal. */</font>
+
+  } else {
+    if (sscanf(s.c_str(), "%llu", &v) != 1) return NULL;
+  }
+
+  return number_from_ull(v);
+}
+</pre></td></table></center><p>
+
+Finally, this last code block implements the <b>main()</b>, which reads the user
+input and prints the output.  I don't say anything more about this code except
+for what's in the comments -- this is straightforward code, but it's good code
+for you to read, because I think it is laid out well, and is easy to read,
+despite the fact that it handles input errors pretty cleanly:
+
+<p><center><table border=3 cellpadding=3><td><pre>
+int main()
+{
+  Number *A, *B, *C;
+  string sa, sb, sop;
+  int error;
+
+  printf("When entering numbers, you can enter:\n");
+  printf("  A normal decimal number as big as 2^{64}-1.\n");
+  printf("  A number in hex up to 16 digits, starting with 0x.\n");
+  printf("  A number in binary up to 64 digits, starting with B.\n");
+
+  while (1) {
+    error = 0;
+    C = NULL;
+
+    <font color=blue>/* Grab A, B and the operator. */</font>
+
+    printf("Enter a problem: number AND|OR|XOR|LS|RS|ANDNOT number:\n");
+    fflush(stdout);
+
+    if (! (cin &gt;&gt; sa &gt;&gt; sop &gt;&gt; sb)) exit(1);
+
+    <font color=blue>/* Convert A and B to instances of the Number class, and error check. */</font>
+
+    A = number_from_string(sa);
+    B = number_from_string(sb);
+    if (A == NULL) {
+      printf("Bad format for the first number.\n");
+      error = 1;
+    } 
+    if (B == NULL) {
+      printf("Bad format for the second number.\n");
+      error = 1;
+    }
+    
+    <font color=blue>/* Do the operation if we haven't had an error so far. */</font>
+
+    if (error == 0) {
+      if (sop == "AND") {
+        C = number_from_ull(A-&gt;d & B-&gt;d);
+      } else if (sop == "OR") {
+        C = number_from_ull(A-&gt;d | B-&gt;d);
+      } else if (sop == "XOR") {
+        C = number_from_ull(A-&gt;d ^ B-&gt;d);
+      } else if (sop == "LS") {
+        C = number_from_ull(A-&gt;d &lt;&lt; B-&gt;d);
+      } else if (sop == "RS") {
+        C = number_from_ull(A-&gt;d &gt;&gt; B-&gt;d);
+      } else if (sop == "ANDNOT") {
+        C = number_from_ull(A-&gt;d & (~B-&gt;d));
+      } else {
+        printf("Bad operator.\n");
+        error = 1;
+      }
+    }
+    
+    <font color=blue>/* If everything was successful, print the results. */</font>
+
+    if (error == 0) {
+      printf("\n");
+      printf("Operator: %s\n", sop.c_str());
+      printf("A:        %s\n", A-&gt;To_String().c_str());
+      printf("B:        %s\n", B-&gt;To_String().c_str());
+      printf("C:        %s\n", C-&gt;To_String().c_str());
+      printf("\n");
+    }
+
+    <font color=blue>/* Free up memory: Call delete on anything that you created
+       with new. */</font>
+
+    if (A != NULL) delete A;
+    if (B != NULL) delete B;
+    if (C != NULL) delete C;
+  
+  }
+
+  exit(0);
+}
+</pre></td></table></center><p>
+
