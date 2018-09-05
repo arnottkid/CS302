@@ -19,9 +19,9 @@ class Sudoku {
     int row_ok(int r);
     int column_ok(int c);
     int panel_ok(int pr, int pc);
-    vector <ISet> vrows;
-    vector <ISet> vcols;
-    vector <VISet> vpanels;
+    vector <ISet> vrows;       // Sets of legal values for each row.
+    vector <ISet> vcols;       // Sets of legal values for each row.
+    vector <VISet> vpanels;    // Sets of legal values for each panel.
 };
 
 void Sudoku::Solve(int r, int c)
@@ -29,6 +29,8 @@ void Sudoku::Solve(int r, int c)
   int i, j, e;
   vector <int> to_try;
   ISet::iterator rit, cit, pit;
+
+  /* At the beginning, first put all values into the three vectors of sets: */
 
   if (r == 0 && c == 0) {
     vrows.resize(9);
@@ -43,6 +45,10 @@ void Sudoku::Solve(int r, int c)
         vpanels[i/3][i%3].insert(j);
       }
     }
+    
+    /* Then, run through each row, column and panel of the puzzle,
+       and remove values from the sets. */
+
     for (i = 0; i < 9; i++) {
       for (j = 0; j < 9; j++) {
         if (puzzle[i][j] != '-') {
@@ -55,8 +61,13 @@ void Sudoku::Solve(int r, int c)
     }
   }
       
-
   if (c == 9) { c = 0; r++; }
+
+  /* Now, instead of trying every value and testing for legality, we instead create
+     a vector from all of the legal values in the row.  We traverse that vector, and
+     if a value is legal in the column and panel, then we add it to the puzzle and
+     remove it from the three sets.  Then we make the recursive call, and add the value
+     back to the sets.  This code is kind of a pain, isn't it? */
 
   while (r < 9) {
     if (puzzle[r][c] == '-') {

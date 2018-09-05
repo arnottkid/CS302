@@ -70,7 +70,7 @@ Here's the core of <a href=SRM-355-D2-550.cpp>SRM-355-D2-550.cpp</a>
 <p><center><table border=3 cellpadding=3><td><pre>
 int NE(string &l, string &h, int index)
 {
-  if (index == l.size()) return 0;     // Base case when we have no digits left.
+  if (index == l.size()) return 0;     <font color=blue>// Base case when we have no digits left.</font>
   if (l[index] != h[index]) return 0;
 
   if (l[index] == '8') return 1 + (NE(l, h, index+1));
@@ -83,7 +83,7 @@ int NoEights::smallestAmount(int low, int high)
   char b[20];
   string l, h;
 
-  sprintf(b, "%010d", low);    // Conversion to 10 digit strings with leading zeros
+  sprintf(b, "%010d", low);    <font color=blue>// Conversion to 10 digit strings with leading zeros</font>
   l = b;
   sprintf(b, "%010d", high);
   h = b;
@@ -574,6 +574,7 @@ The code is a bit icky -- it's in
 <b><a href=sudoku5.cpp>sudoku5.cpp</a></b>.  First, here's the updated 
 class definition:
 
+
 <p><center><table border=3 cellpadding=3><td><pre>
 typedef set &lt;int&gt; ISet;
 typedef vector &lt;ISet&gt; VISet;
@@ -587,9 +588,9 @@ class Sudoku {
     int row_ok(int r);
     int column_ok(int c);
     int panel_ok(int pr, int pc);
-    vector &lt;ISet&gt; vrows;
-    vector &lt;ISet&gt; vcols;
-    vector &lt;VISet&gt; vpanels;
+    vector &lt;ISet&gt; vrows;       <font color=blue>// Sets of legal values for each row.</font>
+    vector &lt;ISet&gt; vcols;       <font color=blue>// Sets of legal values for each row.</font>
+    vector &lt;VISet&gt; vpanels;    <font color=blue>// Sets of legal values for each panel.</font>
 };
 </pre></td></table></center><p>
 
@@ -601,6 +602,8 @@ void Sudoku::Solve(int r, int c)
   int i, j, e;
   vector &lt;int&gt; to_try;
   ISet::iterator rit, cit, pit;
+
+  <font color=blue>/* At the beginning, first put all values into the three vectors of sets: */</font>
 
   if (r == 0 && c == 0) {
     vrows.resize(9);
@@ -615,6 +618,10 @@ void Sudoku::Solve(int r, int c)
         vpanels[i/3][i%3].insert(j);
       }
     }
+    
+    <font color=blue>/* Then, run through each row, column and panel of the puzzle,
+       and remove values from the sets. */</font>
+
     for (i = 0; i &lt; 9; i++) {
       for (j = 0; j &lt; 9; j++) {
         if (puzzle[i][j] != '-') {
@@ -626,8 +633,14 @@ void Sudoku::Solve(int r, int c)
       }
     }
   }
-
+      
   if (c == 9) { c = 0; r++; }
+
+  <font color=blue>/* Now, instead of trying every value and testing for legality, we instead create
+     a vector from all of the legal values in the row.  We traverse that vector, and
+     if a value is legal in the column and panel, then we add it to the puzzle and
+     remove it from the three sets.  Then we make the recursive call, and add the value
+     back to the sets.  This code is kind of a pain, isn't it? */</font>
 
   while (r &lt; 9) {
     if (puzzle[r][c] == '-') {
@@ -661,7 +674,8 @@ void Sudoku::Solve(int r, int c)
 }
 </pre></td></table></center><p>
 
-The code is rather straightforward.  The only subtlety that I see is using <b>to_try</b>.
+Although a bit spindly, the code is straightforward.
+The only subtlety that I see is using <b>to_try</b>.
 Why did I do this?  Why didn't I simply use <b>rit</b> to traverse <b>vrows[r]</b>?
 The reason is that I potentially erase <b>rit</b> inside the loop -- once I do that,
 I invalidate <b>rit</b>, which would be problematic inside a <b>for</b> loop that
@@ -755,18 +769,18 @@ int Sudoku::Solve(int r, int c)
   while (r &lt; 9) {
     while (c &lt; 9) {
       if (P[r][c] == 0) {
-        j = (RS[r] & CS[c] & PS[rctoindex(r, c)]);   // J is the intersection of the three sets
+        j = (RS[r] & CS[c] & PS[rctoindex(r, c)]);   <font color=blue>// J is the intersection of the three sets</font>
         for (i = 1; i &lt;= 9; i++) {
           if (j & (1 &lt;&lt; i)) {
 
             P[r][c] = i;
-            RS[r] &= (~(1 &lt;&lt; i));             // Remove bit i from RS, CS and PS
+            RS[r] &= (~(1 &lt;&lt; i));             <font color=blue>       // Remove bit i from RS, CS and PS</font>
             CS[c] &= (~(1 &lt;&lt; i));
             PS[rctoindex(r, c)] &= (~(1 &lt;&lt; i));
 
             if (Solve(r, c)) return 1;
 
-            RS[r] |= (1 &lt;&lt; i);                // Put bit i back into RS, CS and PS
+            RS[r] |= (1 &lt;&lt; i);                <font color=blue>       // Put bit i back into RS, CS and PS</font>
             CS[c] |= (1 &lt;&lt; i);
             PS[rctoindex(r, c)] |= (1 &lt;&lt; i);
           }
