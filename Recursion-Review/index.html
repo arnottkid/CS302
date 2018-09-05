@@ -1,0 +1,821 @@
+<title>CS302 Lecture Notes</title>
+<h2>CS302 Lecture Notes - Recursion Review</h2>
+<UL>
+<LI> September, 2011
+<LI> Latest Revision: September, 2013
+<LI> James S. Plank
+<LI> Directory: <b>/home/plank/cs302/Notes/Recursion-Review</b>
+</UL>
+
+This is review and reinforcement of recursion.  
+We'll go over three problems that involve recursion in varying levels of
+detail.
+For primary lecture notes on recursion, please see my
+<a href=http://web.eecs.utk.edu/~plank/plank/classes/cs140/Notes/Recursion/index.html>CS140
+Lecture notes on recursion</a>.
+
+<hr>
+<h3>#1: Topcoder SRM 355, D2, 550-point problem</h3>
+
+As always, I don't re-post their problems.  If their server is down, read the 
+problem description from <a href=http://community.topcoder.com/stat?c=problem_statement&pm=7759&rd=10712>http://community.topcoder.com/stat?c=problem_statement&pm=7759&rd=10712</a>.
+The gist is, given two numbers, <b>l</b>
+and <b>h</b>, determine the minimum number of digits that equal eight for all numbers
+between <b>l</b> and <b>h</b> (inclusive).  
+<p>
+Examples: 
+<UL>
+<LI> <b>l</b>=1, <b>h</b>=10: The answer is zero, because every number but 8 has zero eights.
+<LI> <b>l</b>=8, <b>h</b>=8: Duh.
+<LI> <b>l</b>=83848, <b>h</b>=83888: The answer is two -- every number has to start with 838.
+<LI> <b>l</b>=83848, <b>h</b>=84888: The answer is one -- every number has to start with 8, but
+there are numbers, like 84000, that have only one 8.
+</UL>
+The brain dead way to do this is to iterate from <b>l</b> to <b>h</b>, counting eights.  
+Unfortunately, the  constraints on the problem say that <b>l</b> and <b>h</b> can be up
+to 2,000,000,000, so that's too slow.
+<p>
+The key insight is to look at <b>l</b> and <b>h</b> as strings with equal numbers of digits.
+Then, the common prefixes of <b>l</b> and <b>h</b> allow us to determine the minimum
+number of eights.
+The problem description says that
+<b>h</b> will be at most a 10-digit number, so simply convert both to 10-digit strings
+that represent the numbers with leading zeros.  
+<p>
+In other words, if <b>l</b> equals 8 and <b>h</b> equals 20, then convert <b>l</b> to
+"0000000008" and <b>h</b> to "0000000020".
+<p>
+Now, look at the first digit of both numbers.  Call them <b>h[0]</b> and <b>l[0]</b>.  
+If both equal '8', then every number between <b>h</b> and <b>l</b>
+has to start with '8'.  If we remove the '8' from both strings and solve the problem 
+recursively, then our answer is one plus the answer of the recursive problem.
+<p>
+Instead, suppose they both do not equal '8', but they do equal each other.  If we remove
+the digit from both numbers and solve it recursively, then we have the answer. 
+<p>
+Suppose they do not equal each other, and <b>h[0]</b> does not equal '8'.  Then,
+you know the number beginning with <b>h[0]</b> and having zero's in every other digit is 
+between <b>l</b> and <b>h</b>, and it has zero 8's.  You can return zero.  
+<p>
+Suppose they do not equal each other, and <b>h[0]</b> equals '8'.  Then,
+you know the number beginning with <b>l[0]</b> and having nines in every other digit is 
+between <b>l</b> and <b>h</b>, and it has zero 8's.  You can return zero again. 
+<p>
+This maps itself to a straightforward solution.  
+It is in 
+<a href=SRM-355-D2-550.cpp>SRM-355-D2-550.cpp</a>, and a <b>main</b> for compiling it is
+in <a href=SRM-355-D2-550-Main.cpp>SRM-355-D2-550-Main.cpp</a>
+Here's the core of <a href=SRM-355-D2-550.cpp>SRM-355-D2-550.cpp</a>
+
+<p><center><table border=3 cellpadding=3><td><pre>
+int NE(string &l, string &h, int index)
+{
+  if (index == l.size()) return 0;     // Base case when we have no digits left.
+  if (l[index] != h[index]) return 0;
+
+  if (l[index] == '8') return 1 + (NE(l, h, index+1));
+  return 0 + (NE(l, h, index+1));
+}
+
+int NoEights::smallestAmount(int low, int high)
+{
+  int i;
+  char b[20];
+  string l, h;
+
+  sprintf(b, "%010d", low);    // Conversion to 10 digit strings with leading zeros
+  l = b;
+  sprintf(b, "%010d", high);
+  h = b;
+  return NE(l, h, 0);
+}
+</pre></td></table></center><p>
+
+Now, you could have solved that with a <b>for</b> loop, but sometimes it's easier to think
+recursively.  What's the running time?  It's <i>O(n)</i>, where <i>n</i> is the length of
+the string. 
+<hr>
+<h3>#2: Topcoder SRM 351, D1, 250-point problem</h3>
+
+The problem description is available at <a href=http://community.topcoder.com/stat?c=problem_statement&pm=7773&rd=10675>http://community.topcoder.com/stat?c=problem_statement&pm=7773&rd=10675</a>.
+<p>
+We are given six numbers: <b>G1</b>, <b>S1</b> and <b>B1</b>, representing the number
+of gold, silver and bronze coins that we currently have, and 
+<b>G2</b>, <b>S2</b> and <b>B2</b>, representing the number
+of gold, silver and bronze coins that we want to have.  We have exchange rates:
+<p>
+<UL>
+<LI> If you give the bank one gold, you get 9 silver
+<LI> If you give the bank 11 silver, you get one gold
+<LI> If you give the bank one silver, you get 9 bronze
+<LI> If you give the bank 11 bronze, you get one silver
+</UL>
+We are to return the minimum number of exchanges that we need to perform to get
+at least <b>G2/S2/B2</b> from <b>G1/S1/B1</b>.  
+<p>
+This is a problem where you break it into sub-problems and solve them recursively.
+That's a lot easier than trying to think things like: "If <b>G2</b> is greater than <b>G1</b> 
+but 11*<b>(G2-G1)</b> is greater than <b>(S1-S2)</b>, then.....".
+<p>
+Instead, concentrate on how to convert the problem into easier recursive problems.
+Start with gold.  If <b>G2</b> is greater than <b>G1</b>, then you need 11*<b>(G2-G1)</b> extra
+silver.  So, simply solve the recursive problem where <b>G1</b> and <b>G2</b> equal
+zero, and <b>S2</b> is increased by 11*<b>(G2-G1)</b>.  Let that solution be <i>s</i>.
+If <i>s</i> is -1, then there's no solution.  Otherwise, return <i>s</i> plus 
+<b>(G2-G1)</b> exchanges.
+<p>
+Similarly, now that we're done with gold, let's concentrate on bronze.
+If <b>B2</b> is greater than <b>B1</b>, then you need enough silver to get
+<b>(B2-B1)</b> bronze.  Let that amount be <i>x</i>.  You solve the recursive problem
+with <b>B1</b> and <b>B2</b> equal to
+zero, and <b>S2</b> is increased by <i>x</i>.  Let that solution be <i>s</i>.
+then the final solution is <b>s</b>+<i>x</i>.
+<p>
+Now we're done with gold and bronze.  Let's concentrate on silver.  
+If <b>S2</b> is less than or equal to <b>S1</b>, then we're done -- return zero.
+Otherwise, we get the most bang for our buck by converting gold to silver.  See
+if there's enough gold.  If so, return how many conversions are necessary.
+If not, convert as much gold as you can and do the rest from bronze.  If that's impossible,
+return -1.  
+<p>
+That solves all cases.  For the code, see 
+<a href=SRM-351-D1-250.cpp>SRM-351-D1-250.cpp</a> and 
+in <a href=SRM-351-D1-250-Main.cpp>SRM-351-D1-250-Main.cpp</a>
+I have annotated the code to print out what it's doing, in case you find this
+a little confusing.  It is worth the effort to trace through the recursion:
+
+<pre>
+UNIX> <font color=darkred><b>g++ SRM-351-D1-250-Main.cpp</b></font>
+UNIX> <font color=darkred><b>a.out 0</b></font>
+ We have:  G1:   1   S1:   0   B1:   0
+ We want:  G2:   0   S2:   0   B2:  81
+ Recursively trying to get 81 bronze from 9 silver
+
+**** We have:  G1:   1   S1:   0   B1:   0
+**** We want:  G2:   0   S2:   9   B2:   0
+**** We can satisfy silver from gold, returning 1
+
+ After recursively trying to get bronze, returning 10
+
+10
+UNIX> <font color=darkred><b>a.out 1</b></font>
+ We have:  G1:   1   S1: 100   B1:  12
+ We want:  G2:   5   S2:  53   B2:  33
+ Recursively trying to get 4 gold from 44 silver
+
+**** We have:  G1:   0   S1: 100   B1:  12
+**** We want:  G2:   0   S2:  97   B2:  33
+**** Recursively trying to get 21 bronze from 3 silver
+
+******** We have:  G1:   0   S1: 100   B1:   0
+******** We want:  G2:   0   S2: 100   B2:   0
+******** We have enough silver, returning 0
+
+**** After recursively trying to get bronze, returning 3
+
+ After recursively trying to get gold, returning 7
+
+7
+UNIX> <font color=darkred><b>a.out 2</b></font>
+ We have:  G1:   1   S1: 100   B1:  12
+ We want:  G2:   5   S2:  63   B2:  33
+ Recursively trying to get 4 gold from 44 silver
+
+**** We have:  G1:   0   S1: 100   B1:  12
+**** We want:  G2:   0   S2: 107   B2:  33
+**** Recursively trying to get 21 bronze from 3 silver
+
+******** We have:  G1:   0   S1: 100   B1:   0
+******** We want:  G2:   0   S2: 110   B2:   0
+******** We don't have enough gold and bronze to get silver: returning -1
+
+**** After recursively trying to get bronze, returning -1
+
+ After recursively trying to get gold, returning -1
+
+-1
+UNIX> <font color=darkred><b></b></font>
+</pre>
+
+
+<hr>
+<h3>#3: Solving Sudoku Puzzles</h3>
+
+I assume everyone knows what sudoku is, but if you don't, read
+<a href=http://en.wikipedia.org/wiki/Sudoku>Wikipedia's page</a>.  
+Since the problems are pretty small, it's very easy to write a brain-dead
+recursive Sudoku solver, and for hard problems, it's easier to write the
+program than it is to solve the puzzle by hand!
+<p>
+We'll build a solution.  First have to read a problem in -- I'll do that from 
+standard input -- numbers are '1' through '9', empty cells are '-' and everything else is
+ignored.  I store a puzzle in a vector of nine strings, each with nine characters.
+I do this in a <b>Read()</b> method of a class called <b>Sudoku</b>, and I also 
+implement a <b>Print()</b> method in 
+<b><a href=sudoku1.cpp>sudoku1.cpp</a></b>:
+
+<p><center><table border=3 cellpadding=3><td valign=top><pre>
+class Sudoku {
+  public:
+    vector &lt;string&gt; puzzle;
+    void Read();
+    void Print();
+};
+
+void Sudoku::Read() 
+{
+  int i, j;
+  char c;
+
+  puzzle.clear();
+  puzzle.resize(9);
+
+  for (i = 0; i &lt; 9; i++) {
+    for (j = 0; j &lt; 9; j++) {
+      do {
+        if (!(cin &gt;&gt; c)) { 
+          cerr &lt;&lt; "Not enough cells.\n";
+          exit(1);
+        }
+      } while (isspace(c));
+      if (c != '-' && (c &lt; '1' || c &gt; '9')) {
+        cerr &lt;&lt; "Bad character " &lt;&lt; c &lt;&lt; endl;
+        exit(1);
+      }
+      puzzle[i].push_back(c);
+    }
+  }
+}
+</pre></td><td valign=top><pre>
+void Sudoku::Print() 
+{
+  int i, j;
+
+  for (i = 0; i &lt; puzzle.size(); i++) {
+    for (j = 0; j &lt; puzzle[i].size(); j++) {
+      cout &lt;&lt; puzzle[i][j];
+      if (j == 2 || j == 5) cout &lt;&lt; " ";
+    }
+    cout &lt;&lt; endl;
+    if (i == 2 || i == 5) cout &lt;&lt; endl;
+  }
+}
+  
+main()
+{
+  Sudoku S;
+
+  S.Read();
+  S.Print();
+}
+</pre></td></table></center><p>
+
+I have the example from the Wikipedia page in two files:
+<b><a href=sudex1.txt>sudex1.txt</a></b> and
+<b><a href=sudex2.txt>sudex2.txt</a></b>.  They differ in the amount of whitespace.
+However, when the program reads them in, the produce the same output:
+
+<p><center><table border=3><td valign=top><pre>
+UNIX> <font color=darkred><b>g++ -o sudoku1 sudoku1.cpp</b></font>
+UNIX> <font color=darkred><b>cat sudex1.txt</b></font>
+53--7----
+6--195---
+-98----6-
+8---6---3
+4--8-3--1
+7---2---6
+-6----28-
+---419--5
+----8--79
+UNIX> <font color=darkred><b>sudoku1 < sudex1.txt</b></font>
+53- -7- ---
+6-- 195 ---
+-98 --- -6-
+
+8-- -6- --3
+4-- 8-3 --1
+7-- -2- --6
+
+-6- --- 28-
+--- 419 --5
+--- -8- -79
+UNIX>
+</pre>
+</td><td valign=top>
+<pre>
+UNIX> <font color=darkred><b>cat sudex2.txt</b></font>
+5 3 -   - 7 -   - - - 
+6 - -   1 9 5   - - - 
+- 9 8   - - -   - 6 - 
+
+8 - -   - 6 -   - - 3 
+4 - -   8 - 3   - - 1 
+7 - -   - 2 -   - - 6 
+
+- 6 -   - - -   2 8 - 
+- - -   4 1 9   - - 5 
+- - -   - 8 -   - 7 9 
+UNIX> <font color=darkred><b>sudoku1 < sudex2.txt</b></font>
+53- -7- ---
+6-- 195 ---
+-98 --- -6-
+
+8-- -6- --3
+4-- 8-3 --1
+7-- -2- --6
+
+-6- --- 28-
+--- 419 --5
+--- -8- -79
+UNIX> <font color=darkred><b></b></font>
+</pre>
+</td></table></center><p>
+
+As a next step, we implement methods to check whether rows, columns or 
+panels are valid.   They are straightforward.  In 
+<b><a href=sudoku2.cpp>sudoku2.cpp</a></b>, we check to see whether the 
+input matrix is indeed valid.
+
+<p><center><table border=3 cellpadding=3><td valign=top><pre>
+class Sudoku {
+  public:
+    vector &lt;string&gt; puzzle;
+    void Read();
+    void Print();
+    int row_ok(int r);
+    int column_ok(int c);
+    int panel_ok(int pr, int pc);
+};
+
+int Sudoku::row_ok(int r)
+{
+  vector &lt;int&gt; checker;
+  int c;
+
+  checker.clear();
+  checker.resize(10, 0);
+  for (c = 0; c &lt; 9; c++) {
+    if (puzzle[r][c] != '-') {
+      if (checker[puzzle[r][c]-'0']) return 0;
+      checker[puzzle[r][c]-'0'] = 1;
+    }
+  }
+  return 1;
+}
+
+int Sudoku::column_ok(int c)
+{
+  vector &lt;int&gt; checker;
+  int r;
+
+  checker.resize(10, 0);
+  for (r = 0; r &lt; 9; r++) {
+    if (puzzle[r][c] != '-') {
+      if (checker[puzzle[r][c]-'0']) return 0;
+      checker[puzzle[r][c]-'0'] = 1;
+    }
+  }
+  return 1;
+}
+</pre></td><td valign=top><pre>int Sudoku::panel_ok(int pr, int pc)
+{
+  vector &lt;int&gt; checker;
+  int r, c;
+  int i, j;
+
+  checker.resize(10, 0);
+  for (i = 0; i &lt; 3; i++) {
+    for (j = 0; j &lt; 3; j++) {
+      r = pr*3+i;
+      c = pc*3+j;
+      if (puzzle[r][c] != '-') {
+        if (checker[puzzle[r][c]-'0']) return 0;
+        checker[puzzle[r][c]-'0'] = 1;
+      }
+    }
+  }
+  return 1;
+}
+
+main()
+{
+  int r, c;
+  Sudoku S;
+
+  S.Read();
+
+  for (r = 0; r &lt; 9; r++) if (!S.row_ok(r)) printf("Bad row %d\n", r);
+  for (c = 0; c &lt; 9; c++) if (!S.column_ok(c)) printf("Bad col %d\n", c);
+  for (r = 0; r &lt; 3; r++) for (c = 0; c &lt; 3; c++) {
+    if (!S.panel_ok(r, c)) printf("Bad panel %d %d\n", r, c);
+  }
+}
+</pre></td></table></center><p>
+
+I have some example puzzles 
+(<b><a href=sudex3.txt>sudex3.txt</a></b>,
+<b><a href=sudex4.txt>sudex4.txt</a></b> &amp;
+<b><a href=sudex5.txt>sudex5.txt</a></b>)
+with errors: the program 
+correctly identifies them:
+
+<pre>
+UNIX> <font color=darkred><b>g++ -o sudoku2 sudoku2.cpp</b></font>
+UNIX> <font color=darkred><b>sudoku2 < sudex3.txt</b></font>
+Bad row 3
+UNIX> <font color=darkred><b>sudoku2 < sudex4.txt</b></font>
+Bad col 7
+UNIX> <font color=darkred><b>sudoku2 < sudex5.txt</b></font>
+Bad panel 1 2
+UNIX> <font color=darkred><b></b></font>
+</pre>
+
+Now, this gives us all the pieces to write a really brain-dead recursive 
+solver.  What it does is the following:
+<p>
+<UL>
+<LI> It finds an empty cell.
+<LI> It tests every value from 1 to 9 in the cell.
+<LI> If the value yields a legal row, column and panel, it calls itself
+recursively.
+</UL>
+
+If it is called on a filled puzzle, we're done -- we print it and exit.
+The code is in 
+<b><a href=sudoku3.cpp>sudoku3.cpp</a></b>:
+
+<p><center><table border=3 cellpadding=3><td><pre>
+class Sudoku {
+  public:
+    vector &lt;string&gt; puzzle;
+    void Read();
+    void Print();
+    void Solve();
+    int row_ok(int r);
+    int column_ok(int c);
+    int panel_ok(int pr, int pc);
+};
+
+void Sudoku::Solve()
+{
+  int r, c, i;
+
+  for (r = 0; r &lt; 9; r++) {
+    for (c = 0; c &lt; 9; c++) {
+      if (puzzle[r][c] == '-') {
+        for (i = '1'; i &lt;= '9'; i++) {
+          puzzle[r][c] = i;
+          if (row_ok(r) && column_ok(c) && panel_ok(r/3, c/3)) Solve();
+        }
+        puzzle[r][c] = '-';
+        return;
+      }
+    }
+  }
+  Print();
+  exit(0);
+}
+</pre></td></table></center><p>
+
+It works on our example, pretty quickly:
+
+<pre>
+UNIX> <font color=darkred><b>time sudoku3 < sudex1.txt</b></font>
+534 678 912
+672 195 348
+198 342 567
+
+859 761 423
+426 853 791
+713 924 856
+
+961 537 284
+287 419 635
+345 286 179
+0.043u 0.001s 0:00.04 100.0%	0+0k 0+0io 0pf+0w
+UNIX> <font color=darkred><b></b></font>
+</pre>
+
+I find that a little depressing, actually, that a program that brain-dead can
+solve a puzzle in seconds that may take me 10+ minutes of logic and head-scratching.
+<p>
+However, if you're like me, it seems like we could speed this up.  Let's explore.
+
+<hr>
+<h3>Speeding it up a little</h3>
+
+First, we need a way to test speed.  What I've done is grab six "Evil" puzzles
+from a web site.  They are in
+<b><a href=test_puzzle_1.txt>test_puzzle_1.txt</a></b>,
+<b><a href=test_puzzle_2.txt>test_puzzle_2.txt</a></b>,
+<b><a href=test_puzzle_3.txt>test_puzzle_3.txt</a></b>,
+<b><a href=test_puzzle_4.txt>test_puzzle_4.txt</a></b>,
+<b><a href=test_puzzle_5.txt>test_puzzle_5.txt</a></b> and
+<b><a href=test_puzzle_6.txt>test_puzzle_6.txt</a></b>.
+I first compile the program using optimization, and then I time it on the six programs
+with a fancy shell command:
+
+<pre>
+UNIX> <font color=darkred><b>g++ -O3 -o sudoku3 sudoku3.cpp</b></font>
+UNIX> <font color=darkred><b>time sh -c 'for i in 1 2 3 4 5 6 ; do sudoku3 < test_puzzle_$i.txt > /dev/null; done'</b></font>
+0.430u 0.000s 0:00.42 102.3%  0+0k 0+0io 0pf+0w
+UNIX> <font color=darkred><b></b></font>
+</pre>
+
+Roughly 0.07 seconds for each test.  What's one easy way to speed this up?  Well, it
+seems a bit inefficient to look for a blank space from the beginning each time we
+call <b>Solve()</b>.  Let's instead parameterize <b>Solve()</b> with the row and column,
+and then when we call it recursively, we give it the next cell.  The updated
+<b>Solve()</b> is in 
+<b><a href=sudoku4.cpp>sudoku4.cpp</a></b>:
+
+<p><center><table border=3 cellpadding=3><td><pre>
+void Sudoku::Solve(int r, int c)
+{
+  int i;
+
+  if (c == 9) { c = 0; r++; }
+
+  while (r &lt; 9) {
+    if (puzzle[r][c] == '-') {
+      for (i = '1'; i &lt;= '9'; i++) {
+        puzzle[r][c] = i;
+        if (row_ok(r) && column_ok(c) && panel_ok(r/3, c/3)) Solve(r, c+1);
+      }
+      puzzle[r][c] = '-';
+      return;
+    }
+    c++;
+    if (c == 9) { c = 0; r++; }
+  }
+  Print();
+  exit(0);
+}
+</pre></td></table></center><p>
+
+We first call it with <b>Solve(0, 0)</b>.  Does it speed things up?  A little:
+
+<pre>
+UNIX> <font color=darkred><b>g++ -O3 -o sudoku4 sudoku4.cpp</b></font>
+UNIX> <font color=darkred><b>time sh -c 'for i in 1 2 3 4 5 6 ; do sudoku4 < test_puzzle_$i.txt > /dev/null; done'</b></font>
+0.420u 0.000s 0:00.40 105.0%  0+0k 0+0io 0pf+0w
+UNIX> <font color=darkred><b></b></font>
+</pre>
+
+I'm surprised that it doesn't speed matters up more.  Whatever.  Let's try 
+something more drastic.  For each row, column and panel, let's keep a set of 
+valid numbers that can be entered.  Then, we have two potential speed-ups.
+First, when we want to test an empty cell, we can traverse the legal values
+for the cell's row, then test the column & panel sets to see if the value is
+legal for those too.  If so, we can call <b>Solve()</b> recursively.  
+That eliminates the calls to <b>row_ok()</b>, <b>column_ok()</b> and <b>panel_ok()</b>.
+<p>
+The code is a bit icky -- it's in 
+<b><a href=sudoku5.cpp>sudoku5.cpp</a></b>.  First, here's the updated 
+class definition:
+
+<p><center><table border=3 cellpadding=3><td><pre>
+typedef set &lt;int&gt; ISet;
+typedef vector &lt;ISet&gt; VISet;
+
+class Sudoku {
+  public:
+    vector &lt;string&gt; puzzle;
+    void Read();
+    void Print();
+    void Solve(int r, int c);
+    int row_ok(int r);
+    int column_ok(int c);
+    int panel_ok(int pr, int pc);
+    vector &lt;ISet&gt; vrows;
+    vector &lt;ISet&gt; vcols;
+    vector &lt;VISet&gt; vpanels;
+};
+</pre></td></table></center><p>
+
+And here's <b>Solve()</b>:
+
+<p><center><table border=3 cellpadding=3><td><pre>
+void Sudoku::Solve(int r, int c)
+{
+  int i, j, e;
+  vector &lt;int&gt; to_try;
+  ISet::iterator rit, cit, pit;
+
+  if (r == 0 && c == 0) {
+    vrows.resize(9);
+    vcols.resize(9);
+    vpanels.resize(3);
+    for (i = 0; i &lt; 3; i++) vpanels[i].resize(3);
+
+    for (i = 0; i &lt; 9; i++) {
+      for (j = '1'; j &lt;= '9'; j++) {
+        vrows[i].insert(j);
+        vcols[i].insert(j);
+        vpanels[i/3][i%3].insert(j);
+      }
+    }
+    for (i = 0; i &lt; 9; i++) {
+      for (j = 0; j &lt; 9; j++) {
+        if (puzzle[i][j] != '-') {
+          e = puzzle[i][j];
+          vrows[i].erase(vrows[i].find(e));
+          vcols[j].erase(vcols[j].find(e));
+          vpanels[i/3][j/3].erase(vpanels[i/3][j/3].find(e));
+        }
+      }
+    }
+  }
+
+  if (c == 9) { c = 0; r++; }
+
+  while (r &lt; 9) {
+    if (puzzle[r][c] == '-') {
+      for(rit = vrows[r].begin(); rit != vrows[r].end(); rit++) to_try.push_back(*rit);
+      for (i = 0; i &lt; to_try.size(); i++) {
+        e = to_try[i];
+        cit = vcols[c].find(e);
+        if (cit != vcols[c].end()) {
+          pit = vpanels[r/3][c/3].find(e);
+          if (pit != vpanels[r/3][c/3].end()) {
+            rit = vrows[r].find(e);
+            vrows[r].erase(rit);
+            vcols[c].erase(cit);
+            vpanels[r/3][c/3].erase(pit);
+            puzzle[r][c] = e;
+            Solve(r, c+1);
+            vrows[r].insert(e);
+            vcols[c].insert(e);
+            vpanels[r/3][c/3].insert(e);
+          }
+        }
+      }
+      puzzle[r][c] = '-';
+      return;
+    }
+    c++;
+    if (c == 9) { c = 0; r++; }
+  }
+  Print();
+  exit(0);
+}
+</pre></td></table></center><p>
+
+The code is rather straightforward.  The only subtlety that I see is using <b>to_try</b>.
+Why did I do this?  Why didn't I simply use <b>rit</b> to traverse <b>vrows[r]</b>?
+The reason is that I potentially erase <b>rit</b> inside the loop -- once I do that,
+I invalidate <b>rit</b>, which would be problematic inside a <b>for</b> loop that
+uses <b>rit</b>.  Yes, I could store <b>rit++</b> and change the loop -- that's probably
+faster; however, using <b>to_try</b> doesn't seem like a bad alternative.
+<p>
+Is it faster?  Let's see:
+
+<pre>
+UNIX> <font color=darkred><b>g++ -O3 -o sudoku5 sudoku5.cpp</b></font>
+UNIX> <font color=darkred><b>time sh -c 'for i in 1 2 3 4 5 6 ; do sudoku5 < test_puzzle_$i.txt > /dev/null; done'</b></font>
+0.210u 0.010s 0:00.18 122.2%  0+0k 0+0io 0pf+0w
+UNIX> <font color=darkred><b></b></font>
+</pre>
+
+Well, it runs in 50 percent of the time of <b>sudoku4</b>, so I guess I should
+be happy.  I'm not really, but I'll pretend.  I don't think it's a good use of
+class time to keep twiddling with this to make it faster; however, I would encourage
+you to give it a try if it intrigues you.  There are lots of things to try -- 
+for example, 
+<b><a href=sudoku6.cpp>sudoku6.cpp</a></b>
+creates <b>to_try</b> from the smallest of <b>vrows[r]</b>,
+<b>vcols[c]</b> and
+<b>vpanels[r/3][c/3]</b>:
+
+<pre>
+UNIX> <font color=darkred><b>g++ -O3 -o sudoku6 sudoku6.cpp</b></font>
+UNIX> <font color=darkred><b>time sh -c 'for i in 1 2 3 4 5 6 ; do sudoku6 < test_puzzle_$i.txt > /dev/null; done'</b></font>
+0.190u 0.000s 0:00.17 111.7%  0+0k 0+0io 0pf+0w
+UNIX> <font color=darkred><b></b></font>
+</pre>
+
+Let's try something else....
+
+<hr>
+<h3>Using integers and bit operations as sets</h3>
+
+Before you read this, make sure you understand bit operations.
+Please see 
+<a href=http://web.eecs.utk.edu/~plank/plank/classes/cs302/Notes/Bits/>the lecture 
+notes on bit operations</a> if you need to brush up.
+<p>
+As illustrated in those lectures, you can use integers and bit operations to represent sets.
+This actually simplifies the code above.  In
+<b><a href=sudoku7.cpp>sudoku7.cpp</a></b>, we do this.  
+Actually, we do quite a bit more.  First, we use the numbers 1 through 9 in the puzzle rather than
+their characters.  We represent '-' with 0.  
+The sets are now vectors of integers rather than <b>sets</b>.  We also have the panel set be
+a flat vector of nine elements.  We use the procedure <b>rctoindex()</b> to convert row and
+column indices to a single index for this vector.
+<p>
+
+Now, to create the initial
+sets for rows, columns and panels, we do the following:  We first create sets of the numbers that
+are in each row/column/panel, and then we take their complement so that we have sets of the
+numbers that are <i>not</i> in each row/column/panel:
+
+<p><center><table border=3 cellpadding=3><td><pre>
+// In the constructor:
+
+  RS.resize(9, 0);
+  CS.resize(9, 0);
+  PS.resize(9, 0);
+
+  for (i = 0; i &lt; 9; i++) {
+    for (j = 0; j &lt; 9; j++) {
+      if (P[i][j] != 0) {
+        RS[i] |= (1 &lt;&lt; P[i][j]);
+        CS[j] |= (1 &lt;&lt; P[i][j]);
+        PS[rctoindex(i, j)] |= (1 &lt;&lt; P[i][j]);
+      }
+    }
+  }
+
+  for (i = 0; i &lt; 9; i++) {
+    RS[i] = ~RS[i];
+    CS[i] = ~CS[i];
+    PS[i] = ~PS[i];
+  }
+}
+</pre></td></table></center><p>
+
+Then the solver takes the intersection of the three sets, and only puts elements that are
+in that intersection into the recursive tester:
+
+<p><center><table border=3 cellpadding=3><td><pre>
+int Sudoku::Solve(int r, int c)
+{
+  int i, j;
+
+  while (r &lt; 9) {
+    while (c &lt; 9) {
+      if (P[r][c] == 0) {
+        j = (RS[r] & CS[c] & PS[rctoindex(r, c)]);   // J is the intersection of the three sets
+        for (i = 1; i &lt;= 9; i++) {
+          if (j & (1 &lt;&lt; i)) {
+
+            P[r][c] = i;
+            RS[r] &= (~(1 &lt;&lt; i));             // Remove bit i from RS, CS and PS
+            CS[c] &= (~(1 &lt;&lt; i));
+            PS[rctoindex(r, c)] &= (~(1 &lt;&lt; i));
+
+            if (Solve(r, c)) return 1;
+
+            RS[r] |= (1 &lt;&lt; i);                // Put bit i back into RS, CS and PS
+            CS[c] |= (1 &lt;&lt; i);
+            PS[rctoindex(r, c)] |= (1 &lt;&lt; i);
+          }
+        }
+        P[r][c] = 0;
+        return 0;
+      }
+      c++;
+    }
+    if (c == 9) { r++; c = 0; }
+  }
+  return 1;
+}
+</pre></td></table></center><p>
+
+Now we're talking speed improvements!
+
+<pre>
+UNIX> <font color=darkred><b>g++ -O3 -o sudoku7 sudoku7.cpp</b></font>
+UNIX> <font color=darkred><b>time sh -c 'for i in 1 2 3 4 5 6 ; do sudoku7 < test_puzzle_$i.txt > /dev/null; done'</b></font>
+0.070u 0.000s 0:00.02 350.0%  0+0k 0+0io 0pf+0w
+UNIX> <font color=darkred><b></b></font>
+</pre>
+
+The improvement comes because for small sets, bit operations are much faster than using
+balanced binary trees (which is how the STL implements sets).
+
+<hr>
+<h3>My final version</h3>
+
+Try 
+<b><a href=sudoku8.cpp>sudoku8.cpp</a></b>.  I've made the following improvements here:
+
+<UL>
+<LI> I've added an array called <b>vecs</b>, which I index by the intersection of 
+RS/CS/PS.  It contains an array of the elements of the set, terminated by zero.
+Therefore, if the intersection is 0x92, meaning that elements 1, 4 and 7 are in the
+intersection, then <b>vecs[0x92]</b> = { 1, 4, 7, 0 }.  This saves me time figuring
+out what elements are in the set.
+
+<LI> I've added a vector called <b>Empty_Cells</b>, which contains the row and
+column indices of the empty cells in the puzzle.  That way I don't have to waste
+time looking at non-empty cells.
+
+<LI> I precalculate <b>rctoindex(r, c)</b> in case the compiler can't figure it out.
+</UL>
+
+That shaves another hundredth of a second off.  I'm guessing that the overhead of 
+launching the program and reading the puzzle is getting in the way, but I'm sick
+of twiddling with this......
+
+
