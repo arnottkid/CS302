@@ -9,3 +9,4 @@ James S. Plank
 - [The upper_bound and lower_bound method of maps.  The Keno "Lucky Loser" bet.](Upper_Bound/index.html)
 - [Bit Arithmetic](Bits/index.html)
 - [Recursion Review](Recursion-Review/index.html)
+- [Enumeration](Enumeration/index.html)
