@@ -146,7 +146,7 @@ a little confusing.  It is worth the effort to trace through the recursion:
 
 <pre>
 UNIX> <font color=darkred><b>g++ SRM-351-D1-250-Main.cpp</b></font>
-UNIX> <font color=darkred><b>a.out 0</b></font>
+UNIX> <font color=darkred><b>./a.out 0</b></font>
  We have:  G1:   1   S1:   0   B1:   0
  We want:  G2:   0   S2:   0   B2:  81
  Recursively trying to get 81 bronze from 9 silver
@@ -158,7 +158,7 @@ UNIX> <font color=darkred><b>a.out 0</b></font>
  After recursively trying to get bronze, returning 10
 
 10
-UNIX> <font color=darkred><b>a.out 1</b></font>
+UNIX> <font color=darkred><b>./a.out 1</b></font>
  We have:  G1:   1   S1: 100   B1:  12
  We want:  G2:   5   S2:  53   B2:  33
  Recursively trying to get 4 gold from 44 silver
@@ -176,7 +176,7 @@ UNIX> <font color=darkred><b>a.out 1</b></font>
  After recursively trying to get gold, returning 7
 
 7
-UNIX> <font color=darkred><b>a.out 2</b></font>
+UNIX> <font color=darkred><b>./a.out 2</b></font>
  We have:  G1:   1   S1: 100   B1:  12
  We want:  G2:   5   S2:  63   B2:  33
  Recursively trying to get 4 gold from 44 silver
@@ -276,7 +276,8 @@ I have the example from the Wikipedia page in two files:
 However, when the program reads them in, the produce the same output:
 
 <p><center><table border=3><td valign=top><pre>
-UNIX> <font color=darkred><b>g++ -o sudoku1 sudoku1.cpp</b></font>
+UNIX> <font color=darkred><b>make sudoku1</b></font>
+g++ -std=c++98 -O3 -o sudoku1 sudoku1.cpp 
 UNIX> <font color=darkred><b>cat sudex1.txt</b></font>
 53--7----
 6--195---
@@ -287,7 +288,7 @@ UNIX> <font color=darkred><b>cat sudex1.txt</b></font>
 -6----28-
 ---419--5
 ----8--79
-UNIX> <font color=darkred><b>sudoku1 < sudex1.txt</b></font>
+UNIX> <font color=darkred><b>./sudoku1 < sudex1.txt</b></font>
 53- -7- ---
 6-- 195 ---
 -98 --- -6-
@@ -315,7 +316,7 @@ UNIX> <font color=darkred><b>cat sudex2.txt</b></font>
 - 6 -   - - -   2 8 - 
 - - -   4 1 9   - - 5 
 - - -   - 8 -   - 7 9 
-UNIX> <font color=darkred><b>sudoku1 < sudex2.txt</b></font>
+UNIX> <font color=darkred><b>./sudoku1 < sudex2.txt</b></font>
 53- -7- ---
 6-- 195 ---
 -98 --- -6-
@@ -420,12 +421,13 @@ with errors: the program
 correctly identifies them:
 
 <pre>
-UNIX> <font color=darkred><b>g++ -o sudoku2 sudoku2.cpp</b></font>
-UNIX> <font color=darkred><b>sudoku2 < sudex3.txt</b></font>
+UNIX> <font color=darkred><b>make sudoku2</b></font>
+g++ -std=c++98 -O3 -o sudoku2 sudoku2.cpp 
+UNIX> <font color=darkred><b>./sudoku2 < sudex3.txt</b></font>
 Bad row 3
-UNIX> <font color=darkred><b>sudoku2 < sudex4.txt</b></font>
+UNIX> <font color=darkred><b>./sudoku2 < sudex4.txt</b></font>
 Bad col 7
-UNIX> <font color=darkred><b>sudoku2 < sudex5.txt</b></font>
+UNIX> <font color=darkred><b>./sudoku2 < sudex5.txt</b></font>
 Bad panel 1 2
 UNIX> <font color=darkred><b></b></font>
 </pre>
@@ -477,10 +479,11 @@ void Sudoku::Solve()
 }
 </pre></td></table></center><p>
 
-It works on our example, pretty quickly:
+It works on our example, pretty quickly (at this point, I'm assuming that you have
+made all of the executables.
 
 <pre>
-UNIX> <font color=darkred><b>time sudoku3 < sudex1.txt</b></font>
+UNIX> <font color=darkred><b>time ./sudoku3 < sudex1.txt</b></font>
 534 678 912
 672 195 348
 198 342 567
@@ -517,7 +520,7 @@ with a fancy shell command:
 
 <pre>
 UNIX> <font color=darkred><b>g++ -O3 -o sudoku3 sudoku3.cpp</b></font>
-UNIX> <font color=darkred><b>time sh -c 'for i in 1 2 3 4 5 6 ; do sudoku3 < test_puzzle_$i.txt > /dev/null; done'</b></font>
+UNIX> <font color=darkred><b>time sh -c 'for i in 1 2 3 4 5 6 ; do ./sudoku3 < test_puzzle_$i.txt > /dev/null; done'</b></font>
 0.430u 0.000s 0:00.42 102.3%  0+0k 0+0io 0pf+0w
 UNIX> <font color=darkred><b></b></font>
 </pre>
@@ -556,8 +559,7 @@ void Sudoku::Solve(int r, int c)
 We first call it with <b>Solve(0, 0)</b>.  Does it speed things up?  A little:
 
 <pre>
-UNIX> <font color=darkred><b>g++ -O3 -o sudoku4 sudoku4.cpp</b></font>
-UNIX> <font color=darkred><b>time sh -c 'for i in 1 2 3 4 5 6 ; do sudoku4 < test_puzzle_$i.txt > /dev/null; done'</b></font>
+UNIX> <font color=darkred><b>time sh -c 'for i in 1 2 3 4 5 6 ; do ./sudoku4 < test_puzzle_$i.txt > /dev/null; done'</b></font>
 0.420u 0.000s 0:00.40 105.0%  0+0k 0+0io 0pf+0w
 UNIX> <font color=darkred><b></b></font>
 </pre>
@@ -685,25 +687,21 @@ faster; however, using <b>to_try</b> doesn't seem like a bad alternative.
 Is it faster?  Let's see:
 
 <pre>
-UNIX> <font color=darkred><b>g++ -O3 -o sudoku5 sudoku5.cpp</b></font>
-UNIX> <font color=darkred><b>time sh -c 'for i in 1 2 3 4 5 6 ; do sudoku5 < test_puzzle_$i.txt > /dev/null; done'</b></font>
+UNIX> <font color=darkred><b>time sh -c 'for i in 1 2 3 4 5 6 ; do ./sudoku5 < test_puzzle_$i.txt > /dev/null; done'</b></font>
 0.210u 0.010s 0:00.18 122.2%  0+0k 0+0io 0pf+0w
 UNIX> <font color=darkred><b></b></font>
 </pre>
 
 Well, it runs in 50 percent of the time of <b>sudoku4</b>, so I guess I should
-be happy.  I'm not really, but I'll pretend.  I don't think it's a good use of
-class time to keep twiddling with this to make it faster; however, I would encourage
-you to give it a try if it intrigues you.  There are lots of things to try -- 
-for example, 
+be happy.  I'm not really, but I'll pretend.  
+There are lots of things to try -- for example, 
 <b><a href=sudoku6.cpp>sudoku6.cpp</a></b>
 creates <b>to_try</b> from the smallest of <b>vrows[r]</b>,
 <b>vcols[c]</b> and
 <b>vpanels[r/3][c/3]</b>:
 
 <pre>
-UNIX> <font color=darkred><b>g++ -O3 -o sudoku6 sudoku6.cpp</b></font>
-UNIX> <font color=darkred><b>time sh -c 'for i in 1 2 3 4 5 6 ; do sudoku6 < test_puzzle_$i.txt > /dev/null; done'</b></font>
+UNIX> <font color=darkred><b>time sh -c 'for i in 1 2 3 4 5 6 ; do ./sudoku6 < test_puzzle_$i.txt > /dev/null; done'</b></font>
 0.190u 0.000s 0:00.17 111.7%  0+0k 0+0io 0pf+0w
 UNIX> <font color=darkred><b></b></font>
 </pre>
@@ -800,7 +798,7 @@ Now we're talking speed improvements!
 
 <pre>
 UNIX> <font color=darkred><b>g++ -O3 -o sudoku7 sudoku7.cpp</b></font>
-UNIX> <font color=darkred><b>time sh -c 'for i in 1 2 3 4 5 6 ; do sudoku7 < test_puzzle_$i.txt > /dev/null; done'</b></font>
+UNIX> <font color=darkred><b>time sh -c 'for i in 1 2 3 4 5 6 ; do ./sudoku7 < test_puzzle_$i.txt > /dev/null; done'</b></font>
 0.070u 0.000s 0:00.02 350.0%  0+0k 0+0io 0pf+0w
 UNIX> <font color=darkred><b></b></font>
 </pre>
@@ -809,7 +807,7 @@ The improvement comes because for small sets, bit operations are much faster tha
 balanced binary trees (which is how the STL implements sets).
 
 <hr>
-<h3>My final version</h3>
+<h3>My final version (I don't do this in class)</h3>
 
 Try 
 <b><a href=sudoku8.cpp>sudoku8.cpp</a></b>.  I've made the following improvements here:
