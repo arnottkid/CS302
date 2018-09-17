@@ -7,7 +7,6 @@ All = balls-in-boxes-1 \
       divmod \
       gen-permutations \
       gen-teams \
-      SimpleRotationDecoder 
 
 all: $(All)
 
@@ -40,7 +39,4 @@ gen-permutations: gen-permutations.cpp
 
 gen-teams: gen-teams.cpp
 	g++ -o gen-teams gen-teams.cpp
-
-SimpleRotationDecoder: SimpleRotationDecoder.cpp
-	g++ -o SimpleRotationDecoder SimpleRotationDecoder.cpp
 
