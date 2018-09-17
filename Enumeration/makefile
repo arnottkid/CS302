@@ -4,7 +4,7 @@ All = balls-in-boxes-1 \
       balls-in-boxes-4 \
       balls-in-boxes-5 \
       gen-3-teams \
-      gen-passwords \
+      divmod \
       gen-permutations \
       gen-teams \
       SimpleRotationDecoder 
@@ -32,8 +32,8 @@ balls-in-boxes-5: balls-in-boxes-5.cpp
 gen-3-teams: gen-3-teams.cpp
 	g++ -o gen-3-teams gen-3-teams.cpp
 
-gen-passwords: gen-passwords.cpp
-	g++ -o gen-passwords gen-passwords.cpp
+divmod: divmod.cpp
+	g++ -o divmod divmod.cpp
 
 gen-permutations: gen-permutations.cpp
 	g++ -o gen-permutations gen-permutations.cpp

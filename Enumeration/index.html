@@ -1,7 +1,7 @@
 <title>CS302 Lecture Notes</title>
 <h2>CS302 Lecture Notes - Enumeration</h2>
 <UL>
-<LI> September, 2011.  Latest revision: September, 2016.
+<LI> September, 2011.  Latest revision: September, 2018.
 <LI> James S. Plank
 <LI> Directory: <b>/home/plank/cs302/Notes/Enumeration</b>
 </UL>
@@ -58,12 +58,134 @@ problem.  (<a href=http://web.eecs.utk.edu/~plank/plank/classes/cs302/Topcoder/A
 
 There are times in your CS careers where you will be called upon to perform
 an enumeration, and if you're not ready for it, it may be a bit confusing.
-The first type of enumeration is typically a problem where you have an 
+The first type of enumeration is a problem where you have an 
 array of size <i>l</i>, and each element of the array can have one
-of <i>n</i> values (repetitions are fine).  To solve the problem with enumeration,
+of <i>n</i> values (repetitions are fine).  Here are three examples:
+
+<UL>
+<LI> Enumerate all 5-character strings containing the letters 'a', 'b' and 'c'.  Here,
+     <i>n</i> is three and <i>l</i> is five.
+<LI> Enumerate all 4-digit numbers in base 6.  Here, <i>n</i> is six and <i>l</i> is 4.
+<LI> Suppose you have an infinite number of balls, which can have five colors.  If two
+     balls have the same color, they are indistinguishable.  And suppose you have 7 
+     boxes.  Enumerate the distinguishable ways that you put balls into the boxes.
+     Here, <i>n</i> is five and <i>l</i> is seven.
+</UL>
+
+To solve the problem with enumeration,
 you need to generate all possible values of the array.  There will be <i>n<sup>l</sup></i>
 ways to do this, so <i>n</i> and <i>l</i> will have to be be relatively small.
+To enumerate, generate the numbers between 0 and 
+<i>n<sup>l</sup>-1</i>.  For each of these numbers, populate each successive element of the
+array by taking the number modulo <i>n</i>.  Then divide the number by <i>n</i> (using integer
+division).    
 <p>
+Lets' do a small example.  Suppose you want to enumerate all 2-digit numbers that contain the
+digits 0, 1 and 2.  In this example, <i>n</i> is 3, and <i>l</i> is 2, so you need to enumerate
+the numbers between 0 and 8, and convert each of those into the proper two digit number using
+div and mod.  Here's a table:
+<p>
+<pre>
+  i     i%n    i/n    (i/n)%n     Result
+  0      0      0         0         00
+  1      1      0         0         10
+  2      2      0         0         20
+  3      0      1         1         01
+  4      1      1         1         11
+  5      2      1         1         21
+  6      0      2         2         02
+  7      1      2         2         12
+  8      2      2         2         22
+</pre>
+
+The program <b><a href=divmod.cpp>divmod.cpp</a></b>
+takes two command line arguments <i>l</i> and <i>n</i>, and enumerates all strings
+of length <i>l</i> that are composed of the first <i>n</i> letters of the alphabet.
+Here, I show the relevant code.  All variables are <b>ints</b>.
+
+<p><center><table border=3 cellpadding=3><td><pre>
+  <font color=blue>/* Calculate n^l.  This is inefficient, but since l is small, it's ok. */</font>
+
+  top = 1;
+  for (i = 0; i &lt; l; i++) top *= n;
+
+  <font color=blue>/* Enumerate the numbers from 0 to n^l-1, and for each of these
+     numbers extract each digit when the number is considered in 
+     base n.  We do that by taking the number mod n, and then 
+     dividing the number by n. */</font>
+
+  for (i = 0; i &lt; top; i++) {
+    j = i;
+    for (k = 0; k &lt; l; k++) {
+      digit = j % n;
+      j /= n; 
+      printf("%c", 'a'+digit);
+    }
+    printf("\n");
+  }
+  return 0;
+}
+</pre></td></table></center><p>
+
+Let's do the example above:
+
+<pre>
+UNIX> <font color=darkred><b>./divmod </b></font>
+usage: divmod l n
+UNIX> <font color=darkred><b>./divmod 2 3</b></font>
+aa
+ba
+ca
+ab
+bb
+cb
+ac
+bc
+cc
+UNIX> <font color=darkred><b></b></font>
+</pre>
+
+In class, I did an example where <i>n</i> equals 5 and <i>l</i> equals four, and 
+I used Unix tools to prove that the answer had to be correct:
+
+<pre>
+UNIX> <font color=darkred><b>./divmod 4 5 | head </b></font>                            <font color=blue>// We're just taking a look here.</font>
+aaaa
+baaa
+caaa
+daaa
+eaaa
+abaa
+bbaa
+cbaa
+dbaa
+ebaa
+UNIX> <font color=darkred><b>./divmod 4 5 | tail</b></font>                            <font color=blue>// And here.</font>
+adee
+bdee
+cdee
+ddee
+edee
+aeee
+beee
+ceee
+deee
+eeee
+UNIX> <font color=darkred><b>./divmod 4 5 | wc</b></font>                            <font color=blue>// n^l is 625, so this prints the right number of lines.</font>
+     625     625    3125
+UNIX> <font color=darkred><b>./divmod 4 5 | sort -u | wc</b></font>                  <font color=blue>// This ensures that there are no duplicate lines.</font>
+     625     625    3125
+UNIX> <font color=darkred><b>./divmod 4 5 | sed 's/[a-e]/x/g' | sort -u </b></font>  <font color=blue>// This ensures that the only characters printed are a-e and x.</font>
+xxxx
+UNIX> <font color=darkred><b>./divmod 4 5 | sed 's/[a-e]/y/g' | sort -u</b></font>   <font color=blue>// This ensures there were in fact no x's.</font>
+yyyy
+UNIX> <font color=darkred><b></b></font>
+</pre>
+
+
+
+<hr>
+<h4>Topcoder example</h4>
 One example is typified by
 Topcoder problem SRM-344-D2-500 (Don't bother reading the description yet).
 This problem gives you an encrypted string, and a function for encrypting 
@@ -140,75 +262,10 @@ test whether it corresponds to legal clear text.  If so, we return the
 clear text.
 The problem description says that we are guaranteed that there will be one
 unique password that generates legal clear text, and that makes our life simpler.
-<p>
-We'll start by generating all of those passwords.  An easy way to do that is to have
-three nestesd <b>for</b> loops.  However, I'm not going to to that here, because I 
-want to show you a more general way to do it.
-What I'm going to do is 
-enumerate all numbers from 0 to 26<sup>3</sup>-1 and convert each number
-to a three-digit string.  Let the number be <i>i</i>.  
-Then <b>password[0]</b> will equal <i>i%26</i>.
-<b>Password[1]</b> will equal <i>(i/26)%26</i>, and 
-<b>password[2]</b> will equal <i>((i/26)/26)%26</i>.  The code is in
-<b><a href=gen-passwords.cpp>gen-passwords.cpp</a></b>.  Pay attention 
-to how each iteration divides <i>j</i> by 26 so that the password
-digits are calculated correctly:
-
-<p><center><table border=3 cellpadding=3><td><pre>
-#include &lt;string&gt;
-#include &lt;iostream&gt;
-using namespace std;
-
-main()
-{
-  string password;
-  int i, j, k;
-
-  password.resize(3);
-  
-  for (i = 0; i &lt; 26*26*26; i++) {
-    j = i;
-    for (k = 0; k &lt; 3; k++) {
-      password[k] = 'a' + (j%26);
-      j /= 26;
-    }
-    cout &lt;&lt; password &lt;&lt; endl;
-  }
-}
-</pre></td></table></center><p>
-
-We run it, and all looks good:
-
-<pre>
-UNIX> <font color=darkred><b>g++ gen-passwords.cpp</b></font>
-UNIX> <font color=darkred><b>a.out | head</b></font>
-aaa
-baa
-caa
-daa
-eaa
-faa
-gaa
-haa
-iaa
-jaa
-UNIX> <font color=darkred><b>a.out | tail</b></font>
-qzz
-rzz
-szz
-tzz
-uzz
-vzz
-wzz
-xzz
-yzz
-zzz
-UNIX> <font color=darkred><b></b></font>
-</pre>
-
-Now, we can use this to solve the problem -- for each password, we decrypt and
-test the output:
-(in <b><a href=SimpleRotationDecoder.cpp>SimpleRotationDecoder.cpp</a></b>):
+We'll generate the passwords using the exact same technique as in 
+<b><a href=divmod.cpp>divmod.cpp</a></b> above.
+Here's a solution (with a <b>main()</b>) in 
+<b><a href=SimpleRotationDecoder.cpp>SimpleRotationDecoder.cpp</a></b>:
 
 <p><center><table border=3 cellpadding=3><td><pre>
 class SimpleRotationDecoder {
@@ -272,10 +329,11 @@ string SimpleRotationDecoder::decode(string ciphertext)
 A few things about this code.  First, we change all spaces to
 the character ('a'-1) (it's a backquote).  That way, we don't have
 to special-case the space, and we can simply add/subtract characters.
+<p>
 Second, we sentinelize <b>cleartext</b> with a backquote at the end.
 It makes our life easier writing <b>is_legal()</b>.
 <p>
-Second, we perform the decryption calculation using an integer <i>k</i>
+Third, we perform the decryption calculation using an integer <i>k</i>
 rather than a big arithmetic calculation on chars.  That's because I
 don't want to worry about being constrained to a single char in the 
 calculation.  
@@ -322,7 +380,7 @@ of strings to test whether the character is a vowel.
 <p>
 Compile, test, submit!
 <hr>
-Now, in general, if you are generating all <i>l</i>-length vectors <i>v</i>
+To reiterate mathematically: If you are generating all <i>l</i>-length vectors <i>v</i>
 that contain numbers between zero and <i>n</i>, you enumerate
 <i>j</i> from zero to <i>n<sup>l</sup>-1</i>, and then:
 <p>
