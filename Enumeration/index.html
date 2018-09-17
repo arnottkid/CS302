@@ -378,8 +378,7 @@ a valid team.  Here are all teams and their representative strings:
 Enumerating these bit strings can be done as in the previous
 section: <i>l</i> equals <i>4</i> and <i>n</i> equals 2.  Again,
 instead of using div and mod, we can use bit arithmetic.
-(Here is where you review the 
-<a href=http://web.eecs.utk.edu/~plank/plank/classes/cs302/Notes/Bits/>CS140 lecture notes on bit arithmetic</a> if you are hazy on bit arithmetic).  First, <i>2<sup>l</sup></i> may be calculated
+First, <i>2<sup>l</sup></i> may be calculated
 with bit arithmetic as (1 &lt;&lt; <i>l</i>).  Next, if you want
 to see if the <i>j</i>-th digit of the bit string <i>s</i> is one, test
 whether (<i>s</i> &amp; (1 &lt;&lt; <i>j</i>)) is non-zero.
