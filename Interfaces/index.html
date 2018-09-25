@@ -379,7 +379,9 @@ method of <b>Dog</b> or <b>Koozie</b>.  The code is simpler:
 </pre></td></table></center><p>
 
 You need that destructor code in there to make deletion work.  In this case, it is
-specifying that you can use a default destructor.
+specifying that you can use a default destructor for the <b>Item</b>.  You will also 
+use the default destructor for <b>Dog</b> and <b>Koozie</b>, since you have not specified
+them.  See the last section of these lecture notes for some explanation on destructors.
 <p>
 I think you can see how this functionality is powerful, and in many cases can clean up your
 code.   
@@ -532,3 +534,90 @@ that's hard to read, and oh yeah, you have no idea where the variables are defin
 For that reason, I don't use inheritance, and I advocate that you don't either.  I know it's
 cool and seductive, but you'll regret it, most likely.  Of course, 
 please make your own decisions in that regard.  I don't allow it in my classes.
+
+<hr>
+<h3>A little more on destructors</h3>
+
+The proper way to handle destructors in interfaces is to make them virtual, both in the
+superclass and in the subclass.  If you ignore the destructor 
+in the subclass, then you'll simply use the
+default destructor, just like with a regular class.  
+<p>
+If you do write destructors, what happens is as follows: When you delete a pointer, it will
+call the proper subclass destructor first, and then the superclass destructor next.  (You can 
+extrapolate this down the hierarchy if you are using a hierarchy of inheritance.  The following
+code illustrates.  Simply read the inline comments to see what it does.  It is in
+<b><a href=destruct.cpp>destruct.cpp</a></b>:
+
+<p><center><table border=3 cellpadding=3><td><pre>
+<font color=blue>/* destruct.cpp.
+   James S. Plank
+   Tue Sep 25 14:47:43 EDT 2018
+
+   This shows how destructors work with interfaces.
+ */</font>
+
+#include &lt;iostream&gt;
+#include &lt;sstream&gt;
+#include &lt;vector&gt;
+#include &lt;stdio.h&gt;
+#include &lt;stdlib.h&gt;
+using namespace std;
+
+<font color=blue>/* We'll have one superclass called Superclass.  It will have no virtual methods
+   with the exception of a destructor. */</font>
+
+class Superclass {
+  public:
+    virtual ~Superclass();
+};
+
+<font color=blue>/* The destructor will simply print out that it is being called. */</font>
+
+Superclass::~Superclass() { printf("Superclass destructor.\n"); }
+
+<font color=blue>/* Now, we have two subclasses, S1 and S2.  Each of their destructors are declared
+   as virtual, and print out that they are being called: */</font>
+
+class S1 : public Superclass {
+  public:
+    virtual ~S1();
+};
+
+S1::~S1() { printf("S1 destructor.\n"); }
+
+class S2 : public Superclass {
+  public:
+    virtual ~S2();
+};
+
+S2::~S2() { printf("S2 destructor.\n"); }
+
+<font color=blue>/* The main is pretty sparse.  It simply allocates instances of S1 and S2, and
+   then deletes them. Each delete call will call the destructor of the subclass,
+   and then the destructor of the superclass. */</font>
+
+int main()
+{
+  Superclass *s1, *s2;
+
+  s1 = new S1;
+  s2 = new S2;
+
+  delete s1;
+  delete s2;
+
+  return 0;
+}
+</pre></td></table></center><p>
+
+Here is the running code:
+
+<pre>
+UNIX> <font color=darkred><b>destruct </b></font>
+S1 destructor.
+Superclass destructor.
+S2 destructor.
+Superclass destructor.
+UNIX> <font color=darkred><b></b></font>
+</pre>
