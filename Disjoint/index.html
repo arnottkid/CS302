@@ -1,0 +1,989 @@
+<title>CS302 Lecture Notes</title>
+<h2>CS302 Lecture Notes - Disjoint Sets</h2>
+<UL>
+<LI> March 27, 2008.  Latest revision: September, 2014.
+<LI> James S. Plank
+<LI> Directory: <b>/home/plank/cs302/Notes/Disjoint</b>
+</UL>
+<hr>
+
+<h3>Reference Material Online</h3>
+
+<UL>
+<LI> <a href=http://en.wikipedia.org/wiki/Disjoint-set_data_structure>Disjoint Sets</a>
+<LI> <a href=http://www.cs.utk.edu/~plank/plank/classes/cs140/Notes/Disjoint/>My 
+old CS140 lecture notes on disjoint sets, in case you want to see them in C.</a>
+</UL>
+
+<h3>What do you need to know for the exam?</h3>
+
+<UL>
+<LI> The API
+<LI> How to implement union-by-size, union-by-height, union-by-rank, path compression.
+<LI> The running time complexity of all three implementations.
+<LI> How to use Disjoint sets in connected component applications like maze generation,
+Superball, and Kruskal's algorithm (which you'll learn later in the class).
+</ul>
+
+<hr>
+<h3>Overview, and the Disjoint Set API</h3>
+
+The Wikipedia page indexed above gives a pretty thorough treatment of Disjoint Sets.  However,
+like most Wikipedia pages, it gives way too much information.  So, I'll summarize here.
+<p>
+The Disjoint Set data structure solves a specific problem that is interesting both theoretically 
+and practically.  The problem is as follows:
+<p>
+You have a collection of <i>n</i> items, which you number from 0 to
+<i>n-1</i>.  These items will be partitioned into some number of
+sets.  The sets are "disjoint" which means that no item belongs to
+more than one set.  All items belong to some set though (hence the use
+of the word "partition.").
+<p>
+There are two operations that you can perform:
+<UL>
+<LI> <i>int Find(i):</i> This takes the number of an item and returns its "set id."  This is
+a number between zero and <i>n-1</i>.  You don't really care what the number is; however, if
+<i>i</i> and <i>j</i> belong to the same disjoint set, then 
+<i>Find(i)</i> will equal <i>Find(j)</i>.
+<p>
+<LI> <i>int Union(id1, id2)</i>: This takes the set id's of two different sets, and performs
+the union operation on them, coalescing them into one set.  It returns the set id of this
+new set.  Now, when you call <i>Find()</i> on any item that was previously in either of these
+sets, it will return this new set id.
+</UL>
+To initialize an instance of disjoint sets, you start with <i>n</i> items, each of
+which is in its own disjoint set, whose set id equals the element's number.  
+You make <i>Union()</i> calls to start coalescing sets.
+<p>
+Disjoint sets are very useful in connected component applications.  They are also <i>extremely</i>
+efficient (we'll talk about that later).
+
+<hr>
+<h3>Abstract implementation</h3>
+
+In the abstract, we implement disjoint sets with circles and arrows, which we'll call
+"nodes" and links.  Each element will be in its own node, and each element has one link.
+That link is either to another node, or to NULL.  In the beginning, when you first set
+up an instance of disjoint setes, all nodes will have NULL links.
+<p>
+When a node has a NULL link, we call it the "root" of a set.  If you call <i>Find()</i> on 
+a node with a NULL link, it will return the node's item number, and that is the set id of
+the node.   Therefore, when you first start, every node is the root of its own set, and when
+you call <i>Find(i)</i>, it will return <i>i</i>.
+<p>
+When you call <i>Union(i, j)</i>, remember that <i>i</i> and <i>j</i> must be set id's.
+Therefore, they must be nodes with NULL links.  What you do is have one of those nodes set
+its link to the other node.  
+<p>
+Let's illustrate with a simple example.  We initialize an instance of disjoint sets with 
+10 items.  Each item is a node with a number from 0 to 9.  Each node has a NULL link, which 
+we depict by not drawing any arrows from the node:
+
+<p><center><table border=3><td><img src=P1.jpg></td></table></center><p>
+
+Again, each node is in its own set, and each node's set id is its number.  Suppose we call
+<i>Union(0, 1)</i>, 
+<i>Union(2, 3)</i> and 
+<i>Union(4, 5)</i>.  These will each set one of the node's link to the other node.  We'll talk
+about how that gets done later.  However, suppose this is the result:
+
+<p><center><table border=3><td><img src=P2.jpg></td></table></center><p>
+
+As you can see, node 0's link has been set to 1.  Both of these nodes' set ids are now 1, which 
+means <i>Find(0)</i> equals <i>Find(1)</i> equals one.  Similarly, 
+<i>Find(2)</i> equals <i>Find(3)</i> equals three. 
+<p>
+This gives you a clue about implementing <i>Find()</i>.  When you call <i>Find(n)</i>, what you do
+is keep setting <i>n</i> to <i>n</i>'s link, until <i>n</i>'s link is NULL.  At that point, you 
+are at the root of the set, and you return <i>n</i>.
+<p>
+Union is pretty simple, too, but you have some choices about how to determine which node sets
+its link field to the other.  We use three methods to do this:
+<OL>
+<LI> <b>Union by size</b>: Make the node whose set size is smaller point to the node whose set size is bigger.  Break ties arbitrarily.
+<LI> <b>Union by height</b>: The height of a set is the longest number of links that it takes
+to get from one of its items to the root.  With union by height, you make the 
+node whose height is smaller point to the node whose height is bigger.
+<LI> <b>Union by rank with path compression</b>: 
+This works exactly like union by height, except you don't really know the height of the
+set.  Instead, you use the set's rank, which is what its height would be, were you using 
+union by height.  The reason that you don't know the height is that when you call <i>Find(i)</i>
+on an element, you perform "path compression."  What this does is set the link of all non-root
+nodes from the path from i to the root, to the root.  
+<p>
+As always, a picture helps.  Suppose this is the state of our disjoint set instance:
+
+<center><table border=3><td><img src=P8.jpg></td></table></center><p>
+
+There are two sets, with set id's 5 and 9.  Now, suppose you call <i>Find(0)</i>.  It will 
+return five, but along the way to the root node of its set, it encounters nodes 1 and 3.
+Before returning five, it sets the links to 0, 1 and 3 to five:
+
+<center><table border=3><td><img src=P9.jpg></td></table></center><p>
+
+Do you see why this is a good thing?  Previously, when you called <i>Find(0)</i>, you needed to
+travel through nodes 1 and 3 before getting to 5.  If you call <i>Find(0)</i> again, you get to
+node 5 directly.  Similarly, you have improved the performance of <i>Find(1)</i>, and <i>Find(2)</i>.
+<p>
+You can see that path compression has altered the height of the set.  However, we maintain
+what its height would be, had we not used path compression, and call it the set's <i>rank.</i>
+We use the rank to determine how we perform union.
+</OL>
+<hr>
+<h3>Running Times</h3>
+
+We assume the number of items in the instance of disjoint sets is <i>n</i>:
+<UL>
+<LI> Initializing an instance of disjoint sets: <i>O(n)</i>
+<LI> Performing <i>Union()</i> in any of the implementations: <i>O(1)</i>
+<LI> Performing <i>Find()</i> in Union by size or height: <i>O(log(n))</i>
+<LI> Performing <i>Find()</i> in Union by rank with path compression: <i>O(&alpha;(n))</i>,
+where 
+<i>&alpha;(n)</i> is the inverse of Ackerman's function.  I'm not defining that here -- either
+come to class or read 
+<a href=http://en.wikipedia.org/wiki/Ackermann_function>The Wikipedia Page</a>, especially 
+the section entitled "Inverse."
+In other words, while you cannot say that <i>Find()</i> is constant time, for all practical
+purposes, it is.
+</UL>
+
+<hr>
+<h3>Implementation in C++</h3>
+
+The API for disjoint sets is pretty minimal.  In C++, I use an 
+<a href=http://web.eecs.utk.edu/~plank/plank/classes/cs302/Notes/Interfaces/>Interface</a>
+to define the class,
+because I am going to have three separate implementations.  Each one of those is in its
+own subclass.
+
+<UL>
+<LI> A constructor takes the number of elements in the set.  Each element starts off in its own 
+set, whose set id equals the element.
+<p>
+<LI> The <b>Find(e)</b> operator returns the set id for element <i>e</i>.  This can be any integer.
+However, if two elements are in the same set, than calling <b>Find()</b> on them will yield the same
+result.  
+<p>
+<LI> The <b>Union(s1, s2)</b> operator takes two set ids, and merges all elements in the two sets so
+that they are in one set.  It returns the set id of the new set.  Calling <b>Find()</b> on any element
+in the newly merged set will return this set id.
+<p>
+<LI> <b>Print()</b>: This shows the internal state of the data structure.
+</UL>
+
+The API is in 
+<b><a href=disjoint.h>disjoint.h</a></b>:
+
+<p><center><table border=3 cellpadding=3><td><pre>
+#pragma once
+#include &lt;vector&gt;
+using namespace std;
+
+<font color=blue>/* The Disjoint Set API is defined as a c++
+   interface, because I am implementing it three
+   ways.  Each subclass implementation is in its
+   own cpp file.  */</font>
+
+class DisjointSet {
+  public:
+    virtual ~DisjointSet() {};
+    virtual int Union(int s1, int s2) = 0;
+    virtual int Find(int element) = 0;  
+    virtual void Print() = 0;
+};
+
+<font color=blue>/* The first subclass implements Union-by-Size. */</font>
+
+class DisjointSetBySize : public DisjointSet {
+  public:
+    DisjointSetBySize(int nelements);
+    int Union(int s1, int s2);
+    int Find(int element); 
+    void Print();
+
+  protected:
+    vector &lt;int&gt; links;
+    vector &lt;int&gt; sizes;
+};
+</pre></td><td valign=top><pre><font color=blue>/* The second subclass implements Union-by-Height. */</font>
+
+class DisjointSetByHeight : public DisjointSet {
+  public:
+    DisjointSetByHeight(int nelements);
+    int Union(int s1, int s2);
+    int Find(int element); 
+    void Print();
+
+  protected:
+    vector &lt;int&gt; links;
+    vector &lt;int&gt; heights;
+};
+
+<font color=blue>/* The third subclass implements Union-by-Rank 
+   with path compression. */</font>
+
+class DisjointSetByRankWPC : public DisjointSet {
+  public:
+    DisjointSetByRankWPC(int nelements);
+    int Union(int s1, int s2);
+    int Find(int element); 
+    void Print();
+
+  protected:
+    vector &lt;int&gt; links;
+    vector &lt;int&gt; ranks;
+};
+</pre></td></table></center><p>
+
+Each subclass has a <b>links</b> vector that holds the parent pointers for each
+element.  If <b>links[e]</b> is equal to negative one, then <b>e</b>
+is the root and set id of the set.  If <b>links[e]</b> does not equal
+-1, then the set id of <b>e</b> is equal to the set id of
+<b>links[e]</b>.
+<p>
+Each subclass, however, has a different vector to store the sizes/heights/ranks:
+<p>
+<UL>
+<LI> If we're implementing union-by-size, then if <b>e</b> is the root of a set, <b>sizes[e]</b> holds
+the number of elements of that set. 
+<LI> If we're implementing union-by-height, then if <b>e</b> is the root of a set, <b>heights[e]</b> holds
+the number of elements in the longest path in the set. 
+<LI> If we're implementing union-by-rank, then <b>ranks</b> holds the same information as in union-by-height,
+with the understanding that there may not be a path with that many elements due to path compression.
+</UL>
+<p>
+In all cases, if <b>e</b> is not the root of a set,
+<b>sizes[e]/heights[e]/ranks[e]</b> is immaterial.
+<p>
+Each subclass is implemented in its own source file:
+<p>
+<UL>
+<LI> <b><a href=disjoint-size.cpp>disjoint-size.cpp</a></b> implements union-by-size.
+<LI> <b><a href=disjoint-height.cpp>disjoint-height.cpp</a></b> implements union-by-height.
+<LI> <b><a href=disjoint-rank.cpp>disjoint-rank.cpp</a></b> implements union-by-rank with path compression.
+</UL>
+I will start with union-by-size, and then show the differences with the others.  The differences
+are <i>very</i> minor.
+<p>
+The constructor sets up the two vectors.  Each element is in its own set, so all links are -1 and all sizes are 1.
+
+<p><center><table border=3 cellpadding=3><td><pre>
+DisjointSetBySize::DisjointSetBySize(int nelements)
+{
+  links.resize(nelements, -1);
+  sizes.resize(nelements, 1);
+}
+</pre></td></table></center><p>
+
+The <b>Find(e)</b> operator chases <b>link[e]</b> until it equals -1:
+
+<p><center><table border=3 cellpadding=3><td><pre>
+int Disjoint::Find(int element)
+{
+  while (links[element] != -1) element = links[element];
+  return element;
+}
+</pre></td></table></center><p>
+
+And the <b>Union(s1, s2)</b> operator first checks to make sure that the set id's are
+valid, and then chooses a parent and a child from <b>s1</b> and <b>s2</b>.  The parent
+will be the one with the bigger of the two sets.  It changes the link field of the 
+child to point to the parent, and then it updates the size of the parent in the <b>sizes</b>
+vector:
+
+<p><center><table border=3 cellpadding=3><td><pre>
+int Disjoint::Union(int s1, int s2)
+{
+  int p, c;
+
+  if (links[s1] != -1 || links[s2] != -1) {
+    cerr &lt;&lt; "Must call union on a set, and not just an element.\n";
+    exit(1);
+  }
+  if (sizes[s1] &gt; sizes[s2]) {
+    p = s1;
+    c = s2;
+  } else {
+    p = s2;
+    c = s1;
+  }
+  links[c] = p;
+  sizes[p] += sizes[c];    <b>/* HERE */</b>
+  return p;
+}
+</pre></td></table></center><p>
+
+I won't show <b>Print()</b>: it simply prints out the vectors.  
+<p>
+The only difference between union-by-size and union-by-height is that <b>heights</b> keeps track of the 
+number of nodes in the longest path.  It is a one line change to union-by-size -- the line marked
+<b>HERE</b> is changed to:
+
+<p><center><table border=3 cellpadding=3><td><pre>
+  if (heights[s1] == heights[s2]) heights[p]++; 
+</pre></td></table></center><p>
+
+This is because a set's height only changes if the two sets being merged have equal heights.
+<p>
+Finally, union-by-rank is equivalent to union-by-height, except that you perform path 
+compression on find operations.  With path compression, each time you perform a <b>Find(e)</b>
+operation, you update the <b>links</b> field of all elements on the path to the root, so that
+they equal the root.  Here's one way to do this:
+
+<p><center><table border=3 cellpadding=3><td><pre>
+int Disjoint::Find(int element)
+{
+  vector &lt;int&gt; q;
+  int i;
+
+  while (links[element] != -1) {
+    q.push_back(element);
+    element = links[element];
+  }
+  for (i = 0; i &lt; q.size(); i++) links[q[i]] = element;
+  return element;
+}
+</pre></td></table></center><p>
+
+This is one of those convenient things about the STL -- I don't have to call <b>new</b>
+or <b>delete</b>.  When the <b>Find()</b> operation is over, the vector is deallocated.
+<p>
+However, I could implement path compression in two other ways, and it's illustrative to
+go over them.  The first is with simple recursion:
+
+<p><center><table border=3 cellpadding=3><td><pre>
+int Disjoint::Find(int element)
+{
+  if (links[element] == -1) return element;
+  links[element] = Find(links[element]);
+  return links[element];
+}
+</pre></td></table></center><p>
+
+The second is to traverse <b>links</b> to the root, but while doing so, setting
+<b>links[element]</b> to be <b>element</b>'s child.  In that way, once you find
+the root, you can use <b>links</b> to go back to the original element, performing
+path compression along the way.  The code is here -- if you're a little leery of 
+this code, copy it to your directory and put in some print statements.  This should be 
+the best implementation performance-wise, because it doesn't use extra memory like the other two.
+
+<p><center><table border=3 cellpadding=3><td><pre>
+int Disjoint::Find(int e)
+{
+  int p, c;   <font color=blue>// P is the parent, c is the child.</font>
+  c = -1;
+
+  <font color=blue>/* Find the root of the tree, but along the way, set
+     the parents' links to the children. */</font>
+
+  c = -1;
+  while (links[e] != -1) {
+    p = links[e];
+    links[e] = c;
+    c = e;
+    e = p;
+  }
+
+  <font color=blue>/* Now, travel back to the original element, setting
+     every link to the root of the tree. */</font>
+
+  p = e;
+  e = c;
+  while (e != -1) {
+    c = links[e];
+    links[e] = p;
+    e =c;
+  }
+  return p;
+}
+</pre></td></table></center><p>
+
+
+<hr>
+<h3>Example of Use</h3>
+
+The program <b><a href=example.cpp>example.cpp</a></b> shows a simple example of using the
+API.  It does the operations in the example above, which is nice because it illustrates
+the difference between the three algorithms.  First, let's take a look at how it
+uses a command line argument to select which subclass it will use:
+
+<p><center><table border=3 cellpadding=3><td><pre>
+int main(int argc, char **argv)
+{
+  DisjointSet *d;
+  string arg;
+
+  int s01, s23, s45;
+  int s0123, s456, s4567, s45678;
+  int s012345678;
+
+  <font color=blue>/* Error check the command line. */</font>
+  arg = "";
+  if (argc == 2) arg = argv[1];
+
+  if (arg != "size" && arg != "height" && arg != "rank") {
+    fprintf(stderr, "usage: example size|height|rank\n");
+    exit(1);
+  }
+
+  <font color=blue>/* Create the DisjointSet pointer using the proper subclass constructor. */</font>
+  switch(arg[0]) {
+    case 's': d = new DisjointSetBySize(10); break;
+    case 'h': d = new DisjointSetByHeight(10); break;
+    case 'r': d = new DisjointSetByRankWPC(10); break;
+    default: exit(1);
+  }
+</pre></td></table></center><p>
+
+As for the rest, I'm just going to show the Union and Find commands, so that see what
+it's doing without all of the prints:
+
+<p><center><table border=3 cellpadding=3><td><pre>
+  s01 = d-&gt;Union(0, 1); 
+  s23 = d-&gt;Union(2, 3); 
+  s45 = d-&gt;Union(4, 5); 
+  d-&gt;Print();
+
+  print d-&gt;Find(0) and d-&gt;Find(1));
+
+  s0123 = d-&gt;Union(s01, s23); 
+  s456 = d-&gt;Union(s45, 6); 
+  s4567 = d-&gt;Union(s456, 7); 
+  s45678 = d-&gt;Union(s4567, 8); 
+
+
+  print d-&gt;Find(1);
+  print d-&gt;Find(2);
+  print d-&gt;Find(4);
+  print d-&gt;Find(7);
+  d-&gt;Print();
+
+  s012345678 = d-&gt;Union(s0123, s45678); 
+  d-&gt;Print();
+
+  print d-&gt;Find(3);
+  print d-&gt;Find(5);
+  print d-&gt;Find(7);
+  d-&gt;Print();
+
+  print d-&gt;Find(0);
+  d-&gt;Print();
+}
+</pre></td></table></center><p>
+
+The <b><a href=makefile>makefile</a></b> compiles eveything:
+
+<pre>
+UNIX> <font color=darkred><b>make clean</b></font>
+rm -f *.o a.out example
+UNIX> <font color=darkred><b>make example</b></font>
+g++ -c -O example.cpp
+g++ -c -O disjoint-height.cpp
+g++ -c -O disjoint-rank.cpp
+g++ -c -O disjoint-size.cpp
+g++ -O -o example example.o disjoint-height.o disjoint-rank.o disjoint-size.o
+UNIX> 
+</pre>
+
+We first run it with union-by-size.  Let's look at the output incrementally.  When 
+the program starts, it sets up an empty <b>Disjoint</b> with ten elements:
+
+<p><center>
+<table cellpadding=3 border=3>
+<tr>
+<td valign=top>
+<pre>
+UNIX> <font color=darkred><b>./example size</b></font>
+Starting State:
+
+Node:    0  1  2  3  4  5  6  7  8  9
+Links:  -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
+Sizes:   1  1  1  1  1  1  1  1  1  1
+</pre>
+</td>
+<td valign=center align=center><IMG src=P1.jpg></td>
+</tr>
+</table></center><p>
+Next, it performs three union operations: 
+<b>Union(0, 1)</b>,
+<b>Union(2, 3)</b>, and
+<b>Union(4, 5)</b>.  Since each set in all three operations is the same size, the choice
+of parent and child is arbitrary.  Here's the output and how it looks pictorally (I've
+added the sizes to the roots of each set):
+
+<p><center>
+<table cellpadding=3 border=3>
+<tr>
+<td valign=top>
+<pre>
+Doing d->Union(0, 1).  Resulting set = 1
+Doing d->Union(2, 3).  Resulting set = 3
+Doing d->Union(4, 5).  Resulting set = 5
+
+Node:    0  1  2  3  4  5  6  7  8  9
+Links:   1 -1  3 -1  5 -1 -1 -1 -1 -1
+Sizes:   1  2  1  2  1  2  1  1  1  1
+</pre>
+</td>
+<td valign=center align=center><IMG src=P2.jpg></td>
+</tr>
+</table></center><p>
+
+Next it performs four more union operations: 
+<b>Union(1, 3)</b>,
+<b>Union(5, 6)</b>, 
+<b>Union(5, 7)</b>, and
+<b>Union(5, 8)</b>.  The first union operation merges two sets of the same
+size, so the parent/child selection is arbitrary.  The remaining three
+union operations merge sets of size 1 (sets 6, 7 and 8) with set 5 which 
+is larger.  Thus, in each case, set 5 becomes the parent.  The resulting
+sets are pictured to the right.  
+<p>
+The <b>Find()</b> operations return the root of each set -- three in the 
+set {0, 1, 2, 3}, and five in the set {4, 5, 6, 7, 8}.
+<p>
+You should make sure that you understand how the output of the program
+maps to the picture.  In particular, make sure you understand the <b>Links</b>
+and <b>Ranks</b> lines and what they mean.
+
+<p><center>
+<table cellpadding=3 border=3>
+<tr>
+<td valign=top>
+<pre>
+Doing d->Union(1, 3).  Resulting set = 3
+Doing d->Union(5, 6).  Resulting set = 5
+Doing d->Union(5, 7).  Resulting set = 5
+Doing d->Union(5, 8).  Resulting set = 5
+d->Find(1) = 3
+d->Find(2) = 3
+d->Find(4) = 5
+d->Find(7) = 5
+
+Node:    0  1  2  3  4  5  6  7  8  9
+Links:   1  3  3 -1  5 -1  5  5  5 -1
+Sizes:   1  2  1  4  1  5  1  1  1  1
+</pre>
+</td> 
+<td valign=center align=center><IMG src=P3.jpg></td>
+</tr> 
+</table></center><p>  
+
+Now, we perform <b>Union(3, 5)</b>.  Since set 5 has more elements than
+set 3, it is the parent and 3 is the child.  Subsequent <b>Find()</b>
+operations on 3, 5, 7 and 0 all return 5 as the set id:
+
+<p><center>
+<table cellpadding=3 border=3>
+<tr>
+<td valign=top>
+<pre>
+Doing d->Union(3, 5).  Resulting set = 5
+
+Node:    0  1  2  3  4  5  6  7  8  9
+Links:   1  3  3  5  5 -1  5  5  5 -1
+Sizes:   1  2  1  4  1  9  1  1  1  1
+
+d->Find(3) = 5
+d->Find(5) = 5
+d->Find(7) = 5
+
+Node:    0  1  2  3  4  5  6  7  8  9
+Links:   1  3  3  5  5 -1  5  5  5 -1
+Sizes:   1  2  1  4  1  9  1  1  1  1
+
+d->Find(0) = 5
+
+Node:    0  1  2  3  4  5  6  7  8  9
+Links:   1  3  3  5  5 -1  5  5  5 -1
+Sizes:   1  2  1  4  1  9  1  1  1  1
+
+UNIX> <font color=darkred><b></b></font>
+</pre>
+</td>
+<td valign=center align=center><IMG src=P4.jpg></td>
+</tr>
+</table></center><p> 
+
+<hr>
+Now, when we run this on union-by-height, the output is the same until the third picture:
+
+
+<p><center>
+<table cellpadding=3 border=3>
+<tr>
+<td valign=top>
+<pre>
+UNIX> <font color=darkred><b>./example height</b></font>
+Starting State:
+
+Node:    0  1  2  3  4  5  6  7  8  9
+Links:  -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
+Hghts:   1  1  1  1  1  1  1  1  1  1
+</pre>
+</td>
+<td valign=center align=center><IMG src=P1.jpg></td>
+</tr>
+<tr>
+<td valign=top>
+<pre>
+Doing d->Union(0, 1).  Resulting set = 1
+Doing d->Union(2, 3).  Resulting set = 3
+Doing d->Union(4, 5).  Resulting set = 5
+
+Node:    0  1  2  3  4  5  6  7  8  9
+Links:   1 -1  3 -1  5 -1 -1 -1 -1 -1
+Hghts:   1  2  1  2  1  2  1  1  1  1
+</pre>
+</td>
+<td valign=center align=center><IMG src=P2.jpg></td>
+</tr>
+<tr>
+<td valign=top>
+<pre>
+Doing d->Union(1, 3).  Resulting set = 3
+Doing d->Union(5, 6).  Resulting set = 5
+Doing d->Union(5, 7).  Resulting set = 5
+Doing d->Union(5, 8).  Resulting set = 5
+d->Find(1) = 3
+d->Find(2) = 3
+d->Find(4) = 5
+d->Find(7) = 5
+
+Node:    0  1  2  3  4  5  6  7  8  9
+Links:   1  3  3 -1  5 -1  5  5  5 -1
+Hghts:   1  2  1  3  1  2  1  1  1  1
+</pre>
+</td> 
+<td valign=center align=center><IMG src=P3H.jpg></td>
+</tr> 
+</table></center><p>  
+
+Although the trees look the same, the <b>heights</b> fields are different
+from the previous <b>size</b> fields.  So, when we perform the last union of 3 and 
+5, 3 becomes the parent, since
+it has greater height.  Subsequent <b>Find()</b> operations all return 3 now:
+
+<p><center>
+<table cellpadding=3 border=3>
+<tr>
+<td valign=top>
+<pre>
+Doing d->Union(3, 5).  Resulting set = 3
+
+Node:    0  1  2  3  4  5  6  7  8  9
+Links:   1  3  3 -1  5  3  5  5  5 -1
+Hghts:   1  2  1  3  1  2  1  1  1  1
+
+d->Find(3) = 3
+d->Find(5) = 3
+d->Find(7) = 3
+
+Node:    0  1  2  3  4  5  6  7  8  9
+Links:   1  3  3 -1  5  3  5  5  5 -1
+Hghts:   1  2  1  3  1  2  1  1  1  1
+
+d->Find(0) = 3
+
+Node:    0  1  2  3  4  5  6  7  8  9
+Links:   1  3  3 -1  5  3  5  5  5 -1
+Hghts:   1  2  1  3  1  2  1  1  1  1
+
+UNIX> 
+</pre>
+</td>
+<td valign=center align=center><IMG src=P4H.jpg></td>
+</tr>
+</table></center><p>
+
+<hr>
+
+Lastly, with path compression (union-by-rank), all the output is the same until those last <b>Find()</b> operations.
+We'll start with the last Union, where the state of the data structure is the same as above:
+
+<p><center>
+<table cellpadding=3 border=3>
+<tr>
+<td valign=top><pre>
+UNIX> <font color=darkred><b>./example rank</b></font>
+....
+....
+Doing d->Union(3, 5).  Resulting set = 3
+
+Node:    0  1  2  3  4  5  6  7  8  9
+Links:   1  3  3 -1  5  3  5  5  5 -1
+Ranks:   1  2  1  3  1  2  1  1  1  1
+</pre>
+</td>
+<td valign=center align=center><IMG src=P4H.jpg></td>
+</tr>
+</table></center><p>
+
+When we perform the three <b>Find()</b> operations, the last one -- <b>Find(7)</b> 
+performs path compression, setting node 7's <b>link</b> to the root of the set: 3:
+
+
+<p><center>
+<table cellpadding=3 border=3>
+<tr>
+<td valign=top><pre>
+d->Find(3) = 3
+d->Find(5) = 3
+d->Find(7) = 3
+
+Node:    0  1  2  3  4  5  6  7  8  9
+Links:   1  3  3 -1  5  3  5  3  5 -1
+Ranks:   1  2  1  3  1  2  1  1  1  1
+</pre>
+</td>
+<td valign=center align=center><IMG src=P5.jpg></td>
+</tr>
+</table></center><p>
+
+Similarly, the last <b>Find(0)</b> operation also performs path compression:
+
+<p><center>
+<table cellpadding=3 border=3>
+<tr>
+<td valign=top><pre>
+d->Find(0) = 3
+
+Node:    0  1  2  3  4  5  6  7  8  9
+Links:   3  3  3 -1  5  3  5  3  5 -1
+Ranks:   1  2  1  3  1  2  1  1  1  1
+</pre>
+</td>
+<td valign=center align=center><IMG src=P6.jpg></td>
+</tr>
+</table></center><p>
+
+Were we to call 
+<b>Find(4)</b>
+<b>Find(6)</b> and 
+<b>Find(8)</b>, then those nodes too would perform path compression and point directly 
+to node three.  In that case, the state would be the following:
+
+<p><center>
+<table cellpadding=3 border=3>
+<tr>
+<td valign=top><pre>
+d.Find(4) = 3
+d.Find(6) = 3
+d.Find(8) = 3
+
+Node:   0  1  2  3  4  5  6  7  8  9
+Links:  3  3  3 -1  3  3  3  3  3 -1
+Ranks:  1  2  1  3  1  2  1  1  1  1
+</pre>
+</td>
+<td valign=center align=center><IMG src=P7.jpg></td>
+</tr>
+</table></center><p>
+
+I draw this picture because you should see that <b>ranks[3]</b> remains at three, even though its
+height is two.  This is because the <b>ranks</b> field traces what the height of the tree would
+be with no path compression.  We can't keep it updated properly without adding to the running time
+of the <b>Union()</b> or <b>Find()</b> operations.  Fortunately, it doesn't matter -- the fine
+theoreticians of the world have proved that <b>Find()</b>
+operations run in <i>O(&alpha;(n))</i> time.  <b>Union()</b> operations are still <i>O(1)</i>.
+
+<hr>
+<h3>Maze Generation Program with Disjoint Sets</h3>
+
+Generating mazes is a neat application of Disjoint Sets.  A maze, like the one pictured below, may be
+viewed as an undirected graph, where each cell in a grid is a node in the graph, and if one can move
+horizontally or vertically from one cell to the next, there is an edge between the nodes.  If there
+is a wall between two cells, then there is no edge.
+
+<p><center><table border=0><td><IMG src=maze.jpg></table></center><p>
+
+A good maze is one where the graph is fully connected, so that every cell is reachable from the
+start/end cells, but there are no cycles.  We can generate such a maze using disjoint sets.
+We start with a completely disconnected graph, where each cell is surrounded by walls.  
+If this graph has <i>r</i> rows and <i>c</i> columns, then the graph contains <i>r*c</i> 
+nodes and no edges.    
+<p>
+What we'll do is choose a random wall to remove.  If that wall separates nodes in different
+connected components, then we'll remove it, thereby lowering the number of connected components.
+If it doesn't separate nodes in different connected components, we keep it.
+<p>
+This can be done with disjoint sets.  We start with each cell in its own set, and then we choose
+a random wall.  If that wall connects two nodes in different sets, we remove the wall and
+call <b>Union()</b> on the two sets.  Otherwise, we keep the wall.  We keep doing this until
+we have just one set.
+<p>
+The code is in 
+<b><a href=maze-gen.cpp>maze-gen.cpp</a></b>.  It's a little tricky.  We first generate
+all the walls.  Walls that separate vertically adjacent cells are indexed by the smaller
+cell number.  Walls
+that separate horizontally adjacent cells are indexed by the smaller cell number plus <i>r*c</i>.
+We generate all the walls and insert them into a multiset keyed by a random number.  Then we 
+traverse the multiset, deleting walls if they separate different components, until we have
+just one component.  Then we print out the walls:
+
+<p><center><table border=3 cellpadding=3><td><pre>
+#include &lt;vector&gt;
+#include &lt;cstdlib&gt;
+#include &lt;map&gt;
+#include "DJ.h"
+#include &lt;iostream&gt;
+using namespace std;
+
+typedef multimap &lt;double, int&gt; DIMap;
+typedef DIMap::iterator DIMit;
+
+main(int argc, char **argv)
+{
+  int r, c, row, column, c1, c2, ncomp, s1, s2, hov;
+  Disjoint *d;
+  DIMap walls;
+  DIMit wit;
+  DIMit tmp;
+
+  if (argc != 3) { fprintf(stderr, "Bad dog\n"); exit(1); }
+
+  r = atoi(argv[1]);
+  c = atoi(argv[2]);
+
+  d = new Disjoint(r*c);
+
+  for (row = 0; row &lt; r-1; row++) {      <b>// Generate walls that separate vertical cells.</b>
+    for (column = 0; column &lt; c; column++) {
+      c1 = row*c + column;
+      walls.insert(make_pair(drand48(), c1));
+    }
+  }
+
+  for (row = 0; row &lt; r; row++) {      <b>// Generate walls that separate horizontal cells.</b>
+    for (column = 0; column &lt; c-1; column++) {
+      c1 = (row*c + column) + r*c;
+      walls.insert(make_pair(drand48(), c1));
+    }
+  }
+
+  ncomp = r*c;
+  wit = walls.begin();
+  while (ncomp &gt; 1) {
+    c1 = wit-&gt;second;
+    if (c1 &lt; r*c) {    <b>// This is a wall separating vertical cells</b>
+      c2 = c1 + c;
+    } else {              <b>// This is a wall separating horizontal cells</b>
+      c1 -= r*c;
+      c2 = c1+1;
+    }
+    s1 = d-&gt;Find(c1);
+    s2 = d-&gt;Find(c2);
+    if (s1 != s2) {       <b>// Test for different connected components.</b>
+      d-&gt;Union(s1, s2);
+      tmp = wit;
+      wit++;
+      walls.erase(tmp);
+      ncomp--;
+    } else {
+      wit++;
+    }
+  }
+
+  printf("ROWS %d COLS %d\n", r, c);
+  for (wit = walls.begin(); wit != walls.end(); wit++) {
+    c1 = wit-&gt;second;
+    if (c1 &lt; r*c) {
+      c2 = c1 + c;
+    } else {
+      c1 -= r*c;
+      c2 = c1+1;
+    }
+    printf("WALL %d %d\n", c1, c2);
+  }
+}
+</pre></td></table></center><p>
+
+We can run this and pipe the output to the program <b>maze_ppm</b>
+(from a CS302 lab that you may not have done yet), and that lets us
+generate mazes of all sizes:
+
+<p><center><table border=0><td>
+<pre>
+UNIX> <font color=darkred><b>./maze-gen 50 100 rank | maze_ppm 5 | convert - maze2.jpg</b></font>
+</pre>
+<IMG src=maze2.jpg></table></center><p>
+
+<hr>
+<h3>An example exam question</h3>
+
+Behold the following program (in
+<b><a href=example-exam.cpp>example-exam.cpp</a></b>):
+
+<p><center><table border=3 cellpadding=3><td><pre>
+#include &lt;vector&gt;
+#include &lt;cstdlib&gt;
+#include &lt;cstdio&gt;
+#include "disjoint.h"
+#include &lt;iostream&gt;
+using namespace std;
+
+int main()
+{
+  DisjointSet *d;
+  int s01, s23, s45, s67;
+
+  d = new DisjointSetByRankWPC(8);
+
+  s01 = d-&gt;Union(0, 1); 
+  s23 = d-&gt;Union(2, 3); 
+  s45 = d-&gt;Union(4, 5); 
+  s67 = d-&gt;Union(6, 7); 
+
+  s01 = d-&gt;Union(s01, s23);
+  s45 = d-&gt;Union(s45, s67);
+
+  s01 = d-&gt;Union(s01, s45);
+
+  d-&gt;Print();
+
+  printf("\n");
+
+  d-&gt;Find(0);
+  
+  d-&gt;Print();
+  exit(0);
+}
+</pre></td></table></center><p>
+
+When I compile this with <b>DJ-rank.cpp</b> and run it, the first lines are:
+
+<pre>
+UNIX> <font color=darkred><b>example-exam</b></font>
+
+Elts:   0  1  2  3  4  5  6  7
+Links:  1  3  3  7  5  7  7 -1
+Ranks:  1  2  1  3  1  2  1  4
+</pre>
+
+
+Draw the data structure (as circles and pointers) just before the <b>d.Find()</b> call.
+Then give me the output of the last <b>d.Print()</b> call.
+
+<h3>Answer</h3>
+
+You use the <b>links</b> field to draw the data structure:
+
+<p><center><table border=3><td><img src=EE1.jpg></td></table></center><p>
+
+When you call <b>d.Find(0)</b>, path compression occurs, which means that
+nodes 0, 1 (and 3) all point to the root (7): 
+
+<p><center><table border=3><td><img src=EE2.jpg></td></table></center><p>
+
+Thus, the <b>links</b> fields for 0 and 1 will become 7.  Everything else
+remains the same, because <b>Find()</b> doesn't change the <b>ranks</b>. 
+So the output is:
+
+<pre>
+Elts:   0  1  2  3  4  5  6  7
+Links:  7  7  3  7  5  7  7 -1
+Ranks:  1  2  1  3  1  2  1  4
+</pre>
+
+
