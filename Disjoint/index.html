@@ -840,7 +840,7 @@ int main(int argc, char **argv)
   map &lt;double, int&gt;::iterator wit;
   map &lt;double, int&gt;::iterator tmp;
 
-  /* Parse the command line and create the instance of the disjoint set. */
+  <font color=blue>/* Parse the command line and create the instance of the disjoint set. */</font>
 
   if (argc != 4) { 
     fprintf(stderr, "usage mazegen rows cols size|height|rank\n"); exit(1); }
@@ -855,7 +855,7 @@ int main(int argc, char **argv)
     default: fprintf(stderr, "Bad last argument.  Should be s|h|r.\n"); exit(1);
   }
 
-  /* Generate walls that separate vertical cells. */
+  <font color=blue>/* Generate walls that separate vertical cells. */</font>
 
   for (row = 0; row &lt; r-1; row++) {
     for (column = 0; column &lt; c; column++) {
@@ -864,7 +864,7 @@ int main(int argc, char **argv)
     }
   }
 
-  /* Generate walls that separate horizontal cells. */
+  <font color=blue>/* Generate walls that separate horizontal cells. */</font>
 
   for (row = 0; row &lt; r; row++) {
     for (column = 0; column &lt; c-1; column++) {
@@ -873,22 +873,22 @@ int main(int argc, char **argv)
     }
   }
 
-  /* Run through the walls map, deleting walls when they
-     separate cells in different disjoint sets. */
+  <font color=blue>/* Run through the walls map, deleting walls when they
+     separate cells in different disjoint sets. */</font>
 
   ncomp = r*c;
   wit = walls.begin();
   while (ncomp &gt; 1) {
     c1 = wit-&gt;second;
-    if (c1 &lt; r*c) {    // This is a wall separating vertical cells.
+    if (c1 &lt; r*c) {    <font color=blue>// This is a wall separating vertical cells.</font>
       c2 = c1 + c;
-    } else {           // This is a wall separating horizontal cells.
+    } else {           <font color=blue>// This is a wall separating horizontal cells.</font>
       c1 -= r*c;
       c2 = c1+1;
     }
     s1 = d-&gt;Find(c1);
     s2 = d-&gt;Find(c2);
-    if (s1 != s2) {     // Test for different connected components.
+    if (s1 != s2) {     <font color=blue>// Test for different connected components.</font>
       d-&gt;Union(s1, s2);
       tmp = wit;
       wit++;
@@ -899,7 +899,7 @@ int main(int argc, char **argv)
     }
   }
 
-  /* Print out the remaining walls. */
+  <font color=blue>/* Print out the remaining walls. */</font>
 
   printf("ROWS %d COLS %d\n", r, c);
 
