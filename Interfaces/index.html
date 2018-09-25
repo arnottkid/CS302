@@ -1,0 +1,534 @@
+<title>CS302 Lecture Notes</title>
+<h2>CS302 Lecture Notes - Interfaces and Inheritance</h2>
+<UL>
+<LI> September, 2018. 
+<LI> James S. Plank
+<LI> Directory: <b>/home/plank/cs302/Notes/Interfaces</b>
+</UL>
+
+<h2>Introduction</h2>
+
+Inheritance and interfaces are fundamental concepts in Object-Oriented
+programming.  If it's not well-known to you that I don't like them,
+it will be soon.  However, they have their place in the universe of programming,
+whether I like it or not, so I'll give you some discourse on the topic.  I will
+white my detailed opinions at the end of this document, but I will summarize them
+here:
+<p>
+<center>
+<table border=3 cellpadding=10>
+<td>
+Inheritance and interfaces are very powerful organizational tools for programming.
+You can do a lot of things with them that you cannot do easily without them.  On the flip
+side, they introduce intricate sources of bugs and confusion that you avoid by not using
+them, and worse yet, over time, a bad decision about inheritance/interfaces can make your
+code convoluted, inefficient, and incorrect.  
+Therefore, if you do decide to contaminate your code with interfaces, or worse
+yet, inheritance, keep it to a minimum, and <b><i>document your decisions cleanly and thoroughly</i></b>.
+I cannot stress this enough.
+</td></table><p></center>
+
+<hr>
+<h2>A Motivating Example Without Inheritance or Interfaces</h2>
+
+You've decided to take your knitting to the next level, so you open an Etsy store.
+You don't want to "Penny Blossom" yourself, so you decide to start with just two 
+items: dog sweaters and monogrammed Koozies.  
+They have the following attributes that you'd like to 
+keep track of in your bookkeeping:
+
+<p>
+<center>
+<table border=3 cellpadding=10>
+<td valign=top>
+<b>Koozies</b>:
+<UL>
+<LI> Color (string - custom)
+<LI> Monogram (string - custom)
+<LI> Yards of yarn (double - this is a constant: 1.5)
+<LI> Selling Price: $10.00.
+</UL>
+</pre>
+</td><td valign=top>
+<b>Dog Sweaters</b>:
+<UL>
+<LI> Color (string - custom)
+<LI> Size (S|L)
+<LI> Yards of yarn (double: 3 for small, 6 for large)
+<LI> Selling Price ($20 for small, $40 for large).
+</UL>
+</td>
+</table>
+</center>
+<p>
+
+You are keeping track of your sales in text files, one file for sale.  Your
+files have the following format:
+<p>
+<UL>
+<LI> The first line is the customer's name.
+<LI> The remaining lines are in one of two formats:
+<pre>
+"Koozie" color monogram
+"Dog" color S|L
+</pre>
+</UL>
+
+Here are two example files:
+
+<p><center><table border=3 cellpadding=3>
+<td valign=top>
+<b><a href=f1.txt>f1.txt</a></b>
+<pre>
+Isabelle Human
+Koozie Red IH
+Koozie Blue BH
+Dog S Red
+</pre></td>
+<td valign=top>
+<b><a href=f2.txt>f2.txt</a></b>
+<pre>
+Jonathan Cherubim
+Dog L Orange
+Dog S White
+Koozie Orange JLC
+Koozie White JXC
+</pre></td>
+</table></center><p>
+
+You'd like to write a program that formats each sale nicely and reports your profits and
+expenses.  Yarn is $2.25 a yard, and Etsy charges 8% fees on your gross.  Here's what you
+have envisioned:
+
+<hr>
+<pre>
+UNIX> <font color=darkred><b>./make_invoice < f1.txt</b></font>
+Customer: Isabelle Human
+
+Description                                                   Price  Costs
+Red Koozie with monogram IH                                   10.00   3.38
+Blue Koozie with monogram BH                                  10.00   3.38
+Small Red Dog Sweater                                         20.00   6.75
+
+Gross:     40.00
+Costs:     13.50
+Fees:       3.20
+Profit:    23.30
+UNIX> <font color=darkred><b>./make_invoice < f2.txt</b></font>
+Customer: Jonathan Cherubim
+
+Description                                                   Price  Costs
+Large Orange Dog Sweater                                      20.00  13.50
+Small White Dog Sweater                                       20.00   6.75
+Orange Koozie with monogram JLC                               10.00   3.38
+White Koozie with monogram JXC                                10.00   3.38
+
+Gross:     60.00
+Costs:     27.00
+Fees:       4.80
+Profit:    28.20
+UNIX> <font color=darkred><b></b></font>
+</pre>
+<hr>
+
+Let's write the program using vanilla C++.  
+It's in <b><a href=make_invoice_1_normal.cpp>make_invoice_1_normal.cpp</a></b>.
+We'll have a class for a Dog and a class for
+a Koozie.  Here's the Dog class with standard Dr. Plank-style C++:
+
+<p><center><table border=3 cellpadding=3><td valign=top><pre>
+class Dog {
+  public:
+    Dog(istringstream &ss);
+    string Description();
+    double Price();
+    double Expenses();
+  protected:
+    string color;
+    string size;
+    double yards;
+    double price;
+};
+
+Dog::Dog(istringstream &ss)
+{
+  ss &gt;&gt; size &gt;&gt; color;
+
+  if (size == "S") {
+    yards = 3.0;
+    price = 20.0;
+  } else if (size == "L") {
+    yards = 6.0;
+    price = 20.0;
+  } else {
+    fprintf(stderr, "Bad dog size: %s\n", size.c_str());
+    exit(1);
+  }
+}
+</pre></td><td valign=top><pre>
+string Dog::Description()
+{
+  string s;
+ 
+  s = (size == "S") ? "Small " : "Large ";
+  s += color;
+  s += " Dog Sweater";
+  return s;
+}
+
+double Dog::Price()
+{
+  return price;
+}
+
+double Dog::Expenses()
+{
+  return yards * 2.25;
+}
+</pre></td></table></center><p>
+
+I've written the definition for the Koozie class in a different style
+-- here we implement the code in the class definition and specify
+default values in the constructor specification.  You may prefer this
+style, and while I acknowledge the simplicity of the specifications
+of <b>Price()</b> and <b>Expenses()</b>, I still don't like it.  I
+like to have defintions and implementations separated.
+
+<p><center><table border=3 cellpadding=3><td><pre>
+class Koozie {
+  protected:
+    string color;
+    string monogram;
+    double yards;
+    double price;
+  public:
+    Koozie(istringstream &ss) : 
+       yards(1.5), 
+       price(10.0) 
+       { ss &gt;&gt; color &gt;&gt; monogram; };
+    string Description() {
+      string s;
+      s = color + " Koozie with monogram ";
+      s += monogram; 
+      return s;
+    }
+    double Price() { return price; }
+    double Expenses() { return yards * 2.25; }
+};
+</pre></td></table></center><p>
+
+The <b>main()</b> code is really straightforward.  When it's reading the items, it reads
+the first word on the line and decides whether to create an instance of <b>Dog</b> or 
+<b>Koozie</b>.  I'm going to highlight some lines in this code that feel like they are more
+clunky and inefficient than they should be:
+
+<p><center><table border=3 cellpadding=3><td valign=top><pre>
+int main()
+{
+  istringstream ss;
+  string name;
+  string line;
+  string key;
+  Dog *d;
+  Koozie *k;
+  string desc;    <font color=blue>// Description of an item.</font>
+  double p;       <font color=blue>// Price of an item.</font>
+  double e;       <font color=blue>// Expenses of an item.</font>
+  double tp;      <font color=blue>// Running total of prices.</font>
+  double te;      <font color=blue>// Running total of expenses.</font>
+  double fees;    <font color=blue>// Fees</font>
+
+  <font color=blue>/* Read and print the customer name. */</font>
+
+  getline(cin, name);
+  printf("Customer: %s\n", name.c_str());
+  printf("\n");
+
+  <font color=blue>/* Print labels for the items. */</font>
+
+  printf("%-60s %6s %6s\n", "Description", "Price", "Costs");
+</pre></td><td valign=top><pre>
+  <font color=blue>/* Print each item -- description, price, expenses. 
+     You'll note that there's some code duplication, 
+     because Dog and Koozie are different classes.  */</font>
+
+  tp = 0;
+  te = 0;
+  while (getline(cin, line)) {
+    ss.clear();
+    ss.str(line);
+    ss &gt;&gt; key;
+    if (key == "Koozie") {
+      k = new Koozie(ss);
+      desc = k-&gt;Description();    <font color=blue>// These three lines</font>
+      p = k-&gt;Price();             <font color=blue>// feel</font>
+      e = k-&gt;Expenses();          <font color=blue>// redundant.</font>
+      delete k;
+    } else if (key == "Dog") {
+      d = new Dog(ss);
+      desc = d-&gt;Description();    <font color=blue>// With these</font>
+      p = d-&gt;Price();             <font color=blue>// three</font>
+      e = d-&gt;Expenses();          <font color=blue>// lines.</font>
+      delete d;
+    }
+    tp += p;
+    te += e;
+    printf("%-60s %6.2lf %6.2lf\n", desc.c_str(), p, e);
+  }
+
+  <font color=blue>/* Print the final information. */</font>
+
+  printf("\n");
+  fees = tp * 0.08;
+  printf("Gross:  %8.2lf\n", tp);
+  printf("Costs:  %8.2lf\n", te);
+  printf("Fees:   %8.2lf\n", fees);
+  printf("Profit: %8.2lf\n", tp - te - fees);
+  return 0;
+}
+</pre></td></table></center><p>
+
+<hr>
+<h3>Leveraging commonality with an Interface</h3>
+
+With C++, you can specify an <i>interface</i>.  This is a class that only contains "virtual"
+methods.  In your specification, you label the methods with the <b>virtual</b> keyword, and 
+set their values to zero.  I know that seems odd.  The "virtual" keyword is a placeholder,
+saying that the method is going to implemented elsewhere, in another class (as you'll see).
+Here's a specification of an interface for
+an Item, which contains virtual methods for 
+<b>Description()</b>, <b>Price()</b> and <b>Expenses()</b> (it also has a destructor -- more
+on that later).  The code is in
+<b><a href=make_invoice_2_interface.cpp>make_invoice_2_interface.cpp</a></b>:
+
+<p><center><table border=3 cellpadding=3><td><pre>
+class Item {
+  public:
+    virtual ~Item() {};
+    virtual string Description() = 0;
+    virtual double Price() = 0;
+    virtual double Expenses() = 0;
+};
+</pre></td></table></center><p>
+
+Our <b>Dog</b> and <b>Koozie</b> classes have no changes, except they specify that they 
+implement the <b>Item</b> interface.  The changed code is in red.
+
+<p><center><table border=3 cellpadding=3><td><pre>
+class Dog <font color=red>: public Item</font> {
+  public:
+    Dog(istringstream &ss);
+    string Description();
+    double Price();
+    double Expenses();
+  protected:
+    string color;
+    string size;
+    double yards;
+    double price;
+};
+</pre></td><td><pre>
+class Koozie <font color=red>: public Item</font> {
+  public:
+    Koozie(istringstream &ss);
+    string Description();
+    double Price();
+    double Expenses();
+  protected:
+    string color;
+    string monogram;
+    double yards;
+    double price;
+};
+</pre></td></table></center><p>
+
+In the main code, we no longer declare the <b>Dog</b> or <b>Koozie</b> pointers.  Instead, 
+we simply declare a pointer to an <b>Item</b>:
+
+<p><center><table border=3 cellpadding=3><td><pre>
+int main()
+{
+  Item *i;           <font color=blue>// No longer do we have separate Dog / Koozie pointers.</font>
+  istringstream ss;
+  ...
+</pre></td></table></center><p>
+
+And then when we create an instance of <b>Dog</b> or <b>Koozie</b>, we assign the pointer 
+to the <b>Item</b> pointer.  When we call the item's methods, it calls the appropriate
+method of <b>Dog</b> or <b>Koozie</b>.  The code is simpler:
+
+<p><center><table border=3 cellpadding=3><td><pre>
+  while (getline(cin, line)) {
+    ss.clear();
+    ss.str(line);
+    ss &gt;&gt; key;
+    if (key == "Koozie") {          <font color=blue>// Here is the relevant code.</font>
+      i = new Koozie(ss);           <font color=blue>// Since Koozie/Dog implement the </font>
+    } else if (key == "Dog") {      <font color=blue>// Item interface, we can treat </font>
+      i = new Dog(ss);              <font color=blue>// them as items.</font>
+    }
+    desc = i-&gt;Description();        <font color=blue>// Now there is no code duplication.</font>
+    p = i-&gt;Price();
+    e = i-&gt;Expenses();
+    delete i;
+
+    tp += p;
+    te += e;
+    printf("%-60s %6.2lf %6.2lf\n", desc.c_str(), p, e);
+  }
+</pre></td></table></center><p>
+
+You need that destructor code in there to make deletion work.  In this case, it is
+specifying that you can use a default destructor.
+<p>
+I think you can see how this functionality is powerful, and in many cases can clean up your
+code.   
+
+
+<hr>
+<h3>Drinking the Kool-Aid.  Moving from an Interface to Inheritance</h3>
+
+I'm sure you've noticed that the <b>Dog</b> and <b>Koozie</b> classes have a lot more in
+common than the specification of their methods.  In particular:
+
+<UL>
+<LI> They both have <b>color</b>, <b>yards</b> and <b>price</b> variables.
+<LI> Their implementations of <b>Price()</b> and <b>Expenses()</b> are identical.
+</UL>
+
+Wouldn't it be nice if you could remove that duplication?  Enter inheritance.  What we're going
+to do now is move the common elements up into the Item, and we'll remove the <b>virtual</b>
+tag on <b>Price()</b> and <b>Expenses()</b>.  The code is in 
+<b><a href=make_invoice_3_inheritance.cpp>make_invoice_3_inheritance.cpp</a></b>:
+
+<p><center><table border=3 cellpadding=3><td><pre>
+class Item {
+  public:
+    virtual ~Item() {};
+    virtual string Description() = 0;
+
+    <font color=blue>// We have moved these variables and members into the class.</font>
+
+    string color;
+    double yards;
+    double price;
+
+    double Price();
+    double Expenses();
+};
+
+<font color=blue>/* And we implement them here. */</font>
+
+double Item::Price() { return price; }
+double Item::Expenses() { return yards * 2.25; }
+</pre></td></table></center><p>
+
+We remove the common variables and member functions from <b>Dog</b> and <b>Koozie</b>.
+Let's take a quick look at the <b>Dog</b> specification and constructor:
+
+<p><center><table border=3 cellpadding=3><td><pre>
+<font color=blue>/* Our Dog class now only has the items that are specific to it. */</font>
+
+class Dog : public Item {
+  public:
+    Dog(istringstream &ss);
+    string Description();
+  protected:
+    string size;
+};
+
+Dog::Dog(istringstream &ss)
+{
+  ss &gt;&gt; size &gt;&gt; color;
+
+  if (size == "S") {
+    yards = 3.0;
+    price = 20.0;
+  } else if (size == "L") {
+    yards = 6.0;
+    price = 20.0;
+  } else {
+    fprintf(stderr, "Bad dog size: %s\n", size.c_str());
+    exit(1);
+  }
+}
+</pre></td></table></center><p>
+
+You'll notice that <b>Dog</b> can use the variables in <b>Item</b>, because it "inherits"
+them.  That's pretty neat, isn't it?  And also pretty powerful.  If you want, you can create
+a new class that inherits <b>Dog</b>, and now:
+
+<UL>
+<LI> That class will be able to use all of the member variables of both <b>Dog</b> and <b>Item</b>.
+<LI> You can use a pointer to that class as a <b>Dog</b> or an <b>Item</b>.
+</UL>
+
+<hr>
+<h3>Reiterating the difference between an Interface and Inheritance</h3>
+
+An interface is a restricted subset of inheritance.  With an interface you define
+a class which will contain a bunch of subclasses.  The subclasses will each implement
+methods that correspond to methods that the interface defines.  You'll note, the 
+interface implements nothing -- it merely specifies the methods that each of the 
+subclasses will implement.  An interface shouldn't contain variables, and it shouldn't
+contain code.  It merely contains prototypes.
+<p>
+Inheritance on the other hand allows you to set up an arbitrarily complex hierarchy
+of methods, variables and virtual methods.  The main class (superclass) contains 
+all three of these things, and then any subclass that is <i>derived</i> from the superclass
+"inherits" the methods and variables and may use them as if they belong to the superclass.
+As above, a pointer to a subclass may be treated as a pointer to the superclass.
+<p>
+You'll note that C++ doesn't have a distinction between interface and inheritance.  You 
+implement an interface when your superclass doesn't have any data or non-virtual methods.
+<p>
+There are many other issues involved with inheritance with respect to constructors, 
+destructors, and public/protected/private designations.  I'm not going to teach you any
+of that.  In this lecture, I simply wanted to let you know what an interface is, and
+get your feet wet with inheritance.
+
+<hr>
+<h3>My opinions on Inheritance and Interfaces</h3>
+
+Although I don't use them much, I like Interfaces, because they are pretty clean.  
+They allow you to group classes by their functionality and then use a pointer to 
+the grouping, rather than the individual classes.  That's nice.
+<p>
+Inheritance, on the other hand, is a powder keg.  Sure, it's very powerful, and you can 
+eliminate redundancy as we did with the example above.  However, inheritance has two 
+very strong negative features, the impact of which is probably not apparent when you first
+start to learn the concepts:
+<p>
+
+<UL>
+<LI> <b>Where are my variables and member functions defined?</b> 
+When you're writing code, you can hold the code's structure in your head.  So, if you are
+employing multiple levels of inheritance, you know where the pieces go.  Now, fast forward
+three months when you need to fix a bug or modify your code, or god forbid, you have to 
+read someone else's code.  For every variable, you have to find where the variable is 
+declared and how it is used by the class that defined it, and all of the other subclasses
+that inherit it.  IDE's can help you in this endeavor -- they can help you find the variables,
+but they don't help with figuring out all of the interactions between the subclasses that
+also inherit the variables.  This is a bigger issue than you think.
+<p>
+<LI> <b>What if my subclass doesn't really fit like a glove with my superclass or vice
+versa?</b>  Think about the <b>color</b> variable above.  It's easy to envision a situation
+where you decide to sell something new, like a potholder, which has two colors, and also has
+a metal clip on it that is part of the expenses.  With the interface, you can add the <b>Potholder</b> class easly.  However, with the solution based on inheritance, 
+when you pushed those variables and methods into the <b>Item</b>, you made it very difficult to
+add the <b>Potholder</b> class.  You'll be tempted to do something to make the potholder work
+within the current structure (like add a <b>color2</b> variable to the potholder, and to 
+fudge its amount of yard so that the clip's price is reflected in the potholder's price.
+But how is that going to look in three months?
+</UL>
+
+I cannot think of a time where I have seen a solution based on inheritance which wasn't 
+convoluted and difficult to parse, and it's always because the objects get shoehorned into
+an inheritance structure that doesn't really match real life.  Usually, it's because the 
+structure was defined at time A, and new objects were added at time B, and the new objects didn't
+fit the structure.  And it was way too hard to change the structure.  So you get illogical code
+that's hard to read, and oh yeah, you have no idea where the variables are defined.  
+<p>
+For that reason, I don't use inheritance, and I advocate that you don't either.  I know it's
+cool and seductive, but you'll regret it, most likely.  Of course, 
+please make your own decisions in that regard.  I don't allow it in my classes.
