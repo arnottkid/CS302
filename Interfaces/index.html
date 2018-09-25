@@ -9,22 +9,24 @@
 <h2>Introduction</h2>
 
 Inheritance and interfaces are fundamental concepts in Object-Oriented
-programming.  If it's not well-known to you that I don't like them,
-it will be soon.  However, they have their place in the universe of programming,
+programming.  If it's not well-known to you that I don't like inheritance,
+it will be soon.  However, both interfaces and inheritance 
+have their places in the universe of programming,
 whether I like it or not, so I'll give you some discourse on the topic.  I will
-white my detailed opinions at the end of this document, but I will summarize them
+write my detailed opinions at the end of this document, but I will summarize them
 here:
 <p>
 <center>
 <table border=3 cellpadding=10>
 <td>
 Inheritance and interfaces are very powerful organizational tools for programming.
-You can do a lot of things with them that you cannot do easily without them.  On the flip
-side, they introduce intricate sources of bugs and confusion that you avoid by not using
-them, and worse yet, over time, a bad decision about inheritance/interfaces can make your
+You can do a lot of things with them that you cannot do easily without them. 
+On the flip side, they should be approached with caution.  Inheritance, in particular,
+introduces intricate sources of bugs and confusion that you avoid by not using
+it, and worse yet, over time, a bad decision about inheritance can make your
 code convoluted, inefficient, and incorrect.  
-Therefore, if you do decide to contaminate your code with interfaces, or worse
-yet, inheritance, keep it to a minimum, and <b><i>document your decisions cleanly and thoroughly</i></b>.
+Therefore, if you do decide to contaminate your code with inheritance, 
+keep it to a minimum, and <b><i>document your decisions cleanly and thoroughly</i></b>.
 I cannot stress this enough.
 </td></table><p></center>
 
@@ -296,7 +298,7 @@ methods.  In your specification, you label the methods with the <b>virtual</b> k
 set their values to zero.  I know that seems odd.  The "virtual" keyword is a placeholder,
 saying that the method is going to implemented elsewhere, in another class (as you'll see).
 Here's a specification of an interface for
-an Item, which contains virtual methods for 
+an <b>Item</b>, which contains virtual methods for 
 <b>Description()</b>, <b>Price()</b> and <b>Expenses()</b> (it also has a destructor -- more
 on that later).  The code is in
 <b><a href=make_invoice_2_interface.cpp>make_invoice_2_interface.cpp</a></b>:
@@ -312,7 +314,9 @@ class Item {
 </pre></td></table></center><p>
 
 Our <b>Dog</b> and <b>Koozie</b> classes have no changes, except they specify that they 
-implement the <b>Item</b> interface.  The changed code is in red.
+implement the <b>Item</b> interface.  The changed code is in red.  You'll note, both classes
+implement the exact methods specified in <b>Item</b>, with the same prototypes.  That is 
+required for them to implement the <b>Item</b>.
 
 <p><center><table border=3 cellpadding=3><td><pre>
 class Dog <font color=red>: public Item</font> {
@@ -384,7 +388,7 @@ use the default destructor for <b>Dog</b> and <b>Koozie</b>, since you have not 
 them.  See the last section of these lecture notes for some explanation on destructors.
 <p>
 I think you can see how this functionality is powerful, and in many cases can clean up your
-code.   
+code.   When you run it, you'll see that it runs identically to <b>make_invoice_1_normal</b>.
 
 
 <hr>
@@ -399,7 +403,8 @@ common than the specification of their methods.  In particular:
 </UL>
 
 Wouldn't it be nice if you could remove that duplication?  Enter inheritance.  What we're going
-to do now is move the common elements up into the Item, and we'll remove the <b>virtual</b>
+to do now is move the common elements up into the <b>Item</b>, 
+and we'll remove the <b>virtual</b>
 tag on <b>Price()</b> and <b>Expenses()</b>.  The code is in 
 <b><a href=make_invoice_3_inheritance.cpp>make_invoice_3_inheritance.cpp</a></b>:
 
@@ -468,7 +473,9 @@ a new class that inherits <b>Dog</b>, and now:
 <hr>
 <h3>Reiterating the difference between an Interface and Inheritance</h3>
 
-An interface is a restricted subset of inheritance.  With an interface you define
+An interface in C++ is a restricted subset of inheritance that is not supported explicitly
+by the language.  Other languages will make the distinction (and with them, interfaces are not
+a subset, as classes can implement multiple interfaces).  With an interface you define
 a class which will contain a bunch of subclasses.  The subclasses will each implement
 methods that correspond to methods that the interface defines.  You'll note, the 
 interface implements nothing -- it merely specifies the methods that each of the 
@@ -486,13 +493,13 @@ implement an interface when your superclass doesn't have any data or non-virtual
 <p>
 There are many other issues involved with inheritance with respect to constructors, 
 destructors, and public/protected/private designations.  I'm not going to teach you any
-of that.  In this lecture, I simply wanted to let you know what an interface is, and
+of that.  In this lecture, I simply want to let you know what an interface is, and
 get your feet wet with inheritance.
 
 <hr>
 <h3>My opinions on Inheritance and Interfaces</h3>
 
-Although I don't use them much, I like Interfaces, because they are pretty clean.  
+Although I don't use them much, I like interfaces, because they are pretty clean.  
 They allow you to group classes by their functionality and then use a pointer to 
 the grouping, rather than the individual classes.  That's nice.
 <p>
@@ -503,7 +510,7 @@ start to learn the concepts:
 <p>
 
 <UL>
-<LI> <b>Where are my variables and member functions defined?</b> 
+<LI> <b>Where are my variables and member functions defined and how do all of the subclasses interact?</b> 
 When you're writing code, you can hold the code's structure in your head.  So, if you are
 employing multiple levels of inheritance, you know where the pieces go.  Now, fast forward
 three months when you need to fix a bug or modify your code, or god forbid, you have to 
@@ -520,13 +527,13 @@ a metal clip on it that is part of the expenses.  With the interface, you can ad
 when you pushed those variables and methods into the <b>Item</b>, you made it very difficult to
 add the <b>Potholder</b> class.  You'll be tempted to do something to make the potholder work
 within the current structure (like add a <b>color2</b> variable to the potholder, and to 
-fudge its amount of yard so that the clip's price is reflected in the potholder's price.
+fudge its amount of yard so that the clip's price is reflected in the potholder's price).
 But how is that going to look in three months?
 </UL>
 
 I cannot think of a time where I have seen a solution based on inheritance which wasn't 
 convoluted and difficult to parse, and it's always because the objects get shoehorned into
-an inheritance structure that doesn't really match real life.  Usually, it's because the 
+an inheritance structure that doesn't really match its use.  Usually, it's because the 
 structure was defined at time A, and new objects were added at time B, and the new objects didn't
 fit the structure.  And it was way too hard to change the structure.  So you get illogical code
 that's hard to read, and oh yeah, you have no idea where the variables are defined.  
