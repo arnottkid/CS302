@@ -104,7 +104,7 @@ have envisioned:
 
 <hr>
 <pre>
-UNIX> <font color=darkred><b>./make_invoice < f1.txt</b></font>
+UNIX> <font color=darkred><b>./make_invoice_1_normal < f1.txt</b></font>
 Customer: Isabelle Human
 
 Description                                                   Price  Costs
@@ -116,19 +116,19 @@ Gross:     40.00
 Costs:     13.50
 Fees:       3.20
 Profit:    23.30
-UNIX> <font color=darkred><b>./make_invoice < f2.txt</b></font>
+UNIX> <font color=darkred><b>./make_invoice_1_normal < f2.txt</b></font>
 Customer: Jonathan Cherubim
 
 Description                                                   Price  Costs
-Large Orange Dog Sweater                                      20.00  13.50
+Large Orange Dog Sweater                                      40.00  13.50
 Small White Dog Sweater                                       20.00   6.75
 Orange Koozie with monogram JLC                               10.00   3.38
 White Koozie with monogram JXC                                10.00   3.38
 
-Gross:     60.00
+Gross:     80.00
 Costs:     27.00
-Fees:       4.80
-Profit:    28.20
+Fees:       6.40
+Profit:    46.60
 UNIX> <font color=darkred><b></b></font>
 </pre>
 <hr>
@@ -161,7 +161,7 @@ Dog::Dog(istringstream &ss)
     price = 20.0;
   } else if (size == "L") {
     yards = 6.0;
-    price = 20.0;
+    price = 40.0;
   } else {
     fprintf(stderr, "Bad dog size: %s\n", size.c_str());
     exit(1);
@@ -453,7 +453,7 @@ Dog::Dog(istringstream &ss)
     price = 20.0;
   } else if (size == "L") {
     yards = 6.0;
-    price = 20.0;
+    price = 40.0;
   } else {
     fprintf(stderr, "Bad dog size: %s\n", size.c_str());
     exit(1);
@@ -523,12 +523,14 @@ also inherit the variables.  This is a bigger issue than you think.
 <LI> <b>What if my subclass doesn't really fit like a glove with my superclass or vice
 versa?</b>  Think about the <b>color</b> variable above.  It's easy to envision a situation
 where you decide to sell something new, like a potholder, which has two colors, and also has
-a metal clip on it that is part of the expenses.  With the interface, you can add the <b>Potholder</b> class easly.  However, with the solution based on inheritance, 
+a metal clip on it that is part of the expenses.  With the interface, you can add the <b>Potholder</b> class easily.  However, with the solution based on inheritance, 
 when you pushed those variables and methods into the <b>Item</b>, you made it very difficult to
 add the <b>Potholder</b> class.  You'll be tempted to do something to make the potholder work
 within the current structure (like add a <b>color2</b> variable to the potholder, and to 
 fudge its amount of yard so that the clip's price is reflected in the potholder's price).
-But how is that going to look in three months?
+But how is that going to look in three months?  The proper solution is to redo the inheritance
+structure, moving the color and price calculations back into the subclasses, but of course that
+requires a lot of code modification (which is why you will be reluctant to do it).
 </UL>
 
 I cannot think of a time where I have seen a solution based on inheritance which wasn't 
@@ -548,11 +550,11 @@ please make your own decisions in that regard.  I don't allow it in my classes.
 The proper way to handle destructors in interfaces is to make them virtual, both in the
 superclass and in the subclass.  If you ignore the destructor 
 in the subclass, then you'll simply use the
-default destructor, just like with a regular class.  
+default destructor, just like with a regular class.  That's what we did above.
 <p>
 If you do write destructors, what happens is as follows: When you delete a pointer, it will
 call the proper subclass destructor first, and then the superclass destructor next.  (You can 
-extrapolate this down the hierarchy if you are using a hierarchy of inheritance.  The following
+extrapolate this down the hierarchy if you are using a hierarchy of inheritance).  The following
 code illustrates.  Simply read the inline comments to see what it does.  It is in
 <b><a href=destruct.cpp>destruct.cpp</a></b>:
 

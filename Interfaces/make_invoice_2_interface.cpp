@@ -48,7 +48,7 @@ Dog::Dog(istringstream &ss)
     price = 20.0;
   } else if (size == "L") {
     yards = 6.0;
-    price = 20.0;
+    price = 40.0;
   } else {
     fprintf(stderr, "Bad dog size: %s\n", size.c_str());
     exit(1);
