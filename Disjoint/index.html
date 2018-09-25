@@ -1,7 +1,7 @@
 <title>CS302 Lecture Notes</title>
 <h2>CS302 Lecture Notes - Disjoint Sets</h2>
 <UL>
-<LI> March 27, 2008.  Latest revision: September, 2014.
+<LI> March 27, 2008.  Latest revision: September, 2018.
 <LI> James S. Plank
 <LI> Directory: <b>/home/plank/cs302/Notes/Disjoint</b>
 </UL>
@@ -317,7 +317,8 @@ int Disjoint::Union(int s1, int s2)
 I won't show <b>Print()</b>: it simply prints out the vectors.  
 <p>
 The only difference between union-by-size and union-by-height is that <b>heights</b> keeps track of the 
-number of nodes in the longest path.  It is a one line change to union-by-size -- the line marked
+number of nodes in the longest path.  After changing all of the "sizes" to "heights", 
+it is a one line change to union-by-size -- the line marked
 <b>HERE</b> is changed to:
 
 <p><center><table border=3 cellpadding=3><td><pre>

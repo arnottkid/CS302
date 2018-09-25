@@ -11,3 +11,4 @@ James S. Plank
 - [Recursion Review](Recursion-Review/index.html)
 - [Enumeration](Enumeration/index.html)
 - [Interfaces and Inheritance](Interfaces/index.html)
+- [Disjoint Sets](Disjoint/index.html)
