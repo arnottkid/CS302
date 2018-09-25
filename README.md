@@ -10,3 +10,4 @@ James S. Plank
 - [Bit Arithmetic](Bits/index.html)
 - [Recursion Review](Recursion-Review/index.html)
 - [Enumeration](Enumeration/index.html)
+- [Interfaces and Inheritance](Interfaces/index.html)
