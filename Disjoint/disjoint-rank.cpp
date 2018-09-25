@@ -6,6 +6,7 @@
 
 #include <vector>
 #include <cstdlib>
+#include <cstdio>
 #include <iostream>
 #include "disjoint.h"
 using namespace std;

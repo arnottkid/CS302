@@ -1,5 +1,6 @@
 #include <vector>
 #include <cstdlib>
+#include <cstdio>
 #include <map>
 #include "disjoint.h"
 #include <iostream>
