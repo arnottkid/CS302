@@ -1,0 +1,17 @@
+newgraph
+
+xaxis size 5 min 0 max 100000 label fontsize 14 : Number of Elements
+ hash_labels fontsize 12
+yaxis size 2.5 min 0 max .5001 hash .1 label fontsize 14 : Time (Seconds)
+ hash_labels fontsize 12
+
+legend defaults hjl vjt x 10000 y 0.5 fontsize 14
+newline color 0 0 0  label : Multiset
+  pts shell : grep '^s' test-data1.txt | sed 's/..//'
+
+newline color 1 0 0  label : Heap, regular constructor
+  pts shell : grep '^h' test-data1.txt | sed 's/..//'
+
+newline color 0 0 1 label : Heap, vector constructor
+  pts shell : grep '^l' test-data1.txt | sed 's/..//'
+
