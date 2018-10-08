@@ -3,11 +3,9 @@ all: null_sort set_sort bubble_sort selection_sort insertion_1_sort insertion_2_
      stl_sort qsort_sort \
      bucket_1_sort bucket_2_sort 
 
-lab: quick_2_sort quick_2_sorted  \
-     quick_2_lab_sort merge_1_lab_sort \
-     merge_1_sort 
+lab: merge_1_lab_sort merge_1_sort quick_2_sort quick_2_lab_sort
 
-private: quick_1_sort quick_1_sorted merge_2_sort quick_3_sort quick_1_lab_sort 
+private: quick_1_sort quick_2_sorted  quick_1_sorted merge_2_sort quick_3_sort quick_1_lab_sort 
 
 clean: 
 	rm -f *.o null_sort set_sort bubble_sort selection_sort insertion_1_sort insertion_2_sort \
