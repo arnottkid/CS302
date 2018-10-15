@@ -1,0 +1,826 @@
+<title>CS302 Lecture Notes</title>
+<h2>CS302 Lecture Notes - Graph Introduction and Depth-First Search</h2>
+<UL>
+<LI> October 28, 2009.  Last revision, October, 2016.
+<LI> James S. Plank
+<LI> Directory: <b>/home/plank/cs302/Notes/DFS</b>
+</UL>
+<hr>
+
+<h3>Reference Material Online</h3>
+
+I used to point you to Wikipedia, but that is too dominated by theoreticians, who are more worried about completeness than readability.  <a href=https://www.topcoder.com/community/data-science/data-science-tutorials/introduction-to-graphs-and-their-data-structures-section-1/>The
+Topcoder tutorial on graphs and graph algorithms</a> is a great resource.  I suggest that you
+read it through depth first search as reference material for this part of the class.
+<p>
+Wikipedia has a 
+<a href=http://en.wikipedia.org/wiki/Glossary_of_graph_theory>glossary of graph terms.</a>  
+The terms you should know are the following: 
+    vertices, edges, adjacency, incidence, directed/undirected, 
+    path, cycle, loop, multiedge, connected component, bipartite.
+<p>
+Wikipedia also has some pages that are less dense mathematically, which you may also find useful.
+Here is the page on <a href=http://simple.wikipedia.org/wiki/Graph_theory>graph theory</a>.
+
+
+<hr>
+<h3>Topcoder problems with DFS</h3>
+
+<UL>
+<LI> 
+I'll have you do TCCO 2005, Qualification 1, 500-point problem
+in lab.  <a href=http://web.eecs.utk.edu/~plank/plank/classes/cs302/Topcoder/LandMines.html>Hints</a>.
+<LI> SRM 705, D2, 500-pointer does DFS on a directed graph.  <a href=http://web.eecs.utk.edu/~plank/topcoder-writeups/2017/AlphabetOrderDiv2/index.html>Here's a writeup, with a solution.</a>
+<LI> SRM 682, D1, 300-pointer is a straightforward DFS problem.  Here are <a href=http://web.eecs.utk.edu/~plank/plank/classes/cs302/Topcoder/SmilesTheFriendshipUnicorn.html>hints.</a>
+<LI> SRM 576, D2, 500-pointer is a good DFS practice problem.  Here are <a href=http://web.eecs.utk.edu/~plank/plank/classes/cs302/Topcoder/ArcadeManao.html>hints.</a>
+<LI> <a href=http://web.eecs.utk.edu/~plank/plank/classes/cs302/Notes/HamiltonPath/>HamiltonPath</a>.  These lectures
+     notes have code, and if I have time, I'll go over this problem in class.
+<LI> <a href=http://web.eecs.utk.edu/~plank/plank/classes/cs302/Notes/Alarmed/>Alarmed</a>.  Ditto this problem.
+</UL>
+
+<hr>
+<h3>Graph Representations</h3>
+
+There are infinite ways to represent graphs.  There are three main ways that you should know:
+
+<UL>
+<LI> Using adjacency lists.
+<LI> Using an adjacency matrix.
+<LI> Mathematically.
+</UL>
+
+The first two are how you typically represent a graph in a computer program.  We will go over
+all three, plus some more below.
+
+<hr>
+<h3>Adjacency Lists</h3>
+
+With <i>adjacency lists</i>,
+for each node, you maintain a list of the nodes to which this node has edges.  This list can have a variety 
+of elements, depending on what you're doing.  For example, if you are indexing nodes by numbers from zero
+to the number of nodes minus one, then the list can simply be indices of nodes.  Sometimes the list will
+have pointers to node structures.  And sometimes the list will contain structures corresponding to edges,
+which will have more information.
+<p>
+Let's give some examples.  Here are two graphs, which we will call <b>G1</b> and <b>G2</b>:
+
+<p><center><table border=3 cellpadding=10>
+<td align=center><b>G1:</b><hr><IMG src=g1.jpg height=150></td>
+<td align=center><b>G2:</b><hr><IMG src=g2.jpg height=150></td>
+</table></center><p>
+
+They are undirected graphs.  <b>G1</b> has four connected components and no cycles, while
+<b>G2</b> has two connected components and one cycle.  Both graphs are bipartite: with 
+<b>G1</b>, the two sets of nodes are { 0, 1, 2, 5, 6, 7, 9 }, { 3, 4, 8 }.  Other partitionings
+are possible (for example, nodes 0 and 2 can go into either set).  For <b>G2</b>, the
+two sets are { 0, 1, 4, 7, 8, 9 }, { 2, 3, 5, 6 }.  (You can put 4 into either set, 
+but beyond that, the two sets are fixed).
+<p>
+Were we to add the edge (0, 1) to <b>G2</b>, it would no longer be bipartite.
+<p>
+If our adjacency lists contain indices of nodes, then the following table shows the adjacency list representation
+of the graph:
+
+<p><center><table border=3 cellpadding=3>
+<tr><td align=center><b>Node</b></td>
+    <td align=center><b>Adjacency list in G1</b></td>
+    <td align=center><b>Adjacency list in G2</b></td></tr>
+<tr> <td align=center>0</td>
+     <td align=center>{}</td>
+     <td align=center>{ 3 }</td></tr>
+<tr> <td align=center>1</td>
+     <td align=center>{ 3 }</td>
+     <td align=center>{ 2 }</td></tr>
+<tr> <td align=center>2</td>
+     <td align=center>{}</td>
+     <td align=center>{ 1, 9, 7 }</td></tr>
+<tr> <td align=center>3</td>
+     <td align=center>{ 1, 5 }</td>
+     <td align=center>{ 0, 7 }</td></tr>
+<tr> <td align=center>4</td>
+     <td align=center>{ 6, 7, 9 }</td>
+     <td align=center>{}</td></tr>
+<tr> <td align=center>5</td>
+     <td align=center>{ 3 }</td>
+     <td align=center>{ 9, 7 }</td></tr>
+<tr> <td align=center>6</td>
+     <td align=center>{ 4, 8 }</td>
+     <td align=center>{ 8 }</td></tr>
+<tr> <td align=center>7</td>
+     <td align=center>{ 4 }</td>
+     <td align=center>{ 2, 5 }</td></tr>
+<tr> <td align=center>8</td>
+     <td align=center>{ 6 }</td>
+     <td align=center>{ 5, 6 }</td></tr>
+<tr> <td align=center>9</td>
+     <td align=center>{ 4 }</td>
+     <td align=center>{ 2, 5  }</td></tr>
+</table></center><p>
+
+With undirected graphs, we typically store each edge twice, which effectively makes the graph a directed graph.
+That is what we have done above.  
+<p>
+You could, instead, have each node be its own data structure, and have each adjacency list be a vector of pointers
+to nodes.  For example:
+
+<p><center><table border=3 cellpadding=3><td><pre>
+class Node {
+  public:
+    int num;
+    vector &lt;Node *&gt; adj;
+};
+</pre></td></table></center><p>
+
+Then, <b>G1</b> above would look as follows when it is stored in computer memory:
+
+<p><center><a href=AdjList.jpg><table border=3><td><img src=AdjList.jpg width=500></td></table></a></center><p>
+
+<hr>
+<h3>Adjacency Matrices</h3>
+
+With an adjacency matrix, a graph with <i>N</i> nodes is stored using an <i>N X N</i> matrix.  The matrix has one
+row and column for every node in the graph, and the element at row <i>u</i> column <i>v</i> is set to one if there
+is an edge from <i>u</i> to <i>v</i>.  If edges are weighted, you may store the weights there instead of zero or one.
+<p>
+Here are the adjacency matrices for the two example graphs:
+
+<p><center><table border=3 cellpadding=3>
+<td align=center><b>Adjacency Matrix for G1</b>
+<pre>
+     0  1  2  3  4  5  6  7  8  9
+    -- -- -- -- -- -- -- -- -- --
+ 0 | 0  0  0  0  0  0  0  0  0  0
+ 1 | 0  0  0  1  0  0  0  0  0  0
+ 2 | 0  0  0  0  0  0  0  0  0  0
+ 3 | 0  1  0  0  0  1  0  0  0  0
+ 4 | 0  0  0  0  0  0  1  1  0  1
+ 5 | 0  0  0  1  0  0  0  0  0  0
+ 6 | 0  0  0  0  1  0  0  0  1  0
+ 7 | 0  0  0  0  1  0  0  0  0  0
+ 8 | 0  0  0  0  0  0  1  0  0  0
+ 9 | 0  0  0  0  1  0  0  0  0  0
+</pre></td>
+<td align=center><b>Adjacency Matrix for G2</b>
+<pre>
+     0  1  2  3  4  5  6  7  8  9
+    -- -- -- -- -- -- -- -- -- --
+ 0 | 0  0  0  1  0  0  0  0  0  0
+ 1 | 0  0  1  0  0  0  0  0  0  0
+ 2 | 0  1  0  0  0  0  0  1  0  1
+ 3 | 0  0  0  1  0  0  0  1  0  0
+ 4 | 0  0  0  0  0  0  0  0  0  0
+ 5 | 0  0  0  0  0  0  0  1  1  1
+ 6 | 0  0  0  0  0  0  0  0  1  0
+ 7 | 0  0  1  1  0  1  0  0  0  0
+ 8 | 0  0  0  0  0  1  1  0  0  0
+ 9 | 0  0  1  0  0  1  0  0  0  0
+</pre></td></table></center><p>
+
+Because this is an undirected graph, each edge has 
+two entries in the adjacency matrix.  It also means that the adjacency matrices are symmetric
+around the diagonal of the matrix.
+<p>
+If we let <i>|V|</i> be the number of nodes, and <i>|E|</i> be the number of edges (we'll see why
+we use those terms later), then adjacency lists consume <i>O(|E|)</i> of memory, while
+adjacency matrices consume <i>O(|V|<sup>2</sup>)</i> of memory.  For that reason, we typically use
+adjacency matrices either when the graphs are so small that the size of the matrix doesn't matter, or when
+the graph is very dense, which means that <i>|E| is O(|V|<sup>2</sup>)</i>, and the 
+matrix and list representations use roughly the same amount of memory.
+
+<hr>
+<h3>Mathematical Representation</h3>
+
+When computer scientists write about graphs, they often use a more mathematical representation.  
+They typically define a graph as:
+<p>
+<center>
+<i>G = { V, E }</i>
+</center>
+<p>
+<i>V</i> is a set of vertices, and <i>E</i> is a set of edges.  (Yes, Wikipedia will tell you that technically, 
+<i>E</i> is not a set, but that's one of those examples of Wikipedia pages being written by bored theoreticians.  For
+now, call <i>E</i> a set.)  
+<p>
+Because they are sets, you denote the size of <i>V</i>, and therefore the number of vertices 
+as <i>|V|</i>.  Similarly, the number of edges is <i>|E|</i>.
+<p>
+The specification of <i>V</i> and <i>E</i> defines the graph.  For example, here is a mathematical definition of <b>G1</b>:
+
+<UL>
+<LI> <i>V = { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 }</i>
+<LI> <i>E = { (1,3), (3,5), (4,6), (4,7), (4,9), (6,8) }</i>
+</UL>
+
+and here is a mathematical definition of <b>G2</b>.  You'll note, I specify the set of vertices differently, but it
+specifies the same set:
+
+<UL>
+<LI> <i>V = { i | 0 &le; i < 10 }</i>
+<LI> <i>E = { (0,3), (1,2), (2,9), (2,7), (3,7), (7,5), (9,5), (5,8), (6,8) }</i>
+</UL>
+
+You'll also note that I only specified each edge once.  You must be told whether the graph is undirected or directed.
+<p>
+The mathematical representation can be very powerful, albeit a little terse and sometimes hard to read.  For example,
+recall the binary heap implementation of priority queues (<a href=http://web.eecs.utk.edu/~plank/plank/classes/cs302/Notes/PQ/>In the Priority Queue lecture notes</a>).  That
+data may be viewed as a graph, as it's clear where the nodes and edges are.  Here's an example from that lecture:
+
+<p><center><table border=3><td><img src=PQ.jpg></td></table></center><p>
+
+This lends itself to a beautiful mathematical definition:
+
+<UL>
+<LI> <i>G = { V, E }</i>
+<LI> <i>V = { i | 0 &leq; i < n }</i>
+<LI> <i>E = { (u,v) | u,v &isin; V </i>and<i> v = 2u+1 </i>or<i> v = 2u+2 }</i>
+<LI> For all <i>u &isin; V</i>, there is a numeric value <i>val(u)</i>.
+<LI> If <i>(u,v) &isin; E</i>, then <i>val(u) &le; val(v)</i>.
+</UL>
+
+Granted, it's hard to read, but it packs a lot of information into a small amount of space!
+The implementation that we did of priority queues also demonstrates that you can store certain
+graphs without adjacency lists or matrices.  In that implementation, the only data structure we
+used was a vector to hold the values.  We didn't need an adjacency list or matrix, because we
+simply used math on the indices of the vector.  This is a by-product of priority queues having
+such a specific form.
+
+<hr>
+<h3>Other Representations</h3>
+
+As I said above, there are infinite ways to represent graphs.  When we implemented heaps, we were implementing 
+a graph structure in an vector.  When we implemented disjoint sets, we were also implementing a graph structure; however,
+since each node has exactly one link, we implemented all of the links for all of the nodes in a single vector.
+<p>
+When we implemented a maze in the disjoint set lecture, we were also implementing a graph.  However, that graph was 
+represented by a list of walls, which is neither an adjacency list or matrix.  Instead, you can think of it as follows:
+<UL>
+<LI> Each cell of the maze is a node.
+<LI> Each cell has four potential links -- up, down, left, right.
+<LI> If a cell is on the top row of the maze, it doesn't have an up link.
+<LI> If a cell is on the bottom row of the maze, it doesn't have a down link.
+<LI> If a cell is on the left column of the maze, it doesn't have left link.
+<LI> If a cell is on the right column of the maze, it doesn't have right link.
+<LI> If a cell's link is in the list of walls, then that link doesn't exist.
+</UL>
+
+If you wanted to, you could build an adjacency list representation from the maze file, and when you go about solving the 
+maze in your lab, that's probably the best thing to do for the DFS that solves the maze.
+
+<hr>
+<h3>File Representation</h3>
+
+For the rest of this lecture, we are going to store graphs in a specific file format.  A file
+representing a graph will start with a line "NNODES <i>n</i>," where <i>n</i> is the number of 
+nodes in the graph.  Then the remaining lines are of the form "EDGE <i>from</i> <i>to</i>," where
+<i>from</i> and <i>to</i> are numbers between 0 and <i>n-1</i>.  The files for <b>G1</b> and 
+<b>G2</b> are below:
+
+<p><center><table border=3 cellpadding=3>
+<td valign=top>
+<b><a href=g1.txt>g1.txt</a></b>
+<pre>
+NNODES 10
+EDGE 4 9
+EDGE 4 6
+EDGE 4 7
+EDGE 6 8
+EDGE 3 5
+EDGE 1 3
+</pre></td>
+<td valign=top>
+<b><a href=g2.txt>g2.txt</a></b>
+<pre>
+NNODES 10
+EDGE 5 9
+EDGE 1 2
+EDGE 5 8
+EDGE 3 7
+EDGE 2 7
+EDGE 0 3
+EDGE 5 7
+EDGE 6 8
+EDGE 2 9
+</pre></td></table></center><p>
+
+I can specify the nodes and edges in any order.
+<hr>
+<h3>Depth First Search</h3>
+
+Depth-First Search (abbreviated "DFS") is one of the most basic graph algorithms.  With DFS, each node has a boolean value
+called <i>visited</i>.  Before the DFS, that value is set to <b>false</b>, for all nodes.  Then, you commence a DFS on a node.
+Let's call that node <i>n</i>.
+The DFS works as follows:
+<UL>
+<LI> Check <i>n's</i> <i>visited</i> field.  If <b>true</b>, then return.
+<LI> Set <i>n's</i> <i>visited</i> field to <b>true</b>.
+<LI> Optionally do some activity on <i>n</i>.
+<LI> Then, for all edges of the form <i>(n,u)</i> call DFS on <i>u</i>.
+<LI> Optionally Do some final activity on <i>n</i>.
+<LI> Return.
+</UL>
+
+When you call DFS on a node <i>n</i>, the DFS will visit every node connected to <i>n</i>.  For that reason, DFS
+is good for activities that involve connectivity.  We'll see one of those in the next section.
+
+<hr>
+<h3>Depth First Search To Count Connected Components</h3>
+
+Two nodes are in the same
+connected component if there is a path between them.  Thus, a graph may be partitioned
+into its connected components.  To discover all the nodes connected to a given node, you
+can perform a depth first search on that node.  Thus, if you want to identify all of the
+connected components of a graph, you can do that with one DFS for each component of the graph.
+<p>
+This results in the following algorithm for determining connected components.  First, you 
+read in a graph.  Then you set all <i>visited</i> fields to zero.  Then you traverse
+all the nodes in the graph, and whenever you encounter one whose <i>visited</i> field is
+zero, you perform the connected component depth first search on it.  The total number
+of depth first searches is equal to the number of connected components in the graph.
+<p>
+The code is in 
+<b><a href=concomp.cpp>concomp.cpp</a></b>.  (I have a second implementation which 
+has pointers in the adjacency lists rather than integers, because sometimes I 
+write that in class instead.  Please take a look at 
+<a href=cc-pointer.html>this file</a> to see that program, and an explanation of
+how it differs.)
+<p>
+In this program, we have separate classes for graphs and nodes.
+Graphs contain a vector of nodes (pointers to nodes, really).  Each node has an adjacency list called 
+<b>edges</b>, and this is a list of node numbers, as described above.  The DFS is called <b>Component_Count()</b>,
+and it takes two parameters -- the node on which to perform the DFS (<i>n</i>), and the component number.  
+The DFS uses a field <i>component</i> in each node as its <i>visited</i> field; however, instead of setting
+it to <b>false</b> initially, it is set to -1.  And instead of setting it to <b>true</b> during the DFS, it
+is set to the component number.
+<p>
+The code is below.  It is pretty straightforward:
+
+<p><center><table border=3 cellpadding=3><td><pre>
+#include &lt;iostream&gt;
+#include &lt;string&gt;
+#include &lt;vector&gt;
+#include &lt;stdlib.h&gt;
+using namespace std;
+
+class Node {
+  public:
+    int id;
+    vector &lt;int&gt; edges;
+    int component;
+};
+
+class Graph {
+  public:
+    vector &lt;Node *&gt; nodes; <font color=darkblue>// Note, this vector is of *pointers* to nodes.</font>
+    void Print();
+    void Component_Count(int index, int cn);
+};
+
+<font color=darkblue>// This is the DFS, where the component variable is used as the visited field.</font>
+
+void Graph::Component_Count(int index, int cn)
+{
+  Node *n;
+  int i;
+
+  n = nodes[index];
+  if (n-&gt;component != -1) return;
+  n-&gt;component = cn;
+  for (i = 0; i &lt; n-&gt;edges.size(); i++) Component_Count(n-&gt;edges[i], cn);
+}
+
+<font color=darkblue>// The Print() function prints each node, its component number and its adjacency list.</font>
+
+void Graph::Print()
+{
+  int i, j;
+  Node *n;
+
+  for (i = 0; i &lt; nodes.size(); i++) {
+    n = nodes[i];
+    cout &lt;&lt; "Node " &lt;&lt; i &lt;&lt; ": " &lt;&lt; n-&gt;component &lt;&lt; ":";
+    for (j = 0; j &lt; n-&gt;edges.size(); j++) {
+      cout &lt;&lt; " " &lt;&lt; n-&gt;edges[j];
+    }
+    cout &lt;&lt; endl;
+  }
+}
+
+
+<font color=darkblue>// The main() function reads in a graph, does the connected component
+// determination, and then prints the graph.</font>
+
+main(int argc, char **argv)
+{
+  Graph g;
+  string s;
+  int nn, n1, n2, i, c;
+  Node *n;
+
+  cin &gt;&gt; s;
+  if (s != "NNODES") { cerr &lt;&lt; "Bad graph\n"; exit(1); }
+  cin &gt;&gt; nn;
+
+  <font color=darkblue>// Create all of the nodes.</font>
+
+  for (i = 0; i &lt; nn; i++) {
+    n = new Node;
+    n-&gt;component = -1;
+    n-&gt;id = i;
+    g.nodes.push_back(n);
+  }
+
+  <font color=darkblue>// Read all of the edges.  There is no error checking here,
+  // so the input has to be correct or this program will not work.</font>
+
+  while (!cin.fail()) {
+    cin &gt;&gt; s &gt;&gt; n1 &gt;&gt; n2;
+    if (!cin.fail()) {
+      if (s != "EDGE") { cerr &lt;&lt; "Bad graph\n"; exit(1); }
+      g.nodes[n1]-&gt;edges.push_back(n2);
+      g.nodes[n2]-&gt;edges.push_back(n1);
+    }
+  }
+
+  <font color=darkblue>// Traverse the nodes.  If you find one whose component number has
+  // not yet been determined, run the DFS on it.</font>
+
+  c = 0;
+  for (i = 0; i &lt; g.nodes.size(); i++) {
+    if (g.nodes[i]-&gt;component == -1) {
+      c++;
+      g.Component_Count(i, c);
+     }
+  }
+
+  g.Print();
+}
+</pre></td></table></center><p>
+
+As we can see, it works fine on our two example files.  Pay attention to the output.
+Each line prints a node, its connected component number, and its adjacency list.
+Make sure you understand the output and how it relates to the pictures.
+
+<pre>
+UNIX> <font color=darkred><b>concomp < g1.txt</b></font>
+Node 0: 1:
+Node 1: 2: 3
+Node 2: 3:
+Node 3: 2: 5 1
+Node 4: 4: 9 6 7
+Node 5: 2: 3
+Node 6: 4: 4 8
+Node 7: 4: 4
+Node 8: 4: 6
+Node 9: 4: 4
+UNIX> <font color=darkred><b>concomp < g2.txt</b></font>
+Node 0: 1: 3
+Node 1: 1: 2
+Node 2: 1: 1 7 9
+Node 3: 1: 7 0
+Node 4: 2:
+Node 5: 1: 9 8 7
+Node 6: 1: 8
+Node 7: 1: 3 2 5
+Node 8: 1: 5 6
+Node 9: 1: 5 2
+UNIX> 
+</pre>
+
+The first call identifies the connected components as:
+<UL>
+<LI> Component 1: Node 0.
+<LI> Component 2: Nodes 1, 3 and 5.
+<LI> Component 3: Node 2.
+<LI> Component 4: Nodes 4, 6, 7, 8 and 9.
+</UL>
+
+It's not a bad idea to copy this file over and put some print statements in
+so that you can visualize the depth first search.
+<p>
+What's the running time?  <i>O(|V| + |E|)</i>.  This covers two cases:
+<p>
+<UL>
+<LI> If there are more vertices than edges, then the running time is <i>O(|V|)</i>.
+<LI> If there are more edges than vertices (recall that the number of edges can 
+be as big as <i>|V|(|V|-1)//2</i>), then the running time is <i>O(|E|)</i>.
+</UL>
+Thus, we say that counting connected components is linear in the number of vertices and edges.
+(We learned about connected components when we learned about disjoint sets too.  We can easily 
+count connected components with disjoint sets, and the running time is <i>O(|E| &alpha;(|V|))</i>.
+So, why would we ever use disjoint sets?  The answer is that sometimes the problem asks you to
+do the connected component identification incrementally, and for that, disjoint sets are 
+far superior to depth-first search.  Think about that.)
+<hr>
+<h3>Depth First Search To Perform Cycle Detection</h3>
+<p>
+Cycle detection is another depth first search.  Here we also 
+set a <i>visited</i> field; however, if we now encounter a node
+whose <i>visited</i> field is set, we know that the node is part 
+of a cycle, and we return that fact.  Again, it's a simple search,
+and I put the relevant code below
+(in <b><a href=cycledet0.cpp>cycledet0.cpp</a></b>):
+
+<p><center><table border=3 cellpadding=3><td><pre>
+class Graph {
+  public:
+    vector &lt;Node *&gt; nodes;
+    void Print();
+    int is_cycle(int index);
+};
+
+int Graph::is_cycle(int index)
+{
+  Node *n;
+  int i;
+
+  n = nodes[index];
+  if (n-&gt;visited) return 1;
+  n-&gt;visited = 1;
+  for (i = 0; i &lt; n-&gt;edges.size(); i++) {
+    if (is_cycle(n-&gt;edges[i])) return 1;
+  }
+  return 0;
+}
+
+main(int argc, char **argv)
+{
+  ...
+
+  for (i = 0; i &lt; g.nodes.size(); i++) {
+    if (!g.nodes[i]-&gt;visited) {
+      if (g.is_cycle(i)) {
+        cout &lt;&lt; "There is a cycle reachable from node " &lt;&lt; i &lt;&lt; endl;
+      } else {
+        cout &lt;&lt; "No cycle reachable from node " &lt;&lt; i &lt;&lt; endl;
+      }
+    }
+  }
+}
+</pre></td></table></center><p>
+
+Note that unlike connected components, this procedure has a return value,
+and it uses that return value to truncate the search when a cycle is found.
+<p>
+When we run it, we see that it doesn't work correctly, as it says that
+<b>g1</b> has a bunch of cycles, when we know that it doesn't:
+
+<pre>
+UNIX> <font color=darkred><b>cycledet0 < g1.txt</b></font>
+No cycle reachable from node 0
+There is a cycle reachable from node 1
+No cycle reachable from node 2
+There is a cycle reachable from node 4
+There is a cycle reachable from node 6
+There is a cycle reachable from node 7
+There is a cycle reachable from node 8
+UNIX> 
+</pre>
+
+Hmmm -- in 
+<b><a href=cycledet1.cpp>cycledet1.cpp</a></b> I put a print statement at the
+beginning of <b>is_cycle()</b>: 
+
+<pre>
+UNIX> <font color=darkred><b>cycledet1 < g1.txt</b></font>
+Called is_cycle(0)
+No cycle reachable from node 0
+Called is_cycle(1)
+Called is_cycle(3)
+Called is_cycle(5)
+Called is_cycle(3)
+There is a cycle reachable from node 1
+...
+</pre>
+
+There's the bug.
+The program first visits node 0 and finds no cycle.  Then
+it visits node 1 and recursively visits nodes 3 and 5.  Since node 5 has an edge
+back to node 3, it detects a cycle there.  How do we fix this bug?
+<p>
+One simple way is to include who calls <b>is_cycle()</b> as a parameter so that
+<b>is_cycle()</b> will not detect cycles that include the same edge twice.  Here's
+the changed procedure and call from <b>main()</b> in 
+<b><a href=cycledet2.cpp>cycledet2.cpp</a></b>
+
+<p><center><table border=3 cellpadding=3><td><pre>
+int Graph::is_cycle(int index, int from)
+{
+  Node *n;
+  int i;
+
+  n = nodes[index];
+  if (n-&gt;visited) return 1;
+  n-&gt;visited = 1;
+  for (i = 0; i &lt; n-&gt;edges.size(); i++) {
+    if (n-&gt;edges[i] != from) {
+      if (is_cycle(n-&gt;edges[i], index)) return 1;
+    }
+  }
+  return 0;
+}
+
+main(int argc, char **argv)
+{
+  ...
+  for (i = 0; i &lt; g.nodes.size(); i++) {
+    if (!g.nodes[i]-&gt;visited) {
+      if (g.is_cycle(i, -1)) {
+        cout &lt;&lt; "There is a cycle reachable from node " &lt;&lt; i &lt;&lt; endl;
+      } else {
+        cout &lt;&lt; "No cycle reachable from node " &lt;&lt; i &lt;&lt; endl;
+      }
+
+    }
+  }
+}
+</pre></td></table></center><p>
+
+All works well now:
+
+<pre>
+UNIX> <font color=darkred><b>cycledet2 < g1.txt</b></font>
+No cycle reachable from node 0
+No cycle reachable from node 1
+No cycle reachable from node 2
+No cycle reachable from node 4
+UNIX> <font color=darkred><b>cycledet2 < g2.txt</b></font>
+There is a cycle reachable from node 0
+No cycle reachable from node 4
+UNIX> 
+</pre>
+
+If you want to print the cycle, then you can start from when you first detect the cycle,
+and then stop when you reach the node from whence you detected the cycle.  That's
+in <b><a href=cycledet3.cpp>cycledet3.cpp</a></b>.  Note, when I detect the cycle,
+I set the <b>visited</b> field to two.  That is how I know when to stop printing
+and exit the program:
+
+<p><center><table border=3 cellpadding=3><td><pre>
+int Graph::is_cycle(int index, int from)
+{
+  Node *n;
+  int i;
+  int rv;
+
+  n = nodes[index];
+  if (n-&gt;visited) {
+    n-&gt;visited = 2;
+    cout &lt;&lt; "Cycle: " &lt;&lt; index;
+    return 1;
+  }
+  n-&gt;visited = 1;
+  for (i = 0; i &lt; n-&gt;edges.size(); i++) {
+    if (n-&gt;edges[i] != from) {
+      if (is_cycle(n-&gt;edges[i], index)) {
+        cout &lt;&lt; " " &lt;&lt; index;
+        if (n-&gt;visited == 2) {
+          cout &lt;&lt; endl;
+          exit(1);
+        }
+        return 1;
+      }
+    }
+  }
+  return 0;
+}
+</pre></td></table></center><p>
+
+<pre>
+UNIX> <font color=darkred><b>cycledet3 < g2.txt</b></font>
+Cycle: 7 5 9 2 7
+UNIX> 
+</pre>
+
+
+<hr>
+<h3>Generating Random Graphs</h3>
+
+I don't go over this in class, but read it if you're interested.
+<p>
+For some of our examples, we are going to generate random undirected graphs.  This
+is a relatively simple matter, but does take a little care.  First, think
+about a file format format for our graphs.  A simple format is to first specify 
+the number of nodes and assume that the nodes are labeled with numbers from zero
+to the number of nodes minus one.  Then we specify the edges by specifying the 
+two nodes that each edge connects.  That specification makes it easy to write
+code to read 
+the graph, since you can allocate all the nodes after reading the first line.
+<p>
+There are other ways, of course, to represent graphs, which you will see in subsequent lectures
+and labs.
+<p>
+Our graph generation program <b>gen_graph</b> takes two arguments: number of nodes and
+number of edges, and then it emits the number of nodes and generates the appropriate
+number of random edges.  There are two pitfalls in writing <b>gen_graph</b>.  First is
+that you don't want to generate edges from a node to itself, and second is that you 
+don't want to generate duplicate edges.  The first pitfall is taken care of easily by 
+checking to make sure that the second random node generated does not equal the first.
+<p>
+To address the second pitfall, we use a <b>set</b>.  When we generate a random edge,
+we turn it into a string composed of the id of the smaller node followed by a space
+and then the id of the larger node.  We check the set for that string, and if it is
+there, then we have a duplicate edge and must throw it out and try again.
+<p>
+The code is in 
+<b><a href=gen_graph.cpp>gen_graph.cpp</a></b>.  Note it error checks to make sure
+that <i>e</i> is &le; <i>n(n-1)/2</i>.  Think about why:
+
+<p><center><table border=3 cellpadding=3><td><pre>
+#include &lt;iostream&gt;
+#include &lt;string&gt;
+#include &lt;set&gt;
+#include &lt;stdlib.h&gt;
+using namespace std;
+
+main(int argc, char **argv)
+{
+  int n;
+  int e;
+  int i;
+  int n1, n2;
+  set &lt;string&gt; edges;
+  set &lt;string&gt;::iterator eit;
+  string s;
+  char edge[100];
+
+  if (argc != 3) {
+    cerr &lt;&lt; "usage: ggraph n e\n";
+    exit(1);
+  }
+
+  n = atoi(argv[1]);
+  
+  e = atoi(argv[2]);
+  if (e &gt; (n-1) * n / 2) {
+    cerr &lt;&lt; "e is too big\n";
+    exit(1);
+  }
+  srand48(time(0));
+
+  cout &lt;&lt; "NNODES " &lt;&lt; n &lt;&lt; endl;
+  for (i = 0; i &lt; e; i++) {
+    do {
+      n1 = lrand48()%n;
+      do n2 = lrand48()%n; while (n2 == n1);
+      if (n1 &lt; n2) {
+        sprintf(edge, "%d %d", n1, n2);
+      } else {
+        sprintf(edge, "%d %d", n2, n1);
+      }
+      s = edge;
+    } while (edges.find(s) != edges.end());
+    
+    edges.insert(s);
+
+    cout &lt;&lt; "EDGE " &lt;&lt; s &lt;&lt; endl;
+  }
+}
+</pre></td></table></center><p>
+
+It works as it should.  Here we generate two random graphs each 
+with ten nodes.
+
+<pre>
+UNIX> <font color=darkred><b>gen_graph 10 6 > g1.txt</b></font>
+UNIX> <font color=darkred><b>sleep 1</b></font>
+UNIX> <font color=darkred><b>gen_graph 10 9 > g2.txt</b></font>
+</pre>
+
+Here are the graph pictures and files:
+
+<p><center><table border=3 cellpadding=3>
+<td valign=top>
+<b><a href=g1.txt>g1.txt</a></b>
+<p>
+<IMG src=g1.jpg height=150>
+<p><pre>
+NNODES 10
+EDGE 4 9
+EDGE 4 6
+EDGE 4 7
+EDGE 6 8
+EDGE 3 5
+EDGE 1 3
+</pre></td>
+<td valign=top>
+<b><a href=g2.txt>g2.txt</a></b>
+<p>
+<IMG src=g2.jpg height=150>
+<p><pre>
+NNODES 10
+EDGE 5 9
+EDGE 1 2
+EDGE 5 8
+EDGE 3 7
+EDGE 2 7
+EDGE 0 3
+EDGE 5 7
+EDGE 6 8
+EDGE 2 9
+</pre></td></table></center><p>
+
+You'll note, <b>g1</b> has six edges, four connected components and no cycles.
+<b>G2</b> has nine edges, two connected components and one cycle (2,7,5,9,2).
+<p>
+<font color=darkred>(As an aside, is the above program really a good one?  Ask youself,
+when is it good, and when is it bad?  If you aren't sure of yourself, ask me in class.)</font>
