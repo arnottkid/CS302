@@ -1,4 +1,4 @@
-if [ $# -ne 1 ]; then
+qif [ $# -ne 1 ]; then
   echo 'usage: sort_vec_time n'
   exit 1
 fi
