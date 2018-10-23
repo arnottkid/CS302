@@ -1,0 +1,36 @@
+<UL>
+<LI> <b>Topcoder 250-Point problem from SRM 486, Division 1</b>
+<LI> James S. Plank
+<LI> Sun Nov  4 10:47:46 EST 2012
+</UL>
+
+You may read the problem description 
+<a href=http://community.topcoder.com/stat?c=problem_statement&pm=10992&rd=14239>here</a>.
+I have a <b>main</b> in <b><a href=main.cpp>main.cpp</a></b>.
+<p>
+Like many topcoder problems, this is an unweighted shortest path problem, with a couple
+of twists.  I'm not going to hold your hand through this one, though.  You are going to 
+build a graph.  You can build it before doing the BFS or while you do the BFS.  Each edge
+is labeled with an operation.  Whenever you reach a node that is greater than <i>t</i>,
+you can stop processing that node.
+<p>
+Here is an example of the graph that you would build when <i>s</i> is 7 and <i>t</i> is
+392, were you to build the graph before doing the BFS.  Whenever I create a node whose value
+is greater than 392, I stop processing that node.  
+
+<p><center><table border=3><td><img src=Topcoder-486-Picture.jpg></td></table></center><p>
+
+It should be pretty easy to see how this graph generates "+*+".   It should also be
+clear how it generates "/+***" in example 1.  There are some details, however, that you'll
+have to iron out: 
+
+<UL>
+<LI> You only go to node 1 once.
+<LI> The + and * edges from node 2 both go to 4.  You can use the Unix <b>sort</b> program
+to figure out the lexicographic order of the operators.
+<LI> 10<sup>9</sup> is an irritating constraint.  Think about integer overflow and how to 
+handle it.
+<LI> The graph can have cycles if <i>s</i> is a power of two.  Think about it.
+</UL>
+
+Have fun!
