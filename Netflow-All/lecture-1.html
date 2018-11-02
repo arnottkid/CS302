@@ -1,0 +1,209 @@
+<title>CS302 Lecture Notes</title>
+<h2>CS302 Lecture Notes - Network Flow</h2>
+<h3>Lecture 1: Augmenting Paths, Minimum Cuts, A Pathelogical Example</h3>
+<UL>
+<LI> James S. Plank
+<LI> Original Notes: April 2, 2008.  
+<LI> Major Overhaul: November, 2014.
+<LI> Directory: <b>/home/plank/cs302/Notes/Netflow-All</b>
+</UL>
+
+<hr>
+<h3>Reference Material</h3>
+
+The best description that I have found of the basics of network flow come from
+a topcoder tutorial, which is available <a href=https://www.topcoder.com/community/data-science/data-science-tutorials/maximum-flow-section-1/>here</a>.  I used to make this the required reading for Network Flow, but
+I have now written my own lecture notes.  Still, reading this is a great way to reinforce
+your knowledge.
+<p>
+There is more material in the following Wikipedia pages.  As with a lot of Wikipedia, the presentation is too dry and mathematical, so I don't require that you read it, but I provide links to
+it anyway:
+
+<UL>
+<LI> <a href=http://en.wikipedia.org/wiki/Network_flow>Wikipedia's page on network flow</a>
+<LI> <a href=http://en.wikipedia.org/wiki/Max_flow>Wikipedia's page on maximum flow</a>
+<LI> <a href=http://en.wikipedia.org/wiki/Ford-Fulkerson_algorithm>Wikipedia's page on the Ford-Fulkerson algorithm</a>
+<LI> <a href=http://en.wikipedia.org/wiki/Edmonds-Karp_algorithm>Wikipedia's page on the Edmonds-Karp algorithm</a>
+</UL>
+
+<hr>
+<h3>The Problem</h3>
+
+You have a directed graph with non-negative edge weights.  The weights of the edges are 
+called <i>capacities</i>. The easiest way to think of them is as pipes that hold water, and
+the capacities represent the diameters of the pipes.  Nodes are junctions between multiple pipes.
+
+<p>
+There are two special nodes, called the <i>source</i> and the <i>sink</i>  You assume that 
+there is an infinite source of water at the source.  The Network Flow problem is as
+follows: <b>What is the maximum amount of 
+water that can flow from the source
+to the sink?  No edge can hold more flow than its capacity, and the amount of flow going into
+a node has to equal the amount of flow going out of a node.</b>
+<p>
+Here's an example graph, with source <i>S</i> and sink <i>T</i> (in this and other pictures,
+you can click on the pictures, and get the full size picture):
+<p><center><table border=3><td><a href=E1-1.jpg><img src=E1-1.jpg width=200></a></td></table></center><p>
+It's not hard to eyeball this graph, and determine that the maximum flow is 23.  Here's 
+a graph that shows this flow, subject to the above rules:
+<p><center><table border=3><td><a href=E1-2.jpg><img src=E1-2.jpg width=200></a></td></table></center><p>
+
+<hr>
+<h3>A Related Problem: The Minimum Cut</h3>
+
+A <i>cut</i> of a graph is a collection of edges that disconnects the source and the sink.
+A <i>minimum cut</i> is a cut with the smallest total capacity.  The maximum flow through
+a network is <i>f</i>, then the minimum cut has a total capacity of <i>f</i>.  For example, in
+the above graph, the edges <i>AT</i>, <i>BT</i> and <i>CD</i> compose a minimum 
+cut.   I'll show you an algorithm for determining the minimum cut later in this lecture.
+
+<hr>
+<h3>Why do we care about this problem?</h3>
+
+Network flow problems arise in a variety of ways, some expected and some unexpected.
+Many logistical applications map clearly to network flow (think about this the next time
+you try to exit Neyland Stadium after a UT game).  Many surprising applications also
+arise -- you'll see this in your lab.  
+
+<hr>
+
+<h3>A Tempting, but Incorrect Solution to Network Flow</h3>
+
+Our solution to this problem is going to take the following form: We are going to find
+a path through the graph that has some flow.  Then we are going to remove the flow
+from the graph and try again.  How we "remove the flow" will be the important part of
+the solution.  Before I show you that, let's try a naive approach: Every time we find
+a path through the graph, we remove the maximum flow through that path from the graph.
+<p>
+Let's try this on the example above.  Below, I'll show three pictures:  The first 
+removes five units of flow from the path <i>S-A-T</i>, then eight units of flow
+from the path <i>S-C-B-T</i>, and finally six units of flow from the path <i>S-C-D-T</i>:
+
+<p><center><table border=3>
+<td align=center>Remove 5 units of flow from <i>S-A-T</i>:<p><a href=E1-3.jpg><img src=E1-3.jpg width=200></a></td>
+<td align=center>Remove 8 units of flow from <i>S-C-B-T</i>:<p><a href=E1-4.jpg><img src=E1-4.jpg width=200></a></td>
+<td align=center>Remove 6 units of flow from <i>S-C-D-T</i>:<p><a href=E1-5.jpg><img src=E1-5.jpg width=200></a></td>
+</table></center><p>
+
+You'll note that the source is no longer connected to the sink, so we can't find
+any more paths with flow.  But we've only found 19 units of flow, and not 23.
+In other words, our algorithm doesn't work.
+
+<hr>
+<h3>The Correct Solution - The Ford-Fulkerson (Augmenting Paths) Algorithm</h3>
+
+The problem with our solution is how we removed the flow from the graph.  The
+correct way to do this is called the ``Ford-Fulkerson'' algorithm, and sometimes it is
+referred to as simply an ``Augmenting Path'' algorithm.  The algorithm works as follows:
+<UL>
+<LI> We are going to maintain three graphs -- a copy of the original graph, a ``flow''
+graph, which keeps track of the flow that we discover through the graph, and a ``residual''
+graph, which keeps of track of the potential flow that is left in the graph.
+<li> The flow graph starts empty, and the residual graph starts out equaling the original.
+<LI> At each step, we start by finding a path from the source to the sink that has
+flow.  If we can't find such a path, we're done.
+<LI> We add the flow along the path to the flow graph.  
+If there is already flow in the reverse direction,
+you subtract from that flow first, before adding additional flow to the graph.
+<LI> We subtract the flow along the path in the residual graph.  
+<LI> We traverse the path backward, from the sink to the source, adding the flow along
+that path in the backward direction.  I typically call this ``adding reverse flow.''
+</UL>
+<p>
+Let's go back to our example above.  Below is the starting state of the flow graph
+and the residual graph:
+
+<p><center><table border=3>
+<td align=center><u>Flow Graph<u><p><a href=E1-6.jpg><img src=E1-6.jpg width=200></a></td>
+<td align=center><u>Residual Graph<u><p><a href=E1-1.jpg><img src=E1-1.jpg width=200></a></td>
+</table></center><p>
+
+Like before, we start with the path <i>S-A-T</i>.  It has a flow of 5.  So, we'll add
+that path to the flow graph, subtract the flow from <i>S-A-T</i>, and also add ``reverse''
+flow along the path <i>T-A-S</i>.  Here is the result.  I'm drawing the ``reverse'' flow in
+red, since this flow is usually the one that confuses students.
+
+<p><center><table border=3>
+<td align=center><u>Flow Graph<u><p><a href=E1-7.jpg><img src=E1-7.jpg width=200></a></td>
+<td align=center><u>Residual Graph<u><p><a href=E1-8.jpg><img src=E1-8.jpg width=200></a></td>
+</table></center><p>
+
+Also like before, let's choose our next path to be <i>S-C-B-T</i>, with a flow of 8.
+We'll add it to the flow graph, subtract it from the residual, and add the reverse flow
+to the residual:
+
+<p><center><table border=3>
+<td align=center><u>Flow Graph<u><p><a href=E1-9.jpg><img src=E1-9.jpg width=200></a></td>
+<td align=center><u>Residual Graph<u><p><a href=E1-A.jpg><img src=E1-A.jpg width=200></a></td>
+</table></center><p>
+
+Also like before, let's choose our third path to be <i>S-C-D-T</i>, with a flow of 6.
+We'll add it to the flow graph, subtract it from the residual, and add the reverse flow
+to the residual:
+
+<p><center><table border=3>
+<td align=center><u>Flow Graph<u><p><a href=E1-B.jpg><img src=E1-B.jpg width=200></a></td>
+<td align=center><u>Residual Graph<u><p><a href=E1-C.jpg><img src=E1-C.jpg width=200></a></td>
+</table></center><p>
+
+You'll recall that this is the point at which we were stuck above.  However, the reverse
+edges have now given us another path through the graph: <i>S-A-B-C-D-T</i>, with a
+flow of four.  Let's process those:
+
+<p><center><table border=3>
+<td align=center><u>Flow Graph<u><p><a href=E1-2.jpg><img src=E1-2.jpg width=200></a></td>
+<td align=center><u>Residual Graph<u><p><a href=E1-D.jpg><img src=E1-D.jpg width=200></a></td>
+</table></center><p>
+
+Now, there's no way to get from the source to the sink in the residual graph.  Therefore,
+our final network flow is 23 units.
+<p>
+Again, we call this the ``Ford-Fulkerson'' algorithm.  You'll note that it does not specify
+how we find the augmenting paths.  That will be an important problem that we will address
+later.
+<hr>
+<h3>Using the Residual Graph to find the Minimum Cut</h3>
+
+To find the minimum cut, you first find all of the nodes that are reachable from the 
+source in the residual graph.  Lets color those nodes red, and all of the other nodes
+green, both in the residual graph and in the original graph:
+
+<p><center><table border=3>
+<td align=center><u>Residual Graph<u><p><a href=E1-E.jpg><img src=E1-E.jpg width=200></a></td>
+<td align=center><u>Original Graph<u><p><a href=E1-F.jpg><img src=E1-F.jpg width=200></a></td>
+</table></center><p>
+
+The minimum cut is composed of all edges <i>in the original graph</i>, 
+from the red set to the green set.  These
+are highlighted in orange above: <i>AT</i>, <i>BT</i> and <i>CD</i>.
+
+<hr>
+<h3>A pathological example of why you need a smart path-finding algorithm</h3>
+
+This is a classic example of why you need to have a smart algorithm for finding 
+each augmenting path.  Behold the following graph:
+
+<p><center><table border=3><td><img src=Path-1.jpg></td></table></center><p>
+
+It's pretty easy to eyeball this graph and see that it has a maximum flow of 1000.
+The two paths are <i>S->A->T</i> and <i>S->B->T</i>.  However, if you try to determine
+the maximum flow using augmenting paths, and you choose the wrong path at each step,
+it will take 1000 iterations of the algorithm.  To illustrate, suppose that the first
+path you choose is <i>S->A->B->T</i> with a flow of one.  When you process this path 
+through the residual graph, you end up with the following:
+
+<p><center><table border=3><td><img src=Path-2.jpg></td></table></center><p>
+
+At the next iteration, suppose you choose the path <i>S->B->A->T</i>, again with a 
+flow of one.  The residual looks as follows:
+
+<p><center><table border=3><td><img src=Path-3.jpg></td></table></center><p>
+
+You continue in that vein.  The pictures below show how you choose <i>S->A->B->T</i> again,
+and then <i>S->B->A->T</i>, again:
+<p><center><table border=3><td><img src=Path-4.jpg></td><td><img src=Path-5.jpg></td></table></center><p>
+
+Each time, you add one unit of flow, which means that this will take 1000 iterations.  Although
+this example is unlikely to happen in practice, it demonstrates a need for a smart determination
+of paths.  
+

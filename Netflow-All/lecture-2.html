@@ -1,0 +1,717 @@
+<title>CS302 Lecture Notes</title>
+<h2>CS302 Lecture Notes - Network Flow</h2>
+<h3>Lecture 2: Programming the Ford-Fulkerson Algorithm (with DFS)</h3>
+<UL>
+<LI> James S. Plank
+<LI> Original Notes: April 2, 2008.  
+<LI> Major Overhaul: November, 2014.
+<LI> Directory: <b>/home/plank/cs302/Notes/Netflow-All</b>
+</UL>
+
+<hr>
+In this lecture, we are going to program the generic Ford-Fulkerson algorithm
+for network flow.
+We will represent directed, weighted graphs in text files, read them into
+a graph data structure, then find the maximum flow.
+We won't put any smarts into finding augmenting paths.  We will simply use DFS.
+
+<hr>
+
+<h3>Graph Representation and Generating Random Graphs</h3>
+
+We are going to represent graphs with a very flexible file format.  The file
+will contain a stream of words, which should be in the following format:
+<UL>
+<LI> <b>EDGE</b> <i>n1 n2 capacity</i> -- This specifies that there is an edge from
+node <i>n1</i> to node <i>n2</i> with the given capacity.  Capacities must be positive 
+integers.  If an edge is specified multiple times, then the capacities are added.
+It is fine to have edges in both directions between a pair of nodes.
+<LI> <b>SOURCE</b> <i>name</i> -- This specifies the name of the source node.
+<LI> <b>SINK</b> <i>name</i> -- This specifies the name of the sink node.
+</UL>
+
+There must be a single source and sink.
+<p>
+So, for example, below are two files that represent the 
+graph from the <a href=lecture-1.html>First set of network flow lecture notes</a>.
+They differ in the order in which they specify edges.  Thus, the graph is the same,
+but the order of the adjacency lists will differ.
+
+<p><center><table border=3 cellpadding=3>
+<td> <b><a href=g1.txt>g1.txt</a></b>:<pre>
+SOURCE S
+SINK T
+EDGE A B 5
+EDGE A T 5
+EDGE B T 8
+EDGE C B 13
+EDGE C D 10
+EDGE D T 12
+EDGE S A 10
+EDGE S C 14
+</pre></td>
+<td> <b><a href=g1a.txt>g1a.txt</a></b>:<pre>
+SOURCE S
+SINK T
+EDGE D T 12
+EDGE A T 5
+EDGE S C 14
+EDGE S A 10
+EDGE C D 10
+EDGE B T 8
+EDGE A B 5
+EDGE C B 13
+</pre></td>
+<td><img src=E1-1.jpg></td></table></center><p>
+
+I also have a program that generates random graphs, called
+<b><a href=makerandom.cpp>makerandom.cpp</a></b>.
+This program takes one or two arguments.  The first argument is a number of nodes.
+The second number is an optional seed to <b>srand48()</b>.
+The program creates a random graph with one source, one sink, and the
+given number of other nodes.  There is a random edge between every
+pair of nodes (in a random direction) with a random integer capacity between
+1 and 10,000. There are edges from the source to random nodes with a
+40% probability, and there are edges to the sink from random nodes
+with a 40% probability.  Thus, this is a pretty dense graph which
+should be a challenge to our network flow programs.
+<p>
+
+Below is an example of a graph made with <b>makerandom</b> 5. 
+I think we can all agree that finding the maximum flow through this graph will be a bit of a challenge. To help you, I've colored the edges in the minimum cut red:
+
+
+<p><center><table border=3 cellpadding=3>
+<td>
+
+<b><a href=g5.txt>g5.txt</a>:</b><pre>
+SOURCE s
+SINK t
+EDGE n00 t 4923
+EDGE n01 n00 8824
+EDGE n00 n02 6932
+EDGE n00 n03 6518
+EDGE n00 n04 6183
+EDGE n01 t 8471
+EDGE n02 n01 4929
+EDGE n03 n01 5566
+EDGE n01 n04 6661
+EDGE s n02 6263
+EDGE n02 n03 0741
+EDGE n04 n02 5840
+EDGE n04 n03 4417
+EDGE s n04 8033
+</pre></td>
+<td><img src=G5-1.jpg></td></table></center><p>
+
+And here's a graph showing the maximum flow of
+10,087
+
+<p><center><table border=3><td><img src=G5-2.jpg></td></table></center><p>
+
+<hr>
+<h3>The Implementations</h3>
+
+I have eight network flow implementations.  I will only explain a few of them in 
+detail; however, I will explain how they each differ, and I will do a performance
+comparison.
+
+<hr>
+<h3>The Classes in the Program</h3>
+
+I will start my implementation with the program 
+<b><a href=netflow_skeleton.cpp>netflow_skeleton.cpp</a></b>.  This
+sets up the classes and reads the graph.  We will modify it to calculate the maximum flow.
+<p>
+My program has three basic classes: <b>Node</b>, <b>Edge</b> and <b>Graph</b>.
+Let's start with the <b>Node</b> and <b>Edge</b> classes:
+
+<p><center><table border=3 cellpadding=3>
+<td valign=top><pre>
+class Node {
+  public: 
+    string name;
+    vector &lt;class Edge *&gt; adj;
+    int visited;
+};
+</pre></td>
+<td><pre>
+class Edge {
+  public:
+    void Print();
+    string name;
+    Node *n1;
+    Node *n2;
+    Edge *reverse;
+    int original;
+    int residual;
+};
+</pre></td>
+</table></center><p>
+
+Nodes are pretty simple.  They have names, and adjacency lists.  For now, we will represent
+the adjacency lists with vectors.  Nodes also have a <b>visited</b> field, which helps us when
+we use DFS to find paths.
+<p>
+Edges are a little meatier.  They have names, and pointers to the nodes that they connect.
+We store their original capacities and their residual capacities.  If we wanted to maintain
+flow, we could do that too.  However, I'm not doing that, simply to keep the program cleaner.
+When you do your lab, you're going to need to maintain the flow.
+<p>
+Each edge has a pointer to its reverse edge.  This simplifies the task of processing the
+residual graph.  I'm going to make sure that each edge always has a reverse edge, regardless of 
+whether that reverse edge really exists in the residual graph.  
+If the reverse edge really doesn't exist, I'm going to create it anyway, and give it an
+original and residual capacity of zero.  When I "remove" an edge from the residual graph,
+I simply set its residual capacity to zero.
+<p>
+In this initial implementation, I'm going to have all edges go onto their nodes' adjacency 
+lists, regardless of whether their capacities are zero.  That makes the programming easier to
+begin with.  We'll fix this later.  
+<p>
+Finally, each edge has a name and a <b>Print()</b> method, which is useful, because there are
+several places where we print out edges.
+<p>
+You'll note, we're keeping pointers to nodes and edges.  This is because there are several different
+places where we want to access nodes and edges, and to avoid making copies, we have exactly one copy
+of each node and edge, and we manipulate pointers to them.
+<p>
+Here is the definition of the <b>Graph</b> class:
+
+<p><center><table border=3 cellpadding=3><td><pre>
+class Graph {
+  public:
+     Graph();
+     ~Graph();
+     string Verbose;   /* G = print graph at each step. P = print paths.  B = Basic */
+     void Print();
+
+     int NPaths;
+     int MaxCap;
+     Node *Source;
+     Node *Sink;
+
+     vector &lt;Node *&gt; Nodes; 
+     vector &lt;Edge *&gt; Edges; 
+     map &lt;string, Node *&gt; N_Map;
+     map &lt;string, Edge *&gt; E_Map;
+
+     Node *Get_Node(string &s);
+     Edge *Get_Edge(Node *n1, Node *n2);
+
+     int MaxFlow();
+     int Find_Augmenting_Path();
+     int DFS(Node *n);
+     vector &lt;Edge *&gt; Path;
+};
+</pre></td></table></center><p>
+
+There's quite a bit here.  Let's get the simple things out of the way.  There is a constructor,
+a destructor, and a <b>Print()</b> method.  
+I keep a string <b>Verbose</b>, which lets me adjust what I print:  
+<UL>
+<LI> If the string has a <b>G</b>, then I'm going to print the residual 
+graph before finding each augmenting path.
+<LI> If the string has a <b>P</b>, then I'm going to print each augmenting path.
+<LI> If the string has a <b>B</b>, then I will print the graph at the beginning and the end.
+<LI> I will always print the maximum flow and the number of augmenting paths found at the
+  end of the program.
+</UL>
+
+I have variables to store the number of paths, the source, the sink, and the maximum capacity
+that any edge in the graph can achieve.  This gives me a sentinel for flow calculations.  
+<p>
+The next four fields are how I hold nodes and edges.  I have a vector, which enables me to
+easily access every node and edge, and I have a map, which I only use when I'm reading in
+the file.  The map lets me look up nodes and edges by name.
+<p>
+<b>Get_Node()</b> and <b>Get_Edge()</b> are really convenient procedures.  They look up the
+node or edge in the relevant map, and if it's there, they return a pointer.  If it's not there, then
+they create it, insert it into map, and return it.  
+<p>
+The last three methods and <b>Path</b> are for doing the network flow calculation.
+<hr>
+<h3>Reading in the Graph</h3>
+
+As always, reading in the graph is a bit of a pain.  First, here are 
+<b>Get_Node()</b> and <b>Get_Edge()</b>.  They are straghtforward:
+
+<p><center><table border=3 cellpadding=3>
+<td valign=top><pre>
+Node *Graph::Get_Node(string &s)
+{
+  Node *n;
+
+  if (N_Map.find(s) != N_Map.end()) return N_Map[s];
+
+  n = new Node;
+  n-&gt;name = s;
+  n-&gt;visited = 0;
+  N_Map[s] = n;
+  Nodes.push_back(n);
+  return n;
+}
+</pre></td>
+<td><pre>
+Edge *Graph::Get_Edge(Node *n1, Node *n2)
+{
+  string en;
+  Edge *e;
+
+  en = n1-&gt;name + "-&gt;";
+  en += n2-&gt;name;
+
+  if (E_Map.find(en) != E_Map.end()) return E_Map[en];
+  e = new Edge;
+  e-&gt;name = en;
+  E_Map[en] = e;
+  Edges.push_back(e);
+  e-&gt;original = 0;
+  e-&gt;residual = 0;
+  e-&gt;n1 = n1;
+  e-&gt;n2 = n2;
+  e-&gt;reverse = NULL;
+  return e;
+}
+</pre></td></table></center><p>
+
+The only real subtlety here is that I don't create reverse edges in <b>Get_Edge()</b>.
+Instead, I do it in the graph constructor.  
+<p>
+The graph constructor is also straightforward.  I'll include the code here, but I'm not going to
+explain it much:
+
+<p><center><table border=3 cellpadding=3><td><pre>
+Graph::Graph()
+{
+  string s, nn, nn2, en;
+  int cap, i;
+  Node *n1, *n2;
+  Edge *e, *r, *tmp;
+
+  MaxCap = 0;
+  Source = NULL;
+  Sink = NULL;
+
+  while (cin &gt;&gt; s) {
+    if (s == "SOURCE" || s == "SINK") {
+      if (!(cin &gt;&gt; nn)) exit(0);
+      n1 = Get_Node(nn);
+      if (s == "SOURCE") {
+        if (Source != NULL) { cerr &lt;&lt; "Two sources.\n"; exit(1); }
+        Source = n1;
+      } else {
+        if (Sink != NULL) { cerr &lt;&lt; "Two sinks.\n"; exit(1); }
+        Sink = n1;
+      }
+    } else if (s == "EDGE") {
+      if (!(cin &gt;&gt; nn &gt;&gt; nn2 &gt;&gt; cap)) exit(0);
+      if (cap &lt;= 0) exit(0);
+
+      n1 = Get_Node(nn);
+      n2 = Get_Node(nn2);
+      e = Get_Edge(n1, n2);
+      e-&gt;original += cap;
+      e-&gt;residual += cap;
+      if (e-&gt;residual &gt; MaxCap) MaxCap = cap + 1;
+       
+      if (e-&gt;reverse == NULL) {  /* This means that the edge was just created */
+        r = Get_Edge(n2, n1);
+        e-&gt;reverse = r;
+        r-&gt;reverse = e;
+        n1-&gt;adj.push_back(e);
+        n2-&gt;adj.push_back(r);
+      }
+    }
+  }
+  MaxCap *= 2;        /* This is because you can add flow in both directions (just trust me) */
+  if (Source == NULL) { cerr &lt;&lt; "No Source.\n"; exit(1); }
+  if (Sink == NULL) { cerr &lt;&lt; "No Sink.\n"; exit(1); }
+}
+</pre></td></table></center><p>
+
+When I call <b>Get_Edge()</b>, I check <b>reverse</b> to see if it's NULL.  If it is, then
+I have just created the edge for the first time.  That is when I create the reverse edge, and
+put both of them on their respective adjacency lists.
+<p>
+I also have a destructor, which deletes all of the nodes and edges.  This is good form, because
+if I create an instance of a graph and then delete it, all of the memory associated with
+the graph will be released:
+<p><center><table border=3 cellpadding=3><td><pre>
+Graph::~Graph()
+{
+  int i;
+
+  for (i = 0; i &lt; Nodes.size(); i++) delete Nodes[i];
+  for (i = 0; i &lt; Edges.size(); i++) delete Edges[i];
+}
+</pre></td></table></center><p>
+
+The <b>Print()</b> method prints each node and its adjacency list, showing the name and 
+residual flow on each edge.  And the <b>main()</b> simply reads the graph and prints it
+if <b>Verbose</b> contains a 'B'.  Here are both:
+
+<p><center><table border=3 cellpadding=3>
+<td><pre>
+void Edge::Print()
+{
+  printf("[%s:%d]", name.c_str(), residual);
+}
+
+void Graph::Print()
+{
+  int i, j;
+  Node *n;
+
+  printf("Graph:\n");
+  for (i = 0; i &lt; Nodes.size(); i++) {
+    n = Nodes[i];
+    printf("  ");
+    printf("Node: %s - ", n-&gt;name.c_str());
+    for (j = 0; j &lt; n-&gt;adj.size(); j++) n-&gt;adj[j]-&gt;Print();
+    printf("\n");
+  }
+}
+</pre></td>
+<td><pre>
+main(int argc, char **argv)
+{
+  Graph *G;
+  int f;
+
+  if (argc &gt; 2) {
+    cerr &lt;&lt; "usage: netflow verbosity(BGP) - graph on stdin\n";
+    exit(1);
+  }
+
+  G = new Graph();
+
+  if (argc == 2) G-&gt;Verbose = argv[1];
+  if (G-&gt;Verbose.find('B') != string::npos) G-&gt;Print();
+
+  delete G;   /* Doing this just to make sure that the destructor works */
+}
+</pre></td>
+</table></center><p>
+<hr>
+
+With all of these pieces in place, let's print out the graphs in <b>g1.txt</b>
+and <b>g5.txt</b>:
+
+<pre>
+UNIX> <font color=darkred><b>netflow_skeleton B < g1.txt</b></font>
+Graph:
+  Node: S - [S->A:10][S->C:14]
+  Node: T - [T->A:0][T->B:0][T->D:0]
+  Node: A - [A->B:5][A->T:5][A->S:0]
+  Node: B - [B->A:0][B->T:8][B->C:0]
+  Node: C - [C->B:13][C->D:10][C->S:0]
+  Node: D - [D->C:0][D->T:12]
+UNIX> <font color=darkred><b>netflow_skeleton B < g5.txt</b></font>
+Graph:
+  Node: s - [s->n02:6263][s->n04:8033]
+  Node: t - [t->n00:0][t->n01:0]
+  Node: n00 - [n00->t:4923][n00->n01:0][n00->n02:6932][n00->n03:6518][n00->n04:6183]
+  Node: n01 - [n01->n00:8824][n01->t:8471][n01->n02:0][n01->n03:0][n01->n04:6661]
+  Node: n02 - [n02->n00:0][n02->n01:4929][n02->s:0][n02->n03:741][n02->n04:0]
+  Node: n03 - [n03->n00:0][n03->n01:5566][n03->n02:0][n03->n04:0]
+  Node: n04 - [n04->n00:0][n04->n01:0][n04->n02:5840][n04->n03:4417][n04->s:0]
+UNIX> <font color=darkred><b></b></font>
+</pre>
+
+Again, every edge has a reverse edge, and these edges are stored on the adjacency lists.
+
+<hr>
+<h3>Calculating the Maximum Flow</h3>
+
+The program
+<b><a href=netflow_dfs_v_no_delete.cpp>netflow_dfs_v_no_delete.cpp</a></b>
+is the simplest implementation that calculates the maximum flow. 
+This program implements the three  methods that were left unimplemented
+in the skeleton program.
+The first of these is <b>MaxFlow()</b>, which simply calls the 
+<b>Find_Augmenting_Path()</b> repeatedly, until no more augmenting paths may be found.
+<b>MaxFlow()</b> is the simplest of the three methods:
+
+<p><center><table border=3 cellpadding=3><td><pre>
+int Graph::MaxFlow()
+{
+  int mf, f;
+
+  NPaths = 0;
+  mf = 0;
+  while (1) {
+    f = Find_Augmenting_Path();
+    mf += f;
+    if (f == 0) return mf;
+    NPaths++;
+  }
+}
+</pre></td></table></center><p>
+
+The next method is <b>Find_Augmenting_Path()</b>. This calls <b>DFS()</b> to find
+an augmenting path from <b>Source</b> to <b>Sink</b>.  <b>DFS()</b> returns 1 if it
+succeeds and 0 if it fails.  If it succeeds, the path is in the vector <b>Path</b>.
+The order of the edges in <b>Path</b> should be immaterial here -- as long as all of the
+edges are in the vector, then <b>Find_Augmenting_Path()</b> can process it.  As it turns
+out, <b>DFS</b> and all of the other implementations have the edges in reverse order.
+Fortunately, that's not important.  
+
+<p><center><table border=3 cellpadding=3><td><pre>
+int Graph::Find_Augmenting_Path()
+{
+  int i, f;
+  Edge *e;
+
+  <font color=blue>/* Clear visited fields, and the path. Then find an augmenting path with DFS. */</font>
+
+  for (i = 0; i &lt; Nodes.size(); i++) Nodes[i]-&gt;visited = 0;
+  Path.clear();
+  if (Verbose.find('G') != string::npos) Print();
+  if (DFS(Source)) {
+
+    <font color=blue>/* Calculate the flow through the path */</font>
+
+    f = MaxCap;
+    for (i = 0; i &lt; Path.size(); i++) {
+      if (Path[i]-&gt;residual &lt; f) f = Path[i]-&gt;residual;
+    }
+
+    <font color=blue>/* The path is in reverse order, so we print the vector from back to front */</font>
+
+    if (Verbose.find('P') != string::npos) {
+      printf("Path with flow %d: ", f);
+      for (i = Path.size()-1; i &gt;= 0; i--) Path[i]-&gt;Print();
+      printf("\n");
+    }
+
+    <font color=blue>/* Process the residual Graph */</font>
+
+    for (i = 0; i &lt; Path.size(); i++) {
+      e = Path[i];
+      e-&gt;residual -= f;
+      e-&gt;reverse-&gt;residual += f;
+    }
+
+    return f;
+  }
+  return 0;
+}
+</pre></td></table></center><p>
+
+After finding a path, <b>Find_Augmenting_Path()</b> does three things.  First, it 
+calculates the flow, then it optionally prints the path, and last, it processes the
+residual graph, removing flow from the forward direction and adding it to the reverse
+direction.  This is all straightfoward, because we don't bother deleting edges with 
+zero residual capacity from the adjacency lists.  
+
+<p>
+All that's left is to find an augmenting path.  Here is the depth-first search. 
+It is a straightforward recursive DFS.  The only important thing is that we need to ignore
+zero capacity edges, because we want to find paths with flow:
+
+<p><center><table border=3 cellpadding=3><td><pre>
+int Graph::DFS(Node *n)
+{
+  int i;
+  Edge *e;
+
+  if (n-&gt;visited) return 0;
+  if (n == Sink) return 1;
+  n-&gt;visited = 1;
+
+  for (i = 0; i &lt; n-&gt;adj.size(); i++) {
+    e = n-&gt;adj[i];
+    if (e-&gt;residual != 0) {
+      if (DFS(e-&gt;n2)) {
+        Path.push_back(e);
+        return 1;
+      }
+    }
+  }
+  return 0;
+}
+</pre></td></table></center><p>
+
+We create the path whenever a recursive call returns 1.  In other words, we create it when
+we have actually found a path to the sink.
+<p>
+Let's see how this works on our example graph, which I'll reproduce below:
+
+<p><center><table border=3 cellpadding=3>
+<td> <b><a href=g1.txt>g1.txt</a></b>:<pre>
+SOURCE S
+SINK T
+EDGE A B 5
+EDGE A T 5
+EDGE B T 8
+EDGE C B 13
+EDGE C D 10
+EDGE D T 12
+EDGE S A 10
+EDGE S C 14
+</pre></td>
+<td> <b><a href=g1a.txt>g1a.txt</a></b>:<pre>
+SOURCE S
+SINK T
+EDGE D T 12
+EDGE A T 5
+EDGE S C 14
+EDGE S A 10
+EDGE C D 10
+EDGE B T 8
+EDGE A B 5
+EDGE C B 13
+</pre></td>
+<td><img src=E1-1.jpg></td></table></center><p>
+
+Because these two graph files create adjacency lists in different orders, they 
+find different paths when calculating the maximum flow.  The flow in both graphs 
+is the same, however.
+<pre>
+UNIX> <font color=darkred><b>netflow_dfs_v_no_delete PB < g1.txt</b></font>
+Graph:
+  Node: S - [S->A:10][S->C:14]
+  Node: T - [T->A:0][T->B:0][T->D:0]
+  Node: A - [A->B:5][A->T:5][A->S:0]
+  Node: B - [B->A:0][B->T:8][B->C:0]
+  Node: C - [C->B:13][C->D:10][C->S:0]
+  Node: D - [D->C:0][D->T:12]
+Path with flow 5: [S->A:10][A->B:5][B->T:8]
+Path with flow 5: [S->A:5][A->T:5]
+Path with flow 3: [S->C:14][C->B:13][B->T:3]
+Path with flow 10: [S->C:11][C->D:10][D->T:12]
+Max flow is 23 - Paths: 4
+Graph:
+  Node: S - [S->A:0][S->C:1]
+  Node: T - [T->A:5][T->B:8][T->D:10]
+  Node: A - [A->B:0][A->T:0][A->S:10]
+  Node: B - [B->A:5][B->T:0][B->C:3]
+  Node: C - [C->B:10][C->D:0][C->S:13]
+  Node: D - [D->C:10][D->T:2]
+UNIX> <font color=darkred><b>netflow_dfs_v_no_delete PB < g1a.txt</b></font>
+Graph:
+  Node: S - [S->C:14][S->A:10]
+  Node: T - [T->D:0][T->A:0][T->B:0]
+  Node: D - [D->T:12][D->C:0]
+  Node: A - [A->T:5][A->S:0][A->B:5]
+  Node: C - [C->S:0][C->D:10][C->B:13]
+  Node: B - [B->T:8][B->A:0][B->C:0]
+Path with flow 10: [S->C:14][C->D:10][D->T:12]
+Path with flow 4: [S->C:4][C->B:13][B->T:8]
+Path with flow 5: [S->A:10][A->T:5]
+Path with flow 4: [S->A:5][A->B:5][B->T:4]
+Max flow is 23 - Paths: 4
+Graph:
+  Node: S - [S->C:0][S->A:1]
+  Node: T - [T->D:10][T->A:5][T->B:8]
+  Node: D - [D->T:2][D->C:10]
+  Node: A - [A->T:0][A->S:9][A->B:1]
+  Node: C - [C->S:14][C->D:0][C->B:9]
+  Node: B - [B->T:0][B->A:4][B->C:4]
+UNIX> <font color=darkred><b></b></font>
+</pre>
+
+It is not a bad idea for you to process these paths yourself to reinforce how to process
+the residual graph.  To help you, you can run the program with "PG", and that lets you see
+the residual graph at each stage of the calculation.
+
+<hr>
+<h3>How to represent adjacency lists?</h3>
+
+The representation of the adjacency list has a profound impact on the performance of
+Network Flow.  The solution above was easy to code.  However, keeping zero edges on the
+adjacency list is going to slow down our DFS.  On the flip side, deleting edges from the
+adjacency lists will incur its own overhead.  Not to mention, it makes the programming 
+harder.  I have five different implementations, and although I'm not going to go over the
+code specifically with you, the code is there so that you can answer your own questions:
+
+<UL>
+<LI> <a href=netflow_dfs_v_no_delete.cpp><b>netflow_dfs_v_no_delete.cpp</b></a>:  This is the version above.
+<p><LI> <a href=netflow_dfs_v_delete.cpp><b>netflow_dfs_v_delete.cpp</b></a>: In this version, I delete zero edges from the
+adjacency lists.  I don't delete the <b>Edge</b> class though, which means that 
+each edge will have a valid reverse edge.  It just so happens that if the reverse edge has
+zero residual capacity, it is not on an adjacency list.
+<p>
+To delete edges, I have each edge store an integer <b>index</b>, which is the index of the 
+edge in the adjacency list.  When you delete an edge, what you do is first swap it with 
+the last edge in the node's adjacency list (adjusting that node's <b>index</b>).  Then you 
+call <b>pop_back()</b> to delete the edge from the adjacency list.  I do this because it makes
+deletion constant time.  What I don't want to do is, for example, move every edge over and then
+reside the vector, because that is not a constant time action.
+<p><LI> <a href=netflow_dfs_list_pf.cpp><b>netflow_dfs_list_pf.cpp</b></a>: 
+In this version, I use a <b>list</b> rather than a vector for the adjacency list.  
+Instead of storing an <b>index</b>, I store the iterator to the edge on the list, in the 
+variable <b>pointer</b>.  This lets me delete easily using the <b>erase()</b> method, which is
+constant time on lists.  
+<p>
+There is an interesting implementational issue arising from (in my opinion) bad design of the
+STL.  Because <b>push_back()</b> doesn't return an iterator to the new node (like it should), 
+and because <b>rbegin()</b> returns a <b>reverse_iterator</b>, I use <b>push_front()</b> whenever
+I put a new edge onto an adjacency list.  This is because I can now grab its iterator easily
+with <b>begin()</b>.
+<p><LI> <a href=netflow_dfs_list_pb.cpp><b>netflow_dfs_list_pb.cpp</b></a>: 
+This is identical to the last version, but now I am calling <b>push_back()</b>, and grabbing
+the iterator by calling <b>end()</b> and then decrementing.  This ends up being quite a
+significant change.
+<p><LI> <a href=netflow_dfs_edge_list.cpp><b>netflow_dfs_edge_list.cpp</b></a>: 
+Only read this code if you want to torture yourself.  Because <b>push_back()</b> and <b>erase()</b>
+have some overhead to them, what I did here was implement a class called an <b>EdgeList</b>, 
+which stores an adjacency list, but makes sure that the zero capacity edges are at the end.
+When you set an edge's capacity to zero, you swap it with the last non-zero capacity edge.
+I thought this may be more efficient than <b>netflow_dfs_v_delete.cpp</b>, because it eliminates
+all of the <b>push_back()</b> and <b>pop_backs()</b>.  Functionally, it is 
+equivalent to <b>netflow_dfs_v_delete.cpp</b>.
+</UL>
+
+When you run these on a big graph, the results are stunningly not what you'd think.  Here
+are timings on my MacbookPro (2.4 Ghz Intel Core i5 processor - I got the machine in 2011 or so) on 
+<b><a href=g200.txt>g200.txt</a></b>, which is a graph with 200 interior nodes:
+
+<pre>
+UNIX> <font color=darkred><b>time netflow_dfs_v_no_delete < g200.txt</b></font>
+Max flow is 316197 - Paths: 35860
+4.451u 0.013s 0:04.46 100.0%	0+0k 0+1io 0pf+0w
+UNIX> <font color=darkred><b>time netflow_dfs_v_delete < g200.txt</b></font>
+Max flow is 316197 - Paths: 39037
+1.485u 0.009s 0:01.49 99.3%	0+0k 0+0io 0pf+0w
+UNIX> <font color=darkred><b>time netflow_dfs_list_pf < g200.txt</b></font>
+Max flow is 316197 - Paths: 205014
+11.953u 0.022s 0:11.97 100.0%	0+0k 0+0io 0pf+0w
+UNIX> <font color=darkred><b>time netflow_dfs_list_pb < g200.txt</b></font>
+Max flow is 316197 - Paths: 5389
+0.361u 0.009s 0:00.37 97.2%	0+0k 0+0io 0pf+0w
+UNIX> <font color=darkred><b>time netflow_dfs_edge_list < g200.txt</b></font>
+Max flow is 316197 - Paths: 39037
+1.996u 0.011s 0:02.01 99.5%	0+0k 0+0io 0pf+0w
+UNIX> <font color=darkred><b></b></font>
+</pre>
+
+First, they all find the same flow of 316197.  Yay.
+Now, in terms of the two programs that use vectors, the one that deletes nodes is
+far preferable to the one that doesn't.  That's because all of those zero capacity edges
+on the adjacency lists take up time in <b>DFS()</b>.  The "Edge List" does a worse job
+than simply calling <b>pop_back()</b>, so we don't have to worry about that one any more.
+(also Yay).
+<p>
+What about the two <b>list</b> implementations -- that is amazing, isn't it?  The one that
+calls <b>push_front()</b> took nearly 12 seconds, and the one that calls <b>push_back()</b>
+took the shortest amount of time of any of the implementations: Just 0.361 seconds.
+<p>
+The reason why has nothing to do with how the data structures are implemented.  Instead, it
+has to do with the number of paths that are generated.  The <b>push_front()</b> version 
+generated 205,014 paths, while the <b>push_back()</b> version generated just 5,389.  The other
+versions generated roughly 40,000 each.   I want you to think about why the <b>push_front()</b>
+version generates lots of paths, and why the <b>push_back()</b>
+version generates few.  It has to do with the fact that when you process a graph and you 
+add an edge to an adjacency list, the edge is likely to have a small amount of capacity.  
+So, if you put it in the front of a list, then you're more likely to find a new path with small
+flow rather than large.  And small flow edges are bad (remember the pathelogical example from
+the first set of lecture notes).
+<p>
+Now, if you divide the running times by the number of paths, then you get
+0.000038 seconds per path with <b>netflow_dfs_v_delete</b>, and 
+0.000067 seconds per path with <b>netflow_dfs_list_pb</b>.  So using a vector and deleting
+is the fastest way to process paths, when you normalize by the number of paths.  We are
+therefore going to use 
+<b>netflow_dfs_v_delete.cpp</b> as our starting point for the remaining implementations.

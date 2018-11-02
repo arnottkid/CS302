@@ -1,0 +1,149 @@
+<title>CS302 Lecture Notes</title>
+<h2>CS302 Lecture Notes - Network Flow Supplemental Lecture</h2>
+<h3> Some extra help with Network Flow</h3>
+<UL>
+<LI> April 2, 2008.  Latest revision, November, 2014.
+<LI> James S. Plank
+<LI> Directory: <b>/home/plank/cs302/Notes/Netflow-All</b>
+</UL>
+<hr>
+
+This is an old lecture that I include now as supplemental material. 
+In this lecture, I give an example of calculating network flow with three different
+path-finding algorithms.  At the end, I show how to find the minimum cut.
+
+<hr>
+<h3>Greedy Depth-First Search</h3>
+
+The pathelogical example from lecture 1 
+highlights a problem -- choosing paths with little flow.  One way to 
+combat this problem is to perform your DFS so that you prefer edges with a lot of flow to 
+edges with a little flow.  You can implement that by having your adjacency lists be sorted by 
+flow, and then running a standard DFS on them.  I'll show the augmenting paths that arise
+with this method on the example graph below.  The source is <i>A</i> an the sink is <i>G</i>:
+
+<p><center><table border=3><td><img src=Greedy-1.jpg></td></table></center><p>
+
+When we perform a greedy DFS on this graph, we start with edge from <i>A</i> to <i>B</i>
+since its flow is greater than the edge from <i>A</i> to <i>D</i>.  There is only one
+edge leaving <i>B</i>.  When we read node <i>C</i>, we traverse the edge to <i>E</i>, since
+it has the maximum flow of <i>C's</i> three edges.  Finally, <i>E</i> goes to <i>G</i>.
+Thus, the first path we get is <i>A->B->C->D->G</i>
+with a flow of one.  
+<p>Below, I show the flow and residual graphs when this path is
+processed.  In the residual, the edges whose flow is reduced are colored red, and
+the reverse edges are colored green:
+
+<p><center><table border=3><td align=center><u>Flow</u><p><img src=Greedy-2-F.jpg></td><td align=center><u>Residual</u><p><img src=Greedy-2-R.jpg></table></center><p>
+
+The next greedy path through the residual is <i>A->B->C->D->F->G</i>, with a flow of two:
+
+<p><center><table border=3><td align=center><u>Flow</u><p><img src=Greedy-3-F.jpg></td><td align=center><u>Residual</u><p><img src=Greedy-3-R.jpg></table></center><p>
+
+The last path is <i>A->D->F->G</i> with a flow of three.  Here are the final flow and
+residual graphs:
+
+<p><center><table border=3><td align=center><u>Flow</u><p><img src=Greedy-4-F.jpg></td><td align=center><u>Residual</u><p><img src=Greedy-4-R.jpg></table></center><p>
+<hr>
+
+<h3>Finding the Maximum Flow Path through the Graph</h3>
+
+Instead of using a depth-first search, you can use a modification of Dijkstra's
+algorithm to find the path through the residual that has the maximum flow.
+When processing a node, Dijkstra's algorithm traverses the node's edges, and
+if shorter paths to any other nodes is discovered, the nodes are updated.  At each
+step, the node with the shortest known path is processed next.
+<p>
+The modification works as follows.  When processing a node, again the algorithm 
+traverses the node's edges, and if paths with more flow to any other nodes are
+discovered, then the nodes are updated.  At each step, the node with the maximum 
+flow is processed next.
+<p>
+We'll work an example with the same graph as above:
+<p><center><table border=3><td><img src=Greedy-1.jpg></td></table></center><p>
+The maximum flow path here is <i>A->D->F->G</i> with a flow of three:
+
+<p><center><table border=3><td align=center><u>Flow</u><p><img src=Dijkstra-1-F.jpg></td><td align=center><u>Residual</u><p><img src=Dijkstra-1-R.jpg></table></center><p>
+
+The next maximum flow path is <i>A->B->C->D->F->G</i> with a flow of 2:
+
+<p><center><table border=3><td align=center><u>Flow</u><p><img src=Dijkstra-2-F.jpg></td><td align=center><u>Residual</u><p><img src=Dijkstra-2-R.jpg></table></center><p>
+
+The final path is <i>A->B->C->E->G</i> with a flow of one:
+
+<p><center><table border=3><td align=center><u>Flow</u><p><img src=Greedy-4-F.jpg></td><td align=center><u>Residual</u><p><img src=Dijkstra-3-R.jpg></table></center><p>
+
+<hr>
+<h3>Edmonds-Karp: Finding the minimum hop path</h3>
+
+Finally, the Edmonds-Karp algorithm uses a straightforward breadth-first search
+to find the minimum hop path through the residual graph.  This is equivalent to 
+treating the residual as an unweighted and performing a shortest path search on
+it.  
+<p>
+Again, we use the same graph as an example:
+<p><center><table border=3><td><img src=Greedy-1.jpg></td></table></center><p>
+There are two minimum hop paths: <i>A->D->E->G</i> and <i>A->D->F->F</i>.  Suppose
+we process the former of these, with a flow of one:
+
+<p><center><table border=3><td align=center><u>Flow</u><p><img src=EK-1-F.jpg></td><td align=center><u>Residual</u><p><img src=EK-1-R.jpg></table></center><p>
+
+Now, there is only one minimum hop path through the residual: <i>A->D->F->G</i>, with a  flow
+of two:
+
+<p><center><table border=3><td align=center><u>Flow</u><p><img src=EK-2-F.jpg></td><td align=center><u>Residual</u><p><img src=EK-2-R.jpg></table></center><p>
+
+At this point, there are only two paths through the residual: <i>A->B->C->D->F->G</i> and
+<i>A->B->C->E->D->F->G</i>.  The first of these has fewer hops, so we process it.
+It has a flow of two:
+
+<p><center><table border=3><td align=center><u>Flow</u><p><img src=EK-3-F.jpg></td><td align=center><u>Residual</u><p><img src=EK-3-R.jpg></table></center><p>
+
+The final path through the residual is <i>A->B->C->E->D->F->G</i> with a flow of one.  When
+we process it, we get the same flow and residual graphs as the other two algorithms:
+
+<p><center><table border=3><td align=center><u>Flow</u><p><img src=Greedy-4-F.jpg></td><td align=center><u>Residual</u><p><img src=EK-4-R.jpg></table></center><p>
+
+<hr>
+<h3>Bottom Lines</h3>
+
+We've shown three ways to calculate the augmenting paths.  Each way yields a different ordering 
+of augmenting paths; however, all three ways lead to the same flow and residual.
+They differ in what they try to optimize.
+<UL>
+<LI> The greedy DFS and modified Dijkstra algorithms attempt to minimize the number of 
+paths that you find by finding paths with a lot of flow.  They each have an expensive
+component -- in greedy DFS, processing the residual graph is <i>O(|V|log|V|)</i> rather
+than 
+<i>O(|V|)</i>.  In the modified Dijkstra, finding the augmenting path is
+<i>O(|E|log|V|)</i> rather than <i>O(|E|)</i>.  
+<LI> Edmonds-Karp attempts to find a small number of paths, but its path-finding algorithm
+is fast -- <i>O(|E|)</i> -- as is its residual processing algorithm, which is <i>O(|V|)</i>.
+</UL>
+There's no nice closed form solution for either the greedy DFS or the Modified Dijkstra
+algorithm.  When we evaluate performance, the greedy DFS is significantly slower, and
+Modified Dijkstra runs on par with Edmonds-Karp.  Edmonds Karp does have a closed
+form running time: <i>O(|V||E|<sup>2</sup>)</i>.
+
+<p>
+One thing that you should remember about network flow is that it is quite a bit slower than
+all of the other graph algorithms we've studied so far.
+
+<hr>
+<h2>Finding the Minimum Cut</h2>
+
+As detailed in the 
+<a href=lecture-1.html>first network flow lecture</a>, you can use
+the final residual graph to find the minimum cut.  
+First, you find all nodes reachable from the source
+in the residual graph.  This is one set of nodes, which we color purple below:
+
+<p><center><table border=3 cellpadding=3><td valign=top><IMG src=Cut-1.jpg></td></table></center><p>
+
+Now, in the original graph, we divide our nodes into two sets: the set determined above, and all of
+the remaining nodes.  They are drawn purple and yellow in the original graph below:
+
+<p><center><table border=3 cellpadding=3><td valign=top><IMG src=Cut-2.jpg></td></table></center><p>
+
+The minimum cut is composed of all the edges that go from the source set to the sink set.  These are edges AD, CD and EG, which I've drawn in red above.
+The sum of their capacities equals the maximum flow of six.

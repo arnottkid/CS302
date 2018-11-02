@@ -1,0 +1,349 @@
+<title>CS302 Lecture Notes</title>
+<h2>CS302 Lecture Notes - Network Flow</h2>
+<h3>Lecture 3: Different Ways of Finding the Augmenting Paths (including Edmonds-Karp)</h3>
+<UL>
+<LI> James S. Plank
+<LI> Original Notes: April 2, 2008.  
+<LI> Major Overhaul: November, 2014.
+<LI> Directory: <b>/home/plank/cs302/Notes/Netflow-All</b>
+</UL>
+
+<hr>
+The last piece of the Network Flow puzzle is doing a better job of finding augmenting
+paths.  Both of the previous sets of lecture notes have highlighted the importance of finding
+good paths to reduce the number of paths that you find.  One way to do this is to try to 
+find paths with a lot of flow.  That gets you closer to your maximum flow more quickly, and
+therefore reduces the number of paths that you find.
+<p>
+<h3>Ordering the edges in DFS (sometimes called "Greedy DFS")</h3>
+
+The first thing that I tried was to modify my list implementation to use a multimap instead
+of a list for the adjacency lists.  The multimap is keyed on the residual capacity, and
+therefore, you are doing the <b>DFS()</b> in a greedy manner -- always traversing adjacency 
+lists in decreasing order of edge capacity.  The program is in 
+<b><a href=netflow_dfs_greedy.cpp>netflow_dfs_greedy.cpp</a></b>.  
+Let's see how it runs on our favorite two graphs:
+
+<p><center><table border=3 cellpadding=3>
+<td> <b><a href=g1.txt>g1.txt</a></b>:<pre>
+SOURCE S
+SINK T
+EDGE A B 5
+EDGE A T 5
+EDGE B T 8
+EDGE C B 13
+EDGE C D 10
+EDGE D T 12
+EDGE S A 10
+EDGE S C 14
+</pre></td>
+<td> <b><a href=g1a.txt>g1a.txt</a></b>:<pre>
+SOURCE S
+SINK T
+EDGE D T 12
+EDGE A T 5
+EDGE S C 14
+EDGE S A 10
+EDGE C D 10
+EDGE B T 8
+EDGE A B 5
+EDGE C B 13
+</pre></td>
+<td><img src=E1-1.jpg></td></table></center><p>
+
+
+<p><center><table border=3 cellpadding=3>
+<td>
+<b><a href=g5.txt>g5.txt</a>:</b><pre>
+SOURCE s
+SINK t
+EDGE n00 t 4923
+EDGE n01 n00 8824
+EDGE n00 n02 6932
+EDGE n00 n03 6518
+EDGE n00 n04 6183
+EDGE n01 t 8471
+EDGE n02 n01 4929
+EDGE n03 n01 5566
+EDGE n01 n04 6661
+EDGE s n02 6263
+EDGE n02 n03 0741
+EDGE n04 n02 5840
+EDGE n04 n03 4417
+EDGE s n04 8033
+</pre></td>
+<td><img src=G5-1.jpg></td></table></center><p>
+
+<pre>
+UNIX> <font color=darkred><b>netflow_dfs_greedy P < g1.txt</b></font>
+Path with flow 8: [S->C:14][C->B:13][B->T:8]
+Path with flow 5: [S->A:10][A->T:5]
+Path with flow 6: [S->C:6][C->D:10][D->T:12]
+Path with flow 4: [S->A:5][A->B:5][B->C:8][C->D:4][D->T:6]
+Max flow is 23 - Paths: 4
+UNIX> <font color=darkred><b>netflow_dfs_greedy P < g5.txt</b></font>
+Path with flow 4923: [s->n04:8033][n04->n02:5840][n02->n01:4929][n01->n00:8824][n00->t:4923]
+Path with flow 4417: [s->n02:6263][n02->n04:4923][n04->n03:4417][n03->n01:5566][n01->t:8471]
+Path with flow 741: [s->n04:3110][n04->n02:5334][n02->n03:741][n03->n01:1149][n01->t:4054]
+Path with flow 6: [s->n04:2369][n04->n02:4593][n02->n01:6][n01->t:3313]
+Max flow is 10087 - Paths: 4
+UNIX> <font color=darkred><b></b></font>
+</pre>
+
+You should confirm the first paths in each of these graphs.  Since edge <i>SC</i> has the
+largest capacity, that is the first one tried in the DFS.  Then, since <i>CB</i> is C's
+largest edge, that is tried next, and since <i>BT</i> is B's only edge, that is the one that
+gets you to the sink.  This is not the path with the largest flow (that is <i>SCDT</i>, but
+since the edge <i>CB</i> has bigger capacity than edge <i>CD</i>, it is processed first in the
+DFS.
+<p>
+Think about the cost tradeoffs of this algorithm versus a regular depth-first search.
+When you're processing the path, you are going to be doing insertions and deletions in 
+the adjacency multimaps.  Those are logarithmic time operations rather than constant time,
+so that will be slower than the regular DFS.  We are hoping that the fewer number of paths
+will compensate.  
+<p>
+Let's try the big 200-node graph:
+
+<pre>
+UNIX> <font color=darkred><b>time netflow_dfs_greedy < g200.txt</b></font>
+Max flow is 316197 - Paths: 108
+0.217u 0.009s 0:00.22 95.4%	0+0k 0+1io 0pf+0w
+UNIX> <font color=darkred><b></b></font>
+</pre>
+
+We have a winner!  This beats all of our other DFS-based approaches.
+
+<p>
+<hr>
+<h3>Finding the Maximum Flow Path at each Iteration (Modified Dijkstra)</h3>
+
+But we can do better.  How about finding the augmenting path with the maximum flow at each
+step.  That's something that we can't do with depth-first-search, but we can modify Dijkstra's
+shortest path algorithm to achieve the goal.  Recall Dijkstra's algorithm.  At each step, you
+have a collection of nodes for which you know the shortest path.  What you do is find the shortest
+path to the closest node that is not in this set, and add it to the set.  
+<p>
+You can do the same thing with flow.  You maintain a set of nodes where you know the maximum flow
+to each of those nodes.  Then you add the node that is not in the set, 
+that has the highest flow to that set.  
+<p>
+Let's put it another way -- with Dijkstra's shortest path algorithm, you maintain a multiset of
+nodes ordered by the shortest paths to the nodes.  Instead, you are going to maintain a multiset
+of nodes ordered by the maximum flow to the nodes.  It works in the same way.
+<p>
+The code is in 
+<b><a href=netflow_dijkstra.cpp>netflow_dijkstra.cpp</a></b>.  This is the same as
+<b><a href=netflow_dfs_v_delete.cpp>netflow_dfs_v_delete.cpp</a></b>, but instead of <b>DFS()</b>,
+we have a method called <b>Dijkstra()</b>, which finds the maximum flow path.  Below, I
+show the new <b>Node</b> variables to implement Dijsktra's algorithm and the <b>Dijkstra()</b>
+algorithm:
+
+<p><center><table border=3 cellpadding=3><td><pre>
+class Node {
+  public: 
+    string name;
+    vector &lt;class Edge *&gt; adj;
+                                             <font color=blue>/* These are added for Dijkstra's Algorithm: */</font>
+    int bestflow;                            <font color=blue>/* The best flow discovered so far to this node. */</font>
+    class Edge *backedge;                    <font color=blue>/* The edge from which this flow came. */</font>
+    multimap &lt;int, Node *&gt;::iterator qit;    <font color=blue>/* If I'm on the queue, an iterator to my place. */</font>
+};
+
+
+int Graph::Dijkstra()
+{
+  multimap &lt;int, Node *&gt; Q;     <font color=blue>/* Here's the sorted list of best flow to nodes */</font>
+  Node *n;                      <font color=blue>/* The node that I'm processing from the back of Q. */</font>
+  int f;                        <font color=blue>/* When I'm processing n, this is the flow to n. */</font>
+  Edge *e;                      <font color=blue>/* I process each edge from n */</font>
+  Node *t;                      <font color=blue>/* This is the node that e goes to: e is (n,t) */</font>
+  int nf;                       <font color=blue>/* This is the flow to t if I go through n.  If it's better than
+                                   t's current best flow, I'll delete t from Q and put it back
+                                   on Q with this flow. */</font>
+
+  multimap &lt;int, Node *&gt;::iterator qit;
+  int i;    
+
+  for (i = 0; i &lt; Nodes.size(); i++) Nodes[i]-&gt;bestflow = 0;
+  
+  <font color=blue>/* Start by putting the Source onto the queue with infinite flow. */</font>
+
+  Source-&gt;backedge = NULL;
+  Source-&gt;bestflow = MaxCap;
+  Source-&gt;qit = Q.insert(make_pair(MaxCap, Source));
+
+  <font color=blue>/* Now process the Queue.  
+     Always process the last element (that's the one with the most flow). */</font>
+
+  while(!Q.empty()) {
+
+    <font color=blue>/* Grab the last element and delete it */</font>
+    f = Q.rbegin()-&gt;first;
+    n = Q.rbegin()-&gt;second;
+    Q.erase(n-&gt;qit);
+
+    <font color=blue>/* If we're at the sink, we're done.  
+       Create the path by traversing backedges back to the source. */</font>
+ 
+    if (n == Sink) {
+      while (n != Source) {
+        Path.push_back(n-&gt;backedge);
+        n = n-&gt;backedge-&gt;n1;
+      }
+      return 1;
+    }
+
+    <font color=blue>/* Otherwise, process each of n's edges, and if the path through n to t
+       has better flow than t's current flow, then delete t from Q if it's
+       there, and insert t into Q with this new flow. */</font>
+
+    for (i = 0; i &lt; n-&gt;adj.size(); i++) {
+      e = n-&gt;adj[i];
+      t = e-&gt;n2;
+      nf = (e-&gt;residual &lt; f) ? e-&gt;residual : f;
+      if (nf &gt; t-&gt;bestflow) {
+        if (t-&gt;bestflow != 0) Q.erase(t-&gt;qit);
+        t-&gt;backedge = e;
+        t-&gt;bestflow = nf;
+        t-&gt;qit = Q.insert(make_pair(nf, t));
+      }
+    }
+  }
+
+  <font color=blue>/* Return 0 if there's no path to the sink. */</font>
+
+  return 0;
+}
+</pre></td></table></center><p>
+
+As before, let's see it running on our two example graphs:
+
+<pre>
+UNIX> <font color=darkred><b>netflow_dijkstra P < g1.txt</b></font>
+Path with flow 10: [S->C:14][C->D:10][D->T:12]
+Path with flow 5: [S->A:10][A->T:5]
+Path with flow 5: [S->A:5][A->B:5][B->T:8]
+Path with flow 3: [S->C:4][C->B:13][B->T:3]
+Max flow is 23 - Paths: 4
+UNIX> <font color=darkred><b>netflow_dijkstra P < g5.txt</b></font>
+Path with flow 4929: [s->n02:6263][n02->n01:4929][n01->t:8471]
+Path with flow 4417: [s->n04:8033][n04->n03:4417][n03->n01:5566][n01->n00:8824][n00->t:4923]
+Path with flow 741: [s->n04:3616][n04->n02:5840][n02->n03:741][n03->n01:1149][n01->t:3542]
+Max flow is 10087 - Paths: 3
+UNIX> <font color=darkred><b></b></font>
+</pre>
+
+As you see, with <b>g1.txt</b>, the output differs from the greedy DFS, because this one actually
+finds the maximum flow path at each step.  Interestingly, with <b>g5.txt</b>, the two produce
+paths with the same flow, but the paths are different. 
+<p>
+When we try it on the 200-node graph, we get the best time yet, with just 76 paths:
+
+<pre>
+UNIX> <font color=darkred><b>time netflow_dijkstra < g200.txt </b></font>
+Max flow is 316197 - Paths: 76
+0.154u 0.008s 0:00.47 31.9%	0+0k 0+1io 0pf+0w
+UNIX> <font color=darkred><b></b></font>
+</pre>
+
+As with the greedy DFS, let's think about the tradeoffs of this algorithm  With greedy DFS,
+we made processing the residual more expensive, because you had to insert and delete edges
+from the adjacency multimaps.  Here, processing the residual is back to being cheap, involving
+constant time operations.  The expense is in finding the paths, which is <i>O(|E|log|V|)</i> at
+each step, rather than <i>O(|E|)</i>.  To compensate for that expense, we are finding far fewer
+paths, since we find the maximum flow path at each step.
+
+<hr>
+<h3>The Edmonds-Karp Algorithm: Using BFS to find the path</h3>
+
+Our last path-finding algorithm is interesting.  What we do is find the shortest <i>unweighted</i>
+path at each iteration.  In other words, we find the path with the fewest number of edges.  We
+do this with breadth-first search, which is <i>O(|E|)</i> rather than the <i>O(|E|log|V|)</i> of
+Dijkstra's algorithm.  The hope is that we still have a small number of paths, but now our path
+finding algorithm is faster.
+<p>
+This is called the "Edmonds-Karp" algorithm, and its overall running time is <i>(|V||E|<sup>2</sup>)</i>.
+<p>
+I don't show the program that implements it, 
+because that's what you are going to implement in your lab.  However, it is easier than
+the previous program, since it is a simply BFS.  Here it
+is on our two example graphs:
+
+<pre>
+UNIX> <font color=darkred><b>netflow_edmonds_karp P < g1.txt</b></font>
+Path with flow 5: [S->A:10][A->T:5]
+Path with flow 5: [S->A:5][A->B:5][B->T:8]
+Path with flow 3: [S->C:14][C->B:13][B->T:3]
+Path with flow 10: [S->C:11][C->D:10][D->T:12]
+Max flow is 23 - Paths: 4
+UNIX> <font color=darkred><b>netflow_edmonds_karp P < g5.txt</b></font>
+Path with flow 4929: [s->n02:6263][n02->n01:4929][n01->t:8471]
+Path with flow 741: [s->n02:1334][n02->n03:741][n03->n01:5566][n01->t:3542]
+Path with flow 2801: [s->n04:8033][n04->n03:4417][n03->n01:4825][n01->t:2801]
+Path with flow 1616: [s->n04:5232][n04->n03:1616][n03->n01:2024][n01->n00:8824][n00->t:4923]
+Max flow is 10087 - Paths: 4
+UNIX> <font color=darkred><b></b></font>
+</pre>
+
+The algorithm is interesting because it works on the structure of the graph rather than its
+flow, but in doing so, improves the number of paths drastically from DFS.  
+Here it is on the big, 200-node graph.
+
+<pre>
+UNIX> <font color=darkred><b>time netflow_edmonds_karp < g200.txt</b></font>
+Max flow is 316197 - Paths: 176
+0.134u 0.008s 0:00.14 92.8%	0+0k 0+0io 0pf+0w
+UNIX> <font color=darkred><b></b></font>
+</pre>
+
+Interesting, no?  More paths, but faster path-finding make for a (slightly) faster algorithm.
+
+<hr>
+<h3>The big comparison</h3>
+
+Let's put it all together, and compare the 8 implementations.  The graph below is 
+from a pretty old machine -- I'm guessing a 2010 Intel processor.  
+In this graph, I'm repeatedly picking a seed, and then using that seed to 
+call <b>makerandom</b> for graph sizes between 5 and 375.  I then run each of the eight 
+implementations on the graphs.  In this graph, I've done the tests roughly 1,000 times.
+
+<p><center><table border=3><td><a href=Speed.jpg><img src=Speed.jpg width=600></a></td></table></center><p>
+
+Ok, I lied above -- I stopped running some of the implementations (e.g. <b>netflow_dfs_list_pf</b>)
+above a certain graph size, because it's pretty obvious how they are scaling.
+The trends follow the explanation above.  The three path-finding algorithms described in this
+lecture perform the best, and there's no real clear winner between the modified Dijkstra and
+Edmonds-Karp.  It is interesting that the Edmonds-Karp curve is less jaggedy than the 
+modified Dijkstra.  Perhaps you can come up with a good explanation for that.  It has to 
+do with the structure of the graph.
+<p>
+Now take a look at the average number of augmenting paths processed by each algorithm:
+
+<p><center><table border=3><td><a href=Paths.jpg><img src=Paths.jpg width=600></a></td></table></center><p>
+
+This is as we would expect.  With the exception of the greedy DFS, the DFS algorithms generate
+way too many paths, as they don't put any effort into finding smart paths.  The other three algorithms do a <i>much</i>
+better job at reducing the number of paths.  
+<p>
+BTW, you can't see the curve for <b>netflow_dfs_edge_list</b>, because it is identical
+to <b>netflow_dfs_v_delete</b>.
+<p>
+Is it surprising to you that Edmonds-Karp runs so fast, yet is the worst of the three in terms
+of number of paths?  It shouldn't be -- remember the running times of the various components:
+<p>
+<p><center><table border=3>
+<tr><td></td><td>Finding the path</td>
+    <td>Processing the residual graph</td></tr>
+<tr><td align=center>Greedy DFS</td>
+    <td align=center><i>O(|E|)</i></td>
+    <td align=center><i>O(|V|log(|V|))</i></td></tr>
+<tr><td align=center>Modified Dijkstra</td>
+    <td align=center><i>O(|E|log(|V|))</i></td>
+    <td align=center><i>O(|V|)</i></td></tr>
+<tr><td align=center>Edmonds-Karp</td>
+    <td align=center><i>O(|E|)</i></td>
+    <td align=center><i>O(|V|)</i></td></tr>
+</table></center><p>
+
+

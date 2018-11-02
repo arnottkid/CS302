@@ -1,0 +1,369 @@
+<title>CS302 Lecture Notes</title>
+<h2>CS302 Lecture Notes - Breadth First Search</h2>
+<UL>
+<LI> James S. Plank
+<LI> November 2, 2009.
+Latest Modification:
+Tue Oct 28 09:01:14 EDT 2014
+<LI> Directory: <b>/home/plank/cs302/Notes/BFS</b>
+</UL>
+<hr>
+
+<h3>Reference Material Online</h3>
+
+<UL>
+<LI> <a href=https://www.topcoder.com/community/data-science/data-science-tutorials/introduction-to-graphs-and-their-data-structures-section-2/>The Topcoder Tutorial on Graphs, Part 2, which ends with Breadth-First Search.</a>
+<LI> <a href=https://www.topcoder.com/community/data-science/data-science-tutorials/introduction-to-graphs-and-their-data-structures-section-3/>The Topcoder Tutorial on Graphs, Part 3, which covers Dijkstra's shortest path algorithm.</a>
+<LI> <a href=http://en.wikipedia.org/wiki/Breadth-first_search>Breadth-First Search</a>
+<LI> <a href=http://en.wikipedia.org/wiki/Dijkstra%27s_algorithm>Dijkstra's Algorithm</a>
+</UL>
+<h3>Topcoder Practice Problems</h3>
+<UL>
+<LI> <a href=http://web.eecs.utk.edu/~plank/plank/classes/cs302/Notes/CarrotJumping/>BFS: The 
+Topcoder "CarrotJumping" problem (SRM 478, D1, 250)</a>.  I go over this one in class.
+<LI> <a href=http://web.eecs.utk.edu/~plank/topcoder-writeups/2014/EmoticonsDiv1/index.html>BFS:
+The Topcoder "EmoticonsDiv1" problem (SRM 612, D1, 250</a>.  This link has an 
+explanation of the BFS and commented code.  This problem is similar in flavor to 
+"CarrotJumping," because you build the graph as you go.  
+<LI> <a href=http://web.eecs.utk.edu/~plank/topcoder-writeups/2017/StepsConstruct/index.html>BFS: The Topcoder "StepsConstruct" problem (SRM 707, D2, 500)</a>.  I give you hints and programming tips.  There is a commented solution 
+at the end.
+<LI> <a href=http://web.eecs.utk.edu/~plank/plank/classes/cs302/Notes/OneRegister/>BFS: The 
+Topcoder "OneRegister" problem (SRM 486, D1, 250)</a>.  I give you hints here, and not code.
+<LI> <a href=http://web.eecs.utk.edu/~plank/plank/classes/cs302/Notes/CsCourses/>BFS: The 
+Topcoder "CsCourses" problem (SRM 340, D1, 500)</a>.  I do include a link to my code, but
+this is more useful if you write the code yourself.
+<LI> <a href=http://web.eecs.utk.edu/~plank/plank/classes/cs302/Topcoder/CollectingRiders.html>BFS: CollectingRiders (SRM 382, D1, 250)</a>.  Hints and no code. 
+<LI> <a href=http://web.eecs.utk.edu/~plank/topcoder-writeups/2016/FromToDivisible/index.html>BFS: FromToDivisible (SRM 699, D1, 500)</a>.  Hints and no code. 
+<p>
+<LI> <a href=http://web.eecs.utk.edu/~plank/topcoder-writeups/2013/ColorfulRoad/index.html>Dijkstra: ColorfulRoad (SRM 596, D2, 500)</a>.  Hints and no code. 
+<LI> <a href=http://web.eecs.utk.edu/~plank/plank/classes/cs302/Topcoder/ThreeTeleports-Dijkstra.html>Dijkstra: The 
+Topcoder "ThreeTeleports" problem (SRM 519, D2, 600)</a>.  I give you hints here, and not code.
+<LI> <a href=http://web.eecs.utk.edu/~plank/plank/classes/cs302/Topcoder/InsertSort.html>Dijkstra: InsertSort (SRM 351, D2, 1000-pointer)</a>.  Hints and no code. 
+</UL>
+
+<hr>
+
+Breadth First Search (BFS) is complementary to Depth First Search (DFS).  
+DFS works by visiting a node and then recursively visiting children.
+You can view it as relying on a stack -- push a node onto a stack, 
+then go through the following algorithm:
+<p>
+<UL>
+<LI> Pop a node off the stack.
+<LI> Do some processing on the node.
+<LI> Push all of the node's children onto the stack.
+<LI> Repeat until the stack is empty.
+</UL>
+In fact, it will be useful to revisit DFS with this view.  Let's use the following
+graph as an example:
+
+<p><center><table border=3 cellpadding=3>
+<td valign=top><b><a href=Ex-Graph.txt>Ex-Graph.txt</a></b>
+<pre>
+NNODES 12
+EDGE 8 10  EDGE 4 11
+EDGE 4 6   EDGE 3 8
+EDGE 0 2   EDGE 2 9
+EDGE 5 6   EDGE 4 8
+EDGE 1 11  EDGE 6 7
+EDGE 0 11  EDGE 3 7
+EDGE 3 9   EDGE 8 9
+EDGE 6 8
+</pre></td>
+<td valign=top><IMG src=Ex-Graph.png width=200></td></table></center><p>
+
+A recursive visiting of all nodes using DFS starting with node zero will 
+look as follows:
+
+<p><center><table border=3 cellpadding=3><td valign=top><IMG src=DFS-Run.png width=400></td></table></center><p>
+
+Were we to print out the nodes, they would be printed out in the order in which they are visited:
+<center>
+<p>
+0, 2, 9, 8, 10, 3, 7, 6, 4, 11, 1, 5
+<p>
+</center>
+
+Instead of recursion, let's use a stack.  We'll push 0 onto the stack, then repeatedly
+pop a node off the stack, visit the node, then push the non-visited children onto the stack.
+(We push the children onto the stack in reverse order so that the order of visiting is the
+same as the recursive case).
+
+<p>
+<center>
+<table>
+<td align=center width=150><b><u>Node Visited</b></u><br>
+<br>
+0<br>
+2<br>
+9<br>
+8<br>
+10<br>
+3<br>
+7<br>
+6<br>
+4<br>
+11<br>
+1<br>
+5<br>
+6<br>
+4<br>
+3<br>
+11<br>
+</td><td align=left width=150><b><u>Action</b></u><br>
+Start<br>
+Push 11 and 2<br>
+Push 9<br>
+Push 3 and 8<br>
+Push 4, 6, 3 and 10<br>
+Do nothing<br>
+Push 7<br>
+Push 6<br>
+Push 5 and 4<br>
+Push 11<br>
+Push 1<br>
+Do nothing<br>
+Do nothing<br>
+Already visited<br>
+Already visited<br>
+Already visited<br>
+Already visited<br>
+</td><td align=left width=150><b><u>Stack</b></u><br>
+0<br>
+2, 11<br>
+9, 11<br>
+8, 3, 11<br>
+10, 3, 6, 4, 3, 11<br>
+3, 6, 4, 3, 11<br>
+7, 6, 4, 3, 11<br>
+6, 6, 4, 3, 11<br>
+4, 5, 6, 4, 3, 11<br>
+11, 5, 6, 4, 3, 11<br>
+1, 5, 6, 4, 3, 11<br>
+5, 6, 4, 3, 11<br>
+6, 4, 3, 11<br>
+4, 3, 11<br>
+3, 11<br>
+11<br>
+<br>
+</td><td align=center width=150 valign=top><b><u>Print</b></u><br>
+<br>
+0<br>
+2<br>
+9<br>
+8<br>
+10<br>
+3<br>
+7<br>
+6<br>
+4<br>
+11<br>
+1<br>
+5<br>
+<br>
+<br>
+<br>
+</td>
+</table>
+</center><p>
+As you see, the order of the nodes is the same as in the recursive case.
+<p>
+Now, breadth-first search works in the same manner, only we use a queue instead of a stack.  
+See how this differs:
+<p>
+<center>
+<table>
+<td align=center width=150><b><u>Node Visited</b></u><br>
+<br>
+0<br>
+2<br>
+11<br>
+9<br>
+1<br>
+4<br>
+8<br>
+3<br>
+8<br>
+6<br>
+10<br>
+3<br>
+6<br>
+7<br>
+5<br>
+7<br>
+</td><td align=left width=150><b><u>Action</b></u><br>
+Start<br>
+Append 2 and 11<br>
+Append 9<br>
+Append 1 and 4<br>
+Append 8 and 3<br>
+Do nothing<br>
+Append 8 and 6<br>
+Append 10, 3 and 6<br>
+Append 7<br>
+Already visited<br>
+Append 5, and 7<br>
+Do nothing<br>
+Already visited<br>
+Already visited<br>
+Do nothing<br>
+Do nothing<br>
+Already visited<br>
+</td><td align=left width=150><b><u>Queue</b></u><br>
+0<br>
+2, 11<br>
+11, 9<br>
+9, 1, 4<br>
+1, 4, 8, 3<br>
+4, 8, 3<br>
+8, 3, 8, 6<br>
+3, 8, 6, 10, 3, 6<br>
+8, 6, 10, 3, 6, 7<br>
+6, 10, 3, 6, 7<br>
+10, 3, 6, 7, 5, 7<br>
+3, 6, 7, 5, 7<br>
+6, 7, 5, 7<br>
+7, 5, 7<br>
+5, 7<br>
+7<br>
+<br>
+</td><td align=center width=150 valign=top><b><u>Print</b></u><br>
+<br>
+0<br>
+2<br>
+11<br>
+9<br>
+1<br>
+4<br>
+8<br>
+3<br>
+<br>
+6<br>
+10<br>
+<br>
+<br>
+7<br>
+5<br>
+</td>
+</table>
+</center><p>
+The order of the nodes is now 0, 2, 11, 9, 1, 4, 8, 3, 6, 10, 7, 5.
+The algorithm still visits all nodes and edges, but it does so <i>in order of distance from the starting node.</i>
+Think about it.  
+<UL>
+<LI> The first two nodes visited are those that are one edge from node 0: nodes 2 and 11.
+<LI> Next are the nodes that are two edges away: nodes 9, 1 and 4.
+<LI> Next are the nodes that are three edges away: nodes 8, 3 and 6.
+<LI> Finally come the nodes that are four edges away: 10, 7 and 5.
+</UL>
+Thus, breadth-first search is a convenient way to find <i>the shortest path</i> from a starting node to
+all the other nodes in the graph.  To do so, you can store a <i>back-edge</i> in each node <i>n</i> -- this 
+is the edge that first put <i>n</i> onto the queue.  You can also maintain node <i>n</i>'s distance to 
+the starting node.  The BFS algorithm becomes:
+
+<UL>
+<LI> For all nodes, set their backedges to <b>NULL</b> and their distances to <i>-1</i>.
+<LI> Set node 0's distance to zero and put it on the queue.
+<LI> Repeat the following:
+<p>
+<UL>
+<LI> Remove a node <i>n</i> from the queue.
+<LI> For each edge <i>e</i> from <i>n</i> to <i>n2</i> such that <i>n2's</i> distance is <i>-1</i>:
+<p>
+<UL>
+<LI> Set <i>n2's</i> distance to <i>n's</i> distance plus one.
+<LI> Set <i>n2's</i> backedge to <i>e</i>.
+<LI> Append <i>n2</i> to the queue.
+</UL>
+</UL>
+</UL>
+When the algorithm terminates, each node contains its shortest distance to node zero, and the
+path to node zero can be obtained by traversing the backedges.
+<p>
+The PDF file <b><a href=BFS-Run.pdf>BFS-Run.pdf</a></b> contains an example from the graph
+above.  It shows every step along the way.  The final state is below:
+
+<p><center><table border=3 cellpadding=3><td valign=top><IMG src=BFS-Run.png></td></table></center><p>
+
+Once the BFS finishes, we know the shortest distance of every node from node zero, and we can use
+the backedges to find the paths.  For example, the shortest path from node 0 to node 7 is:
+<p><center>
+(0,2)(2,9)(9,3)(3,7)
+</center><p>
+
+<hr>
+<h3>Dijkstra's Algorithm</h3>
+
+Dijkstra's algorithm is a simple modification to breadth first search.  It is used to find the 
+shortest path from a given node to all other nodes, where edges may have non-negative weights.
+The modification uses a multimap instead of the queue.  The multimap uses the distance to 
+from the starting node to the node as a key, and the node itself as a val.
+The algorithm is as follows:
+
+<UL>
+<LI> For all nodes, set their backedges to <b>NULL</b>, their distances to <i>-1</i>, and their "visited" 
+field to be false.
+<LI> Set node 0's distance to zero and put it on the multimap.
+<LI> Repeat the following:
+<p>
+<UL>
+<LI> Remove a node <i>n</i> from the front of the multimap and set its visited field to true.
+<LI> For each edge <i>e</i> from <i>n</i> to <i>n2</i> such that <i>n2</i> has not been visited.
+Let <i>d</i> be <i>n's</i> distance plus the weight of edge <i>e</i>.
+If <i>n2's</i> distance is -1, or if <i>d</i> is less than node <i>n2's</i> current distance:
+<p>
+<UL>
+<LI> If <i>n2</i> was in the multimap, remove it. <font color=blue>[* We're going to revisit this below. *]</font>
+<LI> Set <i>n2's</i> distance to <i>d</i>.
+<LI> Set <i>n2's</i> backedge to <i>e</i>.
+<LI> Insert <i>n2</i> into the multimap, keyed on distance.
+</UL>
+</UL>
+</UL>
+When the algorithm terminates, all the nodes will contain their shortest distance to node 0, 
+and their backedges will define the shortest paths.
+<p>
+<font color=blue>[* Revisiting Here *]: You actually  have a choice of whether to remove a node from the multimap
+or not.  It is often easier to code up Dijkstra's algorithm to leave nodes on the multimap
+rather than remove them. In that case, when a node reaches the front of the multimap for
+you to process, you need to check its distance versus its key in the multimap.
+If they
+differ, you simply ignore the node, because you have processed it already.  
+<p>
+The tradeoff
+is memory and potentially performance vs coding complexity.  When you code, it is much 
+easier to leave the node on the multimap.  However, if you end up replacing a lot of nodes
+on the multimap, it can make performance and memory consumption suffer.  Ideally, it is
+better to remove the node before you re-insert it.  To do that properly, you need to store
+an iterator to the node's place in the multiple, in the node's class definition.  Think
+about that, especially if you decide to remove the node in your own implementation.  BTW,
+I do advocate that you try removing the node in your lab.  Not only is the code better,
+but it forces you to think about data structure design..</font>
+<p>
+As an example, suppose we enrich the graph above with edge weights:
+<p><center><table border=3 cellpadding=3><td valign=top><IMG src=Ex-Graph-W.png width=250></td></table></center><p>
+Then 
+the PDF file <b><a href=Dijkstra-Run.pdf>Dijkstra-Run.pdf</a></b> shows how Dijkstra's
+algorithm runs on the graph.  In the PDF file, we are removing nodes when we 
+replace them).  When it finishes, here is the state of the system:
+
+
+<p><center><table border=3 cellpadding=3><td valign=top><IMG src=Dijkstra-Run.png></td></table></center><p>
+
+As with the BFS run above, you can use the backedges to find the shortest paths.  For example, 
+the shortest path from node 0 to node 3 has a distance of 20, and contains the edges:
+<p>
+<center>
+(0,11)(11,4)(4,8)(8,9)(9,3)
+</center>
+
+<hr>
+<h3>Running Times</h3>
+
+The running time of BFS (and therefore the unweighted shortest path problem) is <i>O(|V| + |E|)</i>.  
+As with DFS, it visits each node and edge once.
+The running time of Dijkstra's algorithm (and therefore the weighted shortest path problem) 
+is a little more complex: <i>O(|V| + |E|log(|V|))</i>.
+This is because Dijkstra's algorithm  visits each node and edge once, 
+and at each edge, it potentially inserts a node into the multimap.
+Memorize those running times!
