@@ -1,0 +1,637 @@
+<h3>Topcoder SRM 519, D2, 600-point problem - Solving with enumeration</h3>
+<a href=http://web.eecs.utk.edu/~plank>James S. Plank</a><br>
+CS302<br>
+September, 2016
+<p>
+<hr>
+Problem description: <a href=http://community.topcoder.com/stat?c=problem_statement&pm=11554&rd=14544>http://community.topcoder.com/stat?c=problem_statement&pm=11554&rd=14544</a>.
+<p>
+<h3>Solving this problem with enumeration</h3>
+
+Our driver code is in <b>Teleport-Main.cpp</b>, which includes
+<b>ThreeTeleports.cpp</b>.  That is where we will implement the class and method.
+<p>
+We're going to see this problem again later this semester.  However, its constraints are 
+so small that we can solve it with enumeration.  There are only eight places
+in the frog's universe that we care about:
+<UL>
+<LI> "Me" -- let's call that place 0.
+<LI> "Home" -- let's call that place 7.
+<LI> The two endpoints of the first teleport.  Let's call those places 1 and 2.
+<LI> The two endpoints of the second teleport.  Let's call those places 3 and 4.
+<LI> The two endpoints of the third teleport.  Let's call those places 5 and 6.
+</UL>
+
+The frog's path from "Me" to "Home" can be defined by an ordering of these places.
+For example, 0-1-2-3-4-5-6-7 would be a path where the frog goes from:
+<UL>
+<LI> "Me" to the first endpoint of the first teleport, and then through the teleport.
+<LI> From the second endpoint of the first teleport to the first endpoint of the second teleport, and then through the teleport.
+<LI> From the second endpoint of the second teleport to the first endpoint of the third teleport, and then through the teleport.
+<LI> From the second endpoint of the third teleport to "Home."
+</UL>
+
+0-2-1-3-4-5-6-7 would be the same path, but the frog would travel through the first 
+teleport in reverse order.
+<p>
+We're going to solve this problem by enumerating the paths.  There are a few
+details that we're going to have to take care of, though.
+<p>
+<hr>
+<h3>Part 1: Reading those teleport strings</h3>
+
+Our first task is to read those teleport strings.  What we're going to do is create
+two vectors, <b>X</b> and <b>Y</b>, 
+where <b>X[<i>i</i>]</b> is the <i>x</i> position of location <i>i</i>, and 
+<b>Y[<i>i</i>]</b> is the <i>y</i> position of location <i>i</i>.  Our first 
+program creates <b>X</b> and <b>Y</b> and prints them out.
+It is in <b><a href=Teleport-1.cpp>Teleport-1.cpp</a></b>:
+
+<p><center><table border=3 cellpadding=3><td><pre>
+#include &lt;string&gt;
+#include &lt;vector&gt;
+#include &lt;algorithm&gt;
+#include &lt;iostream&gt;
+#include &lt;cstdio&gt;
+#include &lt;cstdlib&gt;
+using namespace std;
+
+class ThreeTeleports {
+  public:
+    int shortestDistance(int xMe, int yMe, int xHome, int yHome, vector &lt;string&gt; teleports);
+    vector &lt;int&gt; Order;
+    void Permute(int index);
+};
+
+int ThreeTeleports::shortestDistance(int xMe, int yMe, int xHome, int yHome, 
+                                     vector &lt;string&gt; teleports)
+{
+  vector &lt;long long&gt; X, Y;
+  int i, x1, x2, y1, y2;
+
+  <font color=blue>/* Create the vectors X and Y, which hold the x and y coordinates of the eight
+     locations that we care about. */</font>
+
+  X.push_back(xMe);
+  Y.push_back(yMe);
+
+  for (i = 0; i &lt; teleports.size(); i++) {
+    sscanf(teleports[i].c_str(), "%d %d %d %d", &x1, &y1, &x2, &y2);
+    X.push_back(x1);
+    Y.push_back(y1);
+    X.push_back(x2);
+    Y.push_back(y2);
+  }
+
+  X.push_back(xHome);
+  Y.push_back(yHome);
+  
+  <font color=blue>/* We use %lld to print out long long's using printf(). */</font>
+
+  for (i = 0; i &lt; X.size(); i++) printf("[%lld,%lld]\n", X[i], Y[i]);
+
+  return 0;
+}
+</pre></td></table></center><p>
+
+I'm storing <b>X</b> and <b>Y</b> as <b>long long</b> vectors. The reason is that the 
+constraints are pretty big: 1,000,000,000.  While that number fits easily into an
+integer, three times that number does not, and since our paths may go from small
+x/y values to high ones and back, we may have paths that are over 3,000,000,000.
+So it's smart to use <b>long long</b>'s.  
+<p>
+We test it on examples 0 and 1, and everything looks good:
+
+<pre>
+UNIX> <font color=darkred><b>cp Teleport-1.cpp ThreeTeleports.cpp</b></font>
+UNIX> <font color=darkred><b>g++ Teleport-Main.cpp</b></font>
+UNIX> <font color=darkred><b>a.out 0</b></font>
+[3,3]
+[1000,1001]
+[1000,1002]
+[1000,1003]
+[1000,1004]
+[1000,1005]
+[1000,1006]
+[4,5]
+0
+UNIX> <font color=darkred><b>a.out 1</b></font>
+[0,0]
+[1,1]
+[18,20]
+[1000,1003]
+[1000,1004]
+[1000,1005]
+[1000,1006]
+[20,20]
+0
+UNIX>
+</pre>
+
+<hr>
+<h3>Part 2: Creating an adjacency matrix from X and Y</h3>
+
+Second, when we enumerate paths, we want to calculate the frog's distance 
+along the paths.  To help us with this, we're going to create a data structure
+called an <i>adjacency matrix.</i>  This is going to be a vector of vectors of
+<b>long longs</b>.  Let's call it <b>AM</b>.  Then <b>AM[<i>i</i>][<i>j</i>]</b>
+will hold the distance that the frog has to jump to go from place <i>i</i> to 
+place <i>j</i>.
+
+The code to create this 
+is in
+<b><a href=Teleport-2.cpp>Teleport-2.cpp</a></b>.  Here's the variable declaration
+and the new code.  For the moment, I'm ignoring the teleports and just calculating
+the frog's hopping distance between places:
+
+<p><center><table border=3 cellpadding=3><td><pre>
+  ...
+  vector &lt; vector &lt;long long&gt; &gt;AM;
+  ...
+  <font color=blue>/* Create the adjacency matrix. */</font>
+
+  AM.resize(X.size());
+  for (i = 0; i &lt; X.size(); i++) {
+    for (j = 0; j &lt; X.size(); j++) {
+      xd = X[j]-X[i];
+      if (xd &lt; 0) xd = -xd;
+      yd = Y[j]-Y[i];
+      if (yd &lt; 0) yd = -yd;
+      AM[i].push_back(xd+yd);
+    }
+  }
+
+  <font color=blue>/* Print the adjacency matrix. */</font>
+
+  for (i = 0; i &lt; AM.size(); i++) {
+    for (j = 0; j &lt; AM[i].size(); j++) {
+      printf("%6lld", AM[i][j]);
+    }
+    printf("\n");
+  }
+
+  return 0;
+}
+</pre></td></table></center><p>
+
+We run this on examples 0 and 1, verifying that it is correct:
+
+<pre>
+UNIX> <font color=darkred><b>cp Teleport-2.cpp ThreeTeleports.cpp</b></font>
+UNIX> <font color=darkred><b>g++ Teleport-Main.cpp</b></font>
+UNIX> <font color=darkred><b>a.out 0</b></font>
+     0  1995  1996  1997  1998  1999  2000     3
+  1995     0     1     2     3     4     5  1992
+  1996     1     0     1     2     3     4  1993
+  1997     2     1     0     1     2     3  1994
+  1998     3     2     1     0     1     2  1995
+  1999     4     3     2     1     0     1  1996
+  2000     5     4     3     2     1     0  1997
+     3  1992  1993  1994  1995  1996  1997     0
+0
+UNIX> <font color=darkred><b>a.out 1</b></font>
+     0     2    38  2003  2004  2005  2006    40
+     2     0    36  2001  2002  2003  2004    38
+    38    36     0  1965  1966  1967  1968     2
+  2003  2001  1965     0     1     2     3  1963
+  2004  2002  1966     1     0     1     2  1964
+  2005  2003  1967     2     1     0     1  1965
+  2006  2004  1968     3     2     1     0  1966
+    40    38     2  1963  1964  1965  1966     0
+0
+UNIX> <font color=darkred><b></b></font>
+</pre>
+
+<hr>
+<h3>Part 3: Adding the teleports to the adjacency matrix</h3>
+
+Next, we need to add the teleports to the adjacency matrix -- these are between 1/2, 3/4, 5/6,
+and are equal to 10 jumps.  This is in
+<b><a href=Teleport-3.cpp>Teleport-3.cpp</a></b>.  Here's the new code, which is added 
+right before we print the adjacency matrix:
+
+<p><center><table border=3 cellpadding=3><td><pre>
+  ...
+  <font color=blue>/* Add the teleports to the adjacency matrix. */</font>
+
+  AM[1][2] = 10;
+  AM[2][1] = 10;
+  AM[3][4] = 10;
+  AM[4][3] = 10;
+  AM[5][6] = 10;
+  AM[6][5] = 10;
+  ...
+</pre></td></table></center><p>
+
+I've highlighed the teleports in the output below:
+
+<pre>
+UNIX> <font color=darkred><b>cp Teleport-3.cpp ThreeTeleports.cpp </b></font>
+UNIX> <font color=darkred><b>g++ Teleport-Main.cpp</b></font>
+UNIX> <font color=darkred><b>a.out 1</b></font>
+     0     2    38  2003  2004  2005  2006    40
+     2     0    <font color=blue><b>10</b></font>  2001  2002  2003  2004    38
+    38    <font color=blue><b>10</b></font>     0  1965  1966  1967  1968     2
+  2003  2001  1965     0    <font color=blue><b>10</b></font>     2     3  1963
+  2004  2002  1966    <font color=blue><b>10</b></font>     0     1     2  1964
+  2005  2003  1967     2     1     0    <font color=blue><b>10</b></font>  1965
+  2006  2004  1968     3     2    <font color=blue><b>10</b></font>     0  1966
+    40    38     2  1963  1964  1965  1966     0
+0
+UNIX> <font color=darkred><b></b></font>
+</pre>
+
+<hr>
+<h3>Part 4: Generating all possible paths</h3>
+
+Now we need to generate all possible paths.  We're going to be a little lazy doing this,
+because we're in a "Topcoder" mindset: Let's solve the problem so that it's fast enough
+for Topcoder, but let's not spend the extra work making it optimally fast.
+<p>
+Our first piece of laziness is the following: We're going to generate more paths than we need, by generating all permutations
+of the numbers from 1 to 7.  We'll put zero in the front the permutation, and then treat that
+as a path.  For example, the permutation 1,2,3,4,5,6,7 is the path 0-1-2-3-4-5-6-7, that
+I explained above.
+<p>
+This approach generates more paths than we need for two reasons:
+
+<UL>
+<LI> With permutations like 1,2,7,3,4,5,6 our path will stop at 7, because the frog is "Home."
+We'll generate many paths that start with 1,2,7, and they are all the same.  That's wasteful.
+<LI> With permutations like 1,3,5,2,4,6,7, there's no way our frog would really take this
+path, because there are no teleports.  The frog may as well just to straight from 0 to 7.
+</UL>
+
+We're going to ignore this wastefulness, though, because the number of permutations, (7!), is
+5040, which is well fast enough for Topcoder.  We couldn't use this solution if there were
+more teleports.
+
+<p>
+Our second piece of laziness is using <b>next_permutation()</b> from C++'s <b>algorithm</b>
+library.  This generates the "next" lexicographic permutation of a vector, and we don't
+need to do recursion.
+<p>
+The code in 
+<b><a href=Teleport-4.cpp>Teleport-4.cpp</a></b> does this, and prints out the permutations.
+What I do here is put all of the numbers from 0 through 7 into a vector <b>path</b>, and
+keep calling <b>next_permutation()</b> until <b>path[0]</b> changes from 0 to 1. 
+Here's the new code:
+
+<p><center><table border=3 cellpadding=3><td><pre>
+  ...
+  <font color=blue>/* Generate and print the permutations of 1-7. 
+     We do that with a vector containing the numbers 0 through 7,
+     and keep calling next_permutation() until path[0] changes from 0 to 1. */</font>
+   
+  for (i = 0; i &lt; 8; i++) path.push_back(i);
+  while (path[0] == 0) {
+    for (i = 0; i &lt; path.size(); i++) printf(" %d", path[i]);
+    printf("\n");
+    next_permutation(path.begin(), path.end());
+  }
+  
+  return 0;
+}
+</pre></td></table></center><p>
+
+<pre>
+UNIX> <font color=darkred><b>cp Teleport-4.cpp ThreeTeleports.cpp</b></font>
+UNIX> <font color=darkred><b>g++ Teleport-Main.cpp</b></font>
+UNIX> <font color=darkred><b>a.out 0 | head -n 10</b></font>
+ 0 1 2 3 4 5 6 7
+ 0 1 2 3 4 5 7 6
+ 0 1 2 3 4 6 5 7
+ 0 1 2 3 4 6 7 5
+ 0 1 2 3 4 7 5 6
+ 0 1 2 3 4 7 6 5
+ 0 1 2 3 5 4 6 7
+ 0 1 2 3 5 4 7 6
+ 0 1 2 3 5 6 4 7
+ 0 1 2 3 5 6 7 4
+UNIX> <font color=darkred><b>a.out 0 | tail -n 10</b></font>
+ 0 7 6 5 3 2 4 1
+ 0 7 6 5 3 4 1 2
+ 0 7 6 5 3 4 2 1
+ 0 7 6 5 4 1 2 3
+ 0 7 6 5 4 1 3 2
+ 0 7 6 5 4 2 1 3
+ 0 7 6 5 4 2 3 1
+ 0 7 6 5 4 3 1 2
+ 0 7 6 5 4 3 2 1
+0
+UNIX> <font color=darkred><b>a.out 0 | wc</b></font>
+    5041   40321   85682
+UNIX> <font color=darkred><b></b></font>
+</pre>
+
+There are 5041 lines, because the last line prints the return value of 
+the procedure.
+
+<hr>
+<h3>Part 5: Calculating the path lengths and returning the minimum. </h3>
+
+The final piece of code takes each permutation and calculates a path length 
+from it, keeping track of the minimum.  I start by setting my minimum to a
+number larger than it can possibly be -- in this case, I choose a gigantic
+<b>long long</b> -- this is a one followed by 36 zeros, or 2<sup>36</sup>.
+I specify the number in hexadecimal (remember, each hex digit is 4 bits, so 
+I have 9 zeros to make 2<sup>36</sup>.).
+I have to put "LL" at the end of the to tell the compiler that it's a <b>long long</b>.
+<p>
+Here's the new code (in 
+<b><a href=Teleport-5.cpp>Teleport-5.cpp</a></b>):
+
+<p><center><table border=3 cellpadding=3><td><pre>
+  ...
+  minimum = 0x1000000000LL;   <font color=blue>/* This number is 2^36. */</font>
+
+  for (i = 0; i &lt; 8; i++) path.push_back(i);
+  while (path[0] == 0) {
+ 
+    <font color=blue>/* Here is where we calculate the path length. */</font>     
+    d = 0;                    
+    for (i = 0; path[i] != 7; i++) {
+      d += AM[path[i]][path[i+1]];
+    }
+    if (d &lt; minimum) minimum = d;
+    next_permutation(path.begin(), path.end());
+  }
+  
+  return minimum;
+}
+</pre></td></table></center><p>
+
+This solves the problem fast enough for topcoder, so if all we cared about was solving the
+topcoder problem, we'd be done.  
+<p>
+But.....
+
+<p>
+<hr>
+<h3>Because I can't help myself: Making the enumeration non-wasteful</h3>
+
+As a mention in part 4 above, the enumeration is wasteful, because it generates too many
+paths that are either redundant, or are paths that the frog would never take.  I'm going
+to do this correctly here, just because I wouldn't be a good teacher if I didn't.
+<p>
+What I'm going to do is enumerate teleports.  I'll name them A, B and C, and then
+I'll enumerate all strings that contain at most one A, one B and one C.  I'm going to
+do that with a recursive procedure, because there's no STL algorithm for it.
+To make my life easier, I'm going to put the adjacency matrix in the class definition,
+and that way, I'll be able to use it in my recursive procedure.  
+<p>
+The procedure is below, and it's slightly tricky -- I'm using a C-style string instead of
+a C++ string, because I'm going to include the NULL character in my enumeration.  And
+I'm going to do the same "permutation" enumeration as in the 
+<a href=http://web.eecs.utk.edu/~plank/plank/classes/cs302/Notes/Enumeration/>CS302
+lecture notes on enumeration.</a>, except when I swap the NULL character, I don't 
+make any recursive calls -- that's when I'm done.
+<p>
+ 
+The code is in 
+<b><a href=Teleport-6.cpp>Teleport-6.cpp</a></b>.  I'm just showing the class 
+definition, the <b>Permute()</b> function, and the initial setting of the
+string <b>PString</b>, which is the one I'm using to permute.  This is a tricky
+recursion, so take some time to study it, and of course, copy it and put in some
+print statements if you want to solidify your knowledge:
+
+<p><center><table border=3 cellpadding=3><td><pre>
+class ThreeTeleports {
+  public:
+    int shortestDistance(int xMe, int yMe, int xHome, int yHome, vector &lt;string&gt; teleports);
+    void Permute(int index);
+
+    vector &lt; vector &lt;long long&gt; &gt;AM;
+    char PString[4];
+};
+
+<font color=blue>/* This is recursive code to print all strings with at most one A, one B, and one C. 
+   It is similar to the permutation code in the Enumeration lecture notes, but
+   it also permutes the NULL character, and then doesn't make a recursive call when
+   the NULL character is the one in "index." */</font>
+
+void ThreeTeleports::Permute(int index)
+{
+  int i;
+  char tmp;
+
+  for (i = index; i &lt; 4; i++) {
+
+    tmp = PString[i];             <font color=blue>/* Swap each character from index to the end */</font>
+    PString[i] = PString[index];
+    PString[index] = tmp;
+
+    if (PString[index] == '\0') { <font color=blue>/* Stop at the NULL character */</font>
+      printf("%s\n", PString);
+
+    } else {                      <font color=blue>/* Otherwise, keep making recursive calls. */</font>
+      Permute(index+1);
+    }
+
+    tmp = PString[i];             <font color=blue>/* Swap the character back. */</font>
+    PString[i] = PString[index];
+    PString[index] = tmp;
+  }
+}
+
+int ThreeTeleports::shortestDistance(int xMe, int yMe, int xHome, int yHome, 
+                                     vector &lt;string&gt; teleports)
+{
+  ...
+
+  <font color=blue>/* Create the string that we'll permute, and make the recursive permute call. */</font>
+
+  strcpy(PString, "ABC");  <font color=blue>/* This turns PString into { 'A', 'B', 'C', '\0' } */</font>
+  Permute(0);
+  
+  return 0;
+}
+</pre></td></table></center><p>
+
+When we run it, we see the proper strings being printed, including the empty string at the
+end, before the return value 0:
+
+<pre>
+UNIX> <font color=darkred><b>cp Teleport-6.cpp ThreeTeleports.cpp</b></font>
+UNIX> <font color=darkred><b>g++ Teleport-Main.cpp</b></font>
+UNIX> <font color=darkred><b>a.out 0</b></font>
+ABC
+AB
+ACB
+AC
+A
+BAC
+BA
+BCA
+BC
+B
+CBA
+CB
+CAB
+CA
+C
+
+0
+UNIX> <font color=darkred><b>vi index.html</b></font>
+</pre>
+
+Now, I'm going to write another procedure that will calculate the frog's
+best distance, given the ordering of teleports.  This is going to require another
+enumeration, because for each teleport, you need to calculate the distance
+of the frog traveling through it in each direction.  
+<p>
+I'm going to use a power set enumeration for this -- for each teleport in 
+<b>PString</b>, there are 2 possibilities for the teleport's direction.
+So, I'll use bit arithmetic for the teleports' directions.  In fact, to 
+make my life easier, instead of using 'A', 'B' and 'C', I'm going to use 
+'1', '3' and '5'.  That will make it easier to convert <b>PString</b> into
+indices for the adjacency matrix.
+<p>
+The new code is in 
+<b><a href=Teleport-7.cpp>Teleport-7.cpp</a></b>, and you can see the 
+power set enumeration in the method <b>Calculate_Distance()</b>.  I print out
+each distance, and the teleport directions, 
+so that you can see how the enumeration works.  Note how it even
+works when <b>PString</b> is empty -- what fun this is!!!
+
+<p><center><table border=3 cellpadding=3><td><pre>
+class ThreeTeleports {
+  public:
+    int shortestDistance(int xMe, int yMe, int xHome, int yHome, vector &lt;string&gt; teleports);
+    void Permute(int index);
+    void Calculate_Distance();
+
+    vector &lt; vector &lt;long long&gt; &gt;AM;
+    char PString[4];
+    long long minimum;
+};
+
+void ThreeTeleports::Calculate_Distance()
+{
+  long long d;
+  int last_place, front, back;
+  int i, j;
+  string PS;
+  string Dir; <font color=blue>/* This string holds the directions - > for forward, < for backward */</font>
+
+  PS = PString;
+  Dir.resize(PS.size(), '-');
+
+  <font color=blue>/* Use bit arithmetic to calculate all of the potential directions
+     for the teleports. */</font>
+
+  for (i = 0; i &lt; (1 &lt;&lt; PS.size()); i++) {
+    last_place = 0;
+    d = 0;
+    for (j = 0; j &lt; PS.size(); j++) {
+ 
+      <font color=blue>/* Use the bits to determine the direction of the teleport. */</font>
+
+      front = ((1 &lt;&lt; j) & i) ? PS[j]-'0'   : PS[j]-'0'+1;
+      back =  ((1 &lt;&lt; j) & i) ? PS[j]-'0'+1 : PS[j]-'0';
+      Dir[j] = ((1 &lt;&lt; j) & i) ? '&gt;' : '&lt;' ;
+      d += AM[last_place][front];
+      d += 10;
+      last_place = back;
+    }
+    d += AM[last_place][7];
+    printf("PS: %3s.  i: %d.  Dir: %3s.  d: %lld\n", PString, i, Dir.c_str(), d);
+    if (d &lt; minimum) minimum = d;
+  }
+}
+
+...
+  minimum = 0x1000000000LL;
+  strcpy(PString, "135");  <font color=blue>/* This turns PString into { '1', '3', '5', '\0' } */</font>
+  Permute(0);
+  
+  return minimum;
+}
+</pre></td></table></center><p>
+
+<pre>
+UNIX> <font color=darkred><b>cp Teleport-7.cpp ThreeTeleports.cpp</b></font>
+UNIX> <font color=darkred><b>g++ Teleport-Main.cpp</b></font>
+UNIX> <font color=darkred><b>a.out 0</b></font>
+PS: 135.  i: 0.  Dir: <<<.  d: 4028
+PS: 135.  i: 1.  Dir: ><<.  d: 4026
+PS: 135.  i: 2.  Dir: <><.  d: 4026
+PS: 135.  i: 3.  Dir: >><.  d: 4024
+PS: 135.  i: 4.  Dir: <<>.  d: 4028
+PS: 135.  i: 5.  Dir: ><>.  d: 4026
+PS: 135.  i: 6.  Dir: <>>.  d: 4026
+PS: 135.  i: 7.  Dir: >>>.  d: 4024
+PS:  13.  i: 0.  Dir:  <<.  d: 4013
+PS:  13.  i: 1.  Dir:  ><.  d: 4011
+PS:  13.  i: 2.  Dir:  <>.  d: 4013
+PS:  13.  i: 3.  Dir:  >>.  d: 4011
+PS: 153.  i: 0.  Dir: <<<.  d: 4026
+PS: 153.  i: 1.  Dir: ><<.  d: 4024
+PS: 153.  i: 2.  Dir: <><.  d: 4026
+PS: 153.  i: 3.  Dir: >><.  d: 4024
+PS: 153.  i: 4.  Dir: <<>.  d: 4028
+PS: 153.  i: 5.  Dir: ><>.  d: 4026
+PS: 153.  i: 6.  Dir: <>>.  d: 4028
+PS: 153.  i: 7.  Dir: >>>.  d: 4026
+PS:  15.  i: 0.  Dir:  <<.  d: 4017
+PS:  15.  i: 1.  Dir:  ><.  d: 4015
+PS:  15.  i: 2.  Dir:  <>.  d: 4017
+PS:  15.  i: 3.  Dir:  >>.  d: 4015
+PS:   1.  i: 0.  Dir:   <.  d: 3998
+PS:   1.  i: 1.  Dir:   >.  d: 3998
+PS: 315.  i: 0.  Dir: <<<.  d: 4030
+PS: 315.  i: 1.  Dir: ><<.  d: 4030
+PS: 315.  i: 2.  Dir: <><.  d: 4030
+PS: 315.  i: 3.  Dir: >><.  d: 4030
+PS: 315.  i: 4.  Dir: <<>.  d: 4030
+PS: 315.  i: 5.  Dir: ><>.  d: 4030
+PS: 315.  i: 6.  Dir: <>>.  d: 4030
+PS: 315.  i: 7.  Dir: >>>.  d: 4030
+PS:  31.  i: 0.  Dir:  <<.  d: 4011
+PS:  31.  i: 1.  Dir:  ><.  d: 4011
+PS:  31.  i: 2.  Dir:  <>.  d: 4013
+PS:  31.  i: 3.  Dir:  >>.  d: 4013
+PS: 351.  i: 0.  Dir: <<<.  d: 4026
+PS: 351.  i: 1.  Dir: ><<.  d: 4024
+PS: 351.  i: 2.  Dir: <><.  d: 4026
+PS: 351.  i: 3.  Dir: >><.  d: 4024
+PS: 351.  i: 4.  Dir: <<>.  d: 4028
+PS: 351.  i: 5.  Dir: ><>.  d: 4026
+PS: 351.  i: 6.  Dir: <>>.  d: 4028
+PS: 351.  i: 7.  Dir: >>>.  d: 4026
+PS:  35.  i: 0.  Dir:  <<.  d: 4017
+PS:  35.  i: 1.  Dir:  ><.  d: 4015
+PS:  35.  i: 2.  Dir:  <>.  d: 4017
+PS:  35.  i: 3.  Dir:  >>.  d: 4015
+PS:   3.  i: 0.  Dir:   <.  d: 4002
+PS:   3.  i: 1.  Dir:   >.  d: 4002
+PS: 531.  i: 0.  Dir: <<<.  d: 4024
+PS: 531.  i: 1.  Dir: ><<.  d: 4024
+PS: 531.  i: 2.  Dir: <><.  d: 4026
+PS: 531.  i: 3.  Dir: >><.  d: 4026
+PS: 531.  i: 4.  Dir: <<>.  d: 4026
+PS: 531.  i: 5.  Dir: ><>.  d: 4026
+PS: 531.  i: 6.  Dir: <>>.  d: 4028
+PS: 531.  i: 7.  Dir: >>>.  d: 4028
+PS:  53.  i: 0.  Dir:  <<.  d: 4015
+PS:  53.  i: 1.  Dir:  ><.  d: 4015
+PS:  53.  i: 2.  Dir:  <>.  d: 4017
+PS:  53.  i: 3.  Dir:  >>.  d: 4017
+PS: 513.  i: 0.  Dir: <<<.  d: 4030
+PS: 513.  i: 1.  Dir: ><<.  d: 4030
+PS: 513.  i: 2.  Dir: <><.  d: 4030
+PS: 513.  i: 3.  Dir: >><.  d: 4030
+PS: 513.  i: 4.  Dir: <<>.  d: 4030
+PS: 513.  i: 5.  Dir: ><>.  d: 4030
+PS: 513.  i: 6.  Dir: <>>.  d: 4030
+PS: 513.  i: 7.  Dir: >>>.  d: 4030
+PS:  51.  i: 0.  Dir:  <<.  d: 4015
+PS:  51.  i: 1.  Dir:  ><.  d: 4015
+PS:  51.  i: 2.  Dir:  <>.  d: 4017
+PS:  51.  i: 3.  Dir:  >>.  d: 4017
+PS:   5.  i: 0.  Dir:   <.  d: 4006
+PS:   5.  i: 1.  Dir:   >.  d: 4006
+PS:    .  i: 0.  Dir:    .  d: 3
+3
+UNIX> <font color=darkred><b></b></font>
+</pre>
