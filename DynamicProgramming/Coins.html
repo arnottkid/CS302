@@ -8,7 +8,7 @@
 <hr>
 
 Here's the problem: Given a list of <i>N</i> coin denominations (V1, V2, ..., VN), 
-and a sum <i>S</i>. Find the minimum number of coins the sum of which is <i>S</i> 
+and a sum <i>S</i>. Find the minimum number of coins that sum to <i>S</i> 
 (we can use as many coins of one denomination as we want), 
 or report that it's not possible to select coins in such a way that they sum up to <i>S</i>. 
 <p>
@@ -140,8 +140,8 @@ int Coins::M(int s)
     }
   }
 
-  <font color=blue>/* The min equals the sentinel, then it's impossible, return -1. 
-     Otherwise, return the minimum. */</font>
+  <font color=blue>/* If the min equals the sentinel, then it's impossible, 
+     and return -1.  Otherwise, return the minimum. */</font>
 
   if (min == s+1) return -1;
   return min;
