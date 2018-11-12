@@ -7,7 +7,17 @@ Wed Nov 16 14:57:50 EST 2016
 <p>This is from Topcoder SRM 605, Division 2, 1000-point problem.
 <br><a href=https://community.topcoder.com/stat?c=problem_statement&pm=12954&rd=15838>Problem Statement</a>.
 <hr>
+In case the topcoder server is not giving the problem description to this one, let me 
+summarize it as follows:
 
+<UL>
+<LI> You are partitioning the numbers from 1 to <i>2N</i> into two equal sets, <i>A</i> and <i>B</i>.
+<LI> If you sort the two sets, the difference between each <i>A[i]</i> and corresponding <i>B[i]</i>
+must be less than or equal to a given number <i>K</i>.
+<LI> Report the number of ways that you can perform this partitioning, modulo 1,000,000,007.
+<LI> <i>N</I> will be &le; 50 and <i>K</i> will be &le; 10.
+</UL>
+<hr>
 This is another tricky dynamic program, where the hard part is spotting the recursion.  After
 you spot the recursion, you can make your solution more efficient by using bit arithmetic.
 <p>

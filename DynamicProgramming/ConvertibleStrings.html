@@ -6,7 +6,21 @@ Latest revision: Tue Nov 15 01:02:49 EST 2016.
 <p>This is from Topcoder SRM 591, Division 2, 500-point problem.
 <br><a href=http://community.topcoder.com/stat?c=problem_statement&pm=12754&rd=15703>Problem Statement</a>.
 <hr>
+In case Topcoder's servers are not working, here is a summary of the problem:
 
+<UL>
+<LI> You are given two strings with upper-case characters from 'A' to 'I'.
+<LI> Call these strings, <b>X</b> and <b>Y</b>.
+<LI> They are the same length which is &le; 50.
+<LI> You are going to choose some number of indices, and remove the characters 
+     at these indices in both <b>X</b> and <b>Y</b>.
+<LI> When you are done, you should be able to convert <b>X</b> to <b>Y</b> with 
+     a simple substitution cipher -- In other words, if <b>X[i]</b> equals <b>X[j]</b>,
+     then <b>Y[i]</b> equals <b>Y[j]</b>, and vice versa.
+</UL>
+
+
+<hr>
 This one screams dynamic programming.  As always, the hard part is to
 spot the recursion.  Here's how I thought about it.  You have your
 two strings, A and B.  Consider the first character of each.  Either
