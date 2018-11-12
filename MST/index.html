@@ -1,0 +1,187 @@
+<title>CS302 Lecture Notes</title>
+<h2>CS302 Lecture Notes - Minimum Spanning Tree</h2>
+<UL>
+<LI> James S. Plank
+<LI> Original Notes: November, 2014
+<LI> Directory: <b>/home/plank/cs302/Notes/MST</b>
+</UL>
+
+<hr>
+<h3>Reference Material</h3>
+
+<LI> <a href=http://en.wikipedia.org/wiki/Minimum_spanning_tree>Wikipedia's description of the problem</a>
+<LI> <a href=http://en.wikipedia.org/wiki/Prim%27s_algorithm>Prim's Algorithm for solving the problem.</a>
+<LI> <a href=http://en.wikipedia.org/wiki/Kruskal%27s_algorithm>Kruskal's Algorithm</a> for solving the problem.
+<LI> 
+If you want some practice studying for the final, check out question 3 from 
+the <a href=http://web.eecs.utk.edu/~plank/plank/classes/cs302/Tests/t2/2009-Fall/index.html>2009 
+Final Exam</a>, and question 3 from the
+<a href=http://web.eecs.utk.edu/~plank/plank/classes/cs302/Tests/t2/2008-fall/index.html>2008
+Final Exam.</a>.
+<LI> A nice topcoder practice problem: <a href=http://web.eecs.utk.edu/~plank/plank/classes/cs302/Topcoder/ActivateGame.html>ActivateGame</a>.
+<LI> A second topcoder practice problem: <a href=http://web.eecs.utk.edu/~plank/plank/classes/cs302/Topcoder/CableDonation.html>CableDonation</a>.
+<LI> A third topcoder practice problem: <a href=http://web.eecs.utk.edu/~plank/plank/classes/cs302/Notes/BearSpans/index.html>BearSpans</a>.
+
+<hr>
+<h3>Definition of Minimum Spanning Tree</h3>
+The minimum spanning tree problem is simple: Given a connected, weighted, undirected graph, a <i>spanning tree</i> 
+is a subset of edges that connects all of the vertices, but has no cycles.  A <i>minimum spanning tree</i> is a 
+spanning tree where the sum of the weights of the edges is minimized.
+Below, I draw a very simple example of a four-node graph on the left, and its minimum spanning
+tree on the right:
+<p>
+
+<p><center><table border=3><td><img src=Ex1.jpg></td>
+                          <td><img src=Ex2.jpg></td></table></center><p>
+
+Read the Wikipedia page for applications of spanning trees.
+<p>
+In this set of lecture notes, we'll teach you two algorithms for finding the minimum 
+spanning tree: Prim's algorithm and Kruskal's algorithm:
+
+<hr>
+<h3>Prim's Algorithm</h3>
+
+Prim's algorithm is a very simple modification to Dijkstra's shortest path algorithm.
+With Prim's algorithm, you build the minimum spanning tree node by node.  
+You are going to maintain a "current spanning tree", which will be a subset of the
+nodes in the graph, and the edges that compose a minimum spanning tree of those nodes.
+<p>
+You start by setting the current spanning tree to an arbitrary node.  You'll note that
+that node, with no edges, is indeed a spanning tree of that solitary node.
+<p>
+You then proceed to iterate, adding one node and one edge to the current spanning
+tree.  What you'll do is find the minimum weight edge from a node in the current spanning
+tree to a node not in the current spanning tree.  You add that node and edge to the
+current spanning tree.  Keep doing that until all nodes are added to the spanning tree.
+<p>
+To implement Prim's algorithm, you maintain a multimap of edges, just like Dijkstra's algorithm.
+However, the keys are the weights of the edges, rather than path lengths like they are
+in Dijkstra's algorithm.  Each time you process an edge by adding the edge and its 
+destination node to the current spanning tree.  Then you process the node's adjacency list,
+adding more edges to the multimap.  You may need to delete edges from the multimap 
+when you do this, because you may be improving a node's distance to the current spanning
+tree.
+<p>
+Let's process an example -- you've seen this graph before:
+
+<p><center><table border=3><td><img src=G5-1.jpg height=300></td></table></center><p>
+
+I think it's safe to say that it's hard to eyeball this graph to find the minimum 
+spanning tree.  So, let's run Prim's algorithm on it.  We'll arbitrarily put <i>s</i>
+onto the current spanning tree.  In the pictures below, I'm going to denote the nodes
+ in the current spanning tree in pink, and the edges in the current spanning tree in red.
+I'll also draw the multimap of edges.  We'll start with <i>s</i> i the current spanning
+tree:
+
+<p><center><table border=3><td><img src=G5-2.jpg height=300></td></table></center><p>
+
+We process the first edge in the multimap.  That will add the edge <i>s-n02</i> and the
+node <i>n02</i> to the current spanning tree.  We add the edges to 
+<i>n00</i>,
+<i>n01</i> and <i>n03</i> to the multimap, and we update the edge to <i>n04</i>, because the
+edge from <i>n02</i> is smaller than the one that is currently there (from <i>s</i>):
+
+<p><center><table border=3><td><img src=G5-3.jpg height=300></td></table></center><p>
+
+Again, we process the smallest edge in the multimap.  That adds the edge <i>n02-n03</i>,
+plus the node <i>n03</i> to the current spanning tree.  When we process edges, we see
+that the edges to <i>n00</i> and <i>n04</i> need to be updated in the map:
+
+<p><center><table border=3><td><img src=G5-4.jpg height=300></td></table></center><p>
+
+Next, we add the edge <i>n03-n04</i>,
+plus the node <i>n04</i> to the current spanning tree.  When we process edges, the only
+modification is that we change the edge to <i>n00</i>:
+
+<p><center><table border=3><td><img src=G5-5.jpg height=300></td></table></center><p>
+
+I'll draw the remaining pictures without comment, until you see the final spanning tree:
+
+<p><center><table border=3><tr><td><img src=G5-6.jpg height=300></td></tr>
+<tr><td><img src=G5-7.jpg height=300></td></tr>
+<tr><td><img src=G5-8.jpg height=300></td></tr>
+</table></center><p>
+
+Here's the final spanning tree:
+<p><center><table border=3><td><img src=G5-9.jpg height=300></td></table></center><p>
+
+The running time of Prim's algorithm is identical to Dijkstra's algorithm.  If we assume
+that the graph is connected, then the running time is <i>O(|E|log(|V|))</i>.  To derive that,
+consider that each time that we visit an edge, we may be deleting and inserting an edge
+into the multimap.  The maximum size of the multimap is one entry per node -- hence the
+<i>log(|V|)</i> term.
+
+<hr>
+<h3>Kruskal's Algorithm</h3>
+
+Whereas Prim's algorithm builds the spanning tree node by node, Kruskal's algorithm builds
+it edge by edge.  The algorithm simple and elegant, in my opinion.  Start with your current
+spanning tree composed of just the nodes, with no edges.  There are <i>|V|</i> connected
+components in the current spanning tree.  
+<p>
+Sort the edges from smallest to largest and process them in that order.  For each edge,
+determine if the edge spans two different connected components in the current spanning
+tree.  If it doesn't, you ignore it.  If it does, then you add the edge to the spanning
+tree, and the two connected components become one.
+<p>
+You repeat this process until you have just one connected component in the graph.
+<p>
+Implementing Kruskal's algorithm is straightforward -- sort edges in a multimap, 
+and use <a href=../Disjoint/index.html>Disjoint Sets</a> to identify connected components.  
+Let's go through the same example above, but using Kruskal's algorithm.  I'll draw
+the current spanning tree, and keep the sorted list of edges to the right of the
+drawing.   Here's our starting point:
+
+<p><center><table border=3><td><img src=Kruskal-1.jpg height=300></td></table></center><p>
+
+We start with the smallest edge: <i>[n02-n03]</i>, and add it to the current spanning
+tree.  It now has 6 connected components rather than seven:
+
+<p><center><table border=3><td><img src=Kruskal-2.jpg height=300></td></table></center><p>
+
+We'll process the next two edges: <i>[n04-n03]</i>
+<i>[n00-t]</i>.  Our graph now has four connected components:
+
+<p><center><table border=3><td><img src=Kruskal-3.jpg height=300></td></table></center><p>
+
+Let's process the next two edges: <i>[n02-n01]</i> and
+<i>[n03-n01]</i>.  We don't add the second of these two the graph, because it does not 
+span connected components:
+
+<p><center><table border=3><td><img src=Kruskal-4.jpg height=300></td></table></center><p>
+
+Similarly, edge <i>[n04-n02]</i> does not span connected components, so we ignore it. 
+The next two edges, <i>[n00-n04]</i> and <i>[s-n02]</i> do span connected components, so we
+add them to our spanning tree.  At that point, we are left with one component, so we're done!
+
+<p><center><table border=3><td><img src=Kruskal-5.jpg height=300></td></table></center><p>
+
+The running time of Kruskal's algorithm is 
+<i>O(|E|log(|E|))</i> to sort the edges, and
+<i>O(|E|&alpha;(|V|))</i> to process the edges.  Since the first time is larger than the second, we
+can ignore the second term: 
+<i>O(|E|log(|E|))</i>.  
+<p>
+Does that mean that Kruskal's algorithm is worse than Prim's algorithm?  Well, we can play games with math.
+In the worst case, <i>|E| = O(|V|<sup>2</sup>)</i>, so:
+<p>
+<center>
+<i>O(|E|log(|E|))</i> = <i>O(|E|log(|V|<sup>2</sup>))</i> <br>
+= <i>O(|E|2log(|V|))</i><br>
+= <i>O(|E|log(|V|))</i>.
+</center>
+
+So, they are equivalent from a big-O perspective.  You'd have to hack them up to see how well they work in
+your own implementations.
+
+<hr>
+<h3>Minimum Spanning Tree Esoterica</h3>
+
+<UL>
+<LI> If the edge weights are all unique, then so is the minimum spanning tree.
+<LI> Negative edge weights don't matter.  In fact, you can add the same constant to every edge, and the
+minimum spanning tree will remain the same.
+<LI> Maximum spanning tree is the same thing, and both algorithms apply.
+</UL>
+
