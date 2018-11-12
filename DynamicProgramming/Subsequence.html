@@ -1,0 +1,398 @@
+<title>CS302 Lecture Notes - Dynamic Programming </title>
+<h2>CS302 Lecture Notes - Dynamic Programming<br>Example Program #3: The Maximum Subsequence Problem</h2>
+<UL>
+<LI> November 18, 2009
+<LI> James S. Plank
+<LI> Directory: <b>/home/plank/cs302/Notes/DynamicProgramming</b>
+</UL>
+<hr>
+
+This one comes from a topcoder article by
+<a href=http://www.topcoder.com/tc?module=Static&d1=features&d2=040104>vorthys</a>.
+You are to write a program that takes two strings and returns the length of the largest
+common subsequence of the two strings.  A subsequence is a subset of the letters of a string
+that appears in the order given by the subsequence.  For example, "dog" is a subsequence
+if "dodger", but "red" is not, because the characters don't appear in "dodger" in the 
+correct order.
+<p>
+As always, we start with <b>Step 1</b>, which is to spot the recursive solution.  To do so,
+let's take a look at two examples.  Here's the first example:
+<p>
+<center>
+S1 = "AbbbcccFyy", S2 = "FxxxyyyAc"
+<p>
+</center>
+And here's the second example.
+<p>
+<center>
+S1 = "AbbbcccFyy", S2 = "FxxxyyyAccc"
+</center>
+<p>
+You should see that these examples are related.  In the first, the longest subsequence is "Fyy",
+and in the second, the longest subsequence is "Accc".  This example highlights the difficulty
+of this problem -- If you start looking for subsequences from the beginning of either string,
+the result may be affected by the end of the string.  We'll return to these examples in a bit.
+Let's try another example:
+<p>
+<center>
+S1 = "9009709947053769973735856707811337348914", S2 = "9404888367379074754510954922399291912221"
+</center>
+<p>
+Man, that looks hard.  Don't even bother trying to solve it.  However, one thing you do know --
+the maximum subsequence starts with a 9.  Why?  It has to -- you can prove this to yourself
+by contradiction: If the subsequence is <i>S</i> and <i>S</i> doesn't start with 9, then there is
+a valid subsequence which is "9"+<i>S</I>.  
+<p>
+I'm hoping these examples help you spot the recursion:  You will compare the first letters of
+both substrings, and do different things depending on whether they equal each other:
+<p>
+<UL>
+<LI> If <b>S1[0] == S2[0]</b>, then the answer is one plus the maximum subsequence of
+<b>S1.substr(1)</b> and 
+<b>S2.substr(1)</b>.  (This method returns the substring starting at index 1 and going to
+the end of the string).
+<p><LI> If <b>S1[0] != S2[0]</b>, then you know that the maximum subsequence either does
+not start with <b>S1[0]</b> or does not start with <b>S2[0]</b>.  Thus, you should
+determine 
+the maximum subsequence of <b>S1</b> and <b>S2.substr(1)</b>, and 
+the maximum subsequence of <b>S2</b> and <b>S1.substr(1)</b>.  
+The answer has to be one of these.
+</UL>
+<p>
+Let's hack that up.  It's in 
+<b><a href=subseq1.cpp>subseq1.cpp</a></b>. (There's a <b>main()</b> that reads the
+two strings from the command line.
+
+<p><center><table border=3 cellpadding=3><td><pre>
+int LCS(string s1, string s2)
+{
+  int r1, r2;
+
+  <font color=blue>/* Base case -- if either string is empty, return 0. */</font>
+
+  if (s1.size() == 0 || s2.size() == 0) return 0;
+
+  <font color=blue>/* If the first characters of the two strings equal each other,
+     then the answer is one plus the LCS of the two string with
+     the first characters chopped off. */</font>
+
+  if (s1[0] == s2[0]) return 1 + LCS(s1.substr(1), s2.substr(1));
+
+  <font color=blue>/* Otherwise, the answer is either:
+       - The LCS of the 1st string, and the 2nd string without its first character.
+       - The LCS of the 2nd string, and the 1st string without its first character.
+   */   </font>
+
+  r1 = LCS(s1, s2.substr(1));
+  r2 = LCS(s1.substr(1), s2);
+  return (r1 &gt; r2) ? r1 : r2;
+}
+</pre></td></table></center><p>
+
+It seems to work on our examples:
+
+<pre>
+UNIX> <font color=darkred><b>g++ -o subseq1 subseq1.cpp</b></font>
+UNIX> <font color=darkred><b>subseq1 AbbbcccFyy FxxxyyyAc</b></font>
+3
+UNIX> <font color=darkred><b>subseq1 AbbbcccFyy FxxxyyyAccc</b></font>
+4
+UNIX> <font color=darkred><b>subseq1 9009709947053769973735856707811337348914 9404888367379074754510954922399291912221</b></font>
+</pre>
+
+However, it hangs on that last one.  Why?  Exponential blow-up of duplicate calls.  Let's
+memoize.  This is an easy memoization on the strings -- just concatenate them with a 
+character that can't be in either string -- I'll choose a colon here.  I'm 
+going to turn the solution into a class so that storing the cache is easier.  
+It's in <b><a href=subseq2.cpp>subseq2.cpp</a></b>:
+
+<p><center><table border=3 cellpadding=3><td><pre>
+class Subseq {
+  public:
+    map &lt;string, int&gt; cache;
+    int LCS(string s1, string s2);
+};
+
+int Subseq::LCS(string s1, string s2)
+{
+  string key;
+  int r1, r2;
+
+  if (s1.size() == 0 || s2.size() == 0) return 0;
+
+  key = s1 + ":";
+  key += s2;
+  if (cache.find(key) != cache.end()) return cache[key];
+
+  if (s1[0] == s2[0]) {
+   cache[key] = 1 + LCS(s1.substr(1), s2.substr(1));
+  } else {
+    r1 = LCS(s1, s2.substr(1));
+    r2 = LCS(s2, s1.substr(1));
+    cache[key] = (r1 &gt; r2) ? r1 : r2;
+  }
+  return cache[key];
+}
+</pre></td></table></center><p>
+
+This works fine on our examples:
+
+<pre>
+UNIX> <font color=darkred><b>g++ -o subseq2 subseq2.cpp</b></font>
+UNIX> <font color=darkred><b>subseq2 AbbbcccFyy FxxxyyyAc</b></font>
+3
+UNIX> <font color=darkred><b>subseq2 AbbbcccFyy FxxxyyyAccc</b></font>
+4
+UNIX> <font color=darkred><b>subseq2 9009709947053769973735856707811337348914 9404888367379074754510954922399291912221</b></font>
+15
+UNIX> <font color=darkred><b></b></font>
+</pre>
+
+However, this solution should make you feel uneasy.  It makes me feel uneasy.  The reason is
+that each call to <b>LCS</b> makes a copy of its arguments, and each call to <b>substr()</b>
+creates a new string which is just one character smaller than the previous string.  That's
+a lot of memory.  To hammer home this point, the file
+<b><a href=sub-big.txt>sub-big.txt</a></b>
+has two 3000-character strings.  When we call <b>subseq2</b> on it, it hangs because it is making
+so many copies of large strings:
+
+<pre>
+UNIX> <font color=darkred><b>subseq2 `cat sub-big.txt`</b></font>
+</pre>
+
+Think about it -- each substring is a suffix of the previous one, so for S1 and S2 there are
+roughly 3000 suffixes.  That means potentially 3000 * 3000 calls to <b>LCS()</b>, each time 
+creating strings of size up to 3000.  That's a huge amount of time and memory.  
+<p>
+Since we are only using suffixes of S1 and S2, we can represent them with indices to their
+first characters, and we call <b>LCS()</b> on these indices rather than on the strings.
+I've put that code into <b><a href=subseq3.cpp>subseq3.cpp</a></b>.  It doesn't memoize.
+
+<p><center><table border=3 cellpadding=3><td><pre>
+class Subseq {
+  public:
+    string s1, s2;
+    int LCS(int i1, int i2);
+};
+
+int Subseq::LCS(int i1, int i2)
+{
+  int r1, r2;
+
+  if (s1.size() == i1 || s2.size() == i2) return 0;
+
+  if (s1[i1] == s2[i2]) {
+    return 1 + LCS(i1+1, i2+1);
+  } else {
+    r1 = LCS(i1, i2+1);
+    r2 = LCS(i1+1, i2);
+    return (r1 &gt; r2) ? r1 : r2;
+  }
+}
+</pre></td></table></center><p>
+
+It works, although since it doesn't memoize, it hangs on the long input.
+
+<pre>
+UNIX> <font color=darkred><b>subseq3 AbbbcccFyy FxxxyyyAc</b></font>
+3
+UNIX> <font color=darkred><b>subseq3 AbbbcccFyy FxxxyyyAccc</b></font>
+4
+UNIX> <font color=darkred><b>subseq3 9009709947053769973735856707811337348914 9404888367379074754510954922399291912221</b></font>
+</pre>
+
+We memoize in <b><a href=subseq4.cpp>subseq4.cpp</a></b>.  Our cache is on the 
+indices, and is thus of size <b>s1.size() * s2.size()</b>:
+
+<p><center><table border=3 cellpadding=3><td><pre>
+class Subseq {
+  public:
+    string s1, s2;
+    vector &lt; vector &lt;int&gt; &gt; cache;
+    int LCS(int i1, int i2);
+};
+
+int Subseq::LCS(int i1, int i2)
+{
+  int r1, r2, i;
+
+  if (s1.size() == i1 || s2.size() == i2) return 0;
+
+  if (cache.size() == 0) {
+    cache.resize(s1.size());
+    for (i = 0; i &lt; s1.size(); i++) cache[i].resize(s2.size(), -1);
+  }
+
+  if (cache[i1][i2] != -1) return cache[i1][i2];
+
+  if (s1[i1] == s2[i2]) {
+   cache[i1][i2] = 1 + LCS(i1+1, i2+1);
+  } else {
+    r1 = LCS(i1, i2+1);
+    r2 = LCS(i1+1, i2);
+    cache[i1][i2] = (r1 &gt; r2) ? r1 : r2;
+  }
+  return cache[i1][i2]; 
+}
+</pre></td></table></center><p>
+
+Now this version is fast, and it even works on the huge input in under a second without
+compiler optimization!
+
+<pre>
+UNIX> <font color=darkred><b>g++ -o subseq4 subseq4.cpp</b></font>
+UNIX> <font color=darkred><b>subseq4 AbbbcccFyy FxxxyyyAc</b></font>
+3
+UNIX> <font color=darkred><b>subseq4 AbbbcccFyy FxxxyyyAccc</b></font>
+4
+UNIX> <font color=darkred><b>subseq4 9009709947053769973735856707811337348914 9404888367379074754510954922399291912221</b></font>
+15
+UNIX> <font color=darkred><b>time subseq4 `cat sub-big.txt`</b></font>
+891
+0.930u 0.040s 0:00.96 101.0%  0+0k 16+0io 0pf+0w
+UNIX> <font color=darkred><b></b></font>
+</pre>
+
+It's faster with optimization:
+
+<pre>
+UNIX> <font color=darkred><b>g++ -O3 -o subseq4 subseq4.cpp</b></font>
+UNIX> time subseq4 `cat sub-big.txt`
+891
+0.310u 0.040s 0:00.33 106.0%  0+0k 0+0io 0pf+0w
+UNIX> 
+</pre>
+
+We can perform step #3 on this by realizing that you perform the recursion on larger indices,
+so you build the cache from high to low.  This is in
+<b><a href=subseq5.cpp>subseq5.cpp</a></b>:
+
+<p><center><table border=3 cellpadding=3><td><pre>
+int Subseq::LCS()
+{
+  int r1, r2, i, i1, i2;
+
+  cache.resize(s1.size()+1);
+  for (i = 0; i &lt; cache.size(); i++) cache[i].resize(s2.size()+1, -1);
+
+  for (i = 0; i &lt;= s1.size(); i++) cache[i][s2.size()] = 0;
+  for (i = 0; i &lt;= s2.size(); i++) cache[s1.size()][i] = 0;
+
+  for (i1 = s1.size()-1; i1 &gt;= 0; i1--) {
+    for (i2 = s2.size()-1; i2 &gt;= 0; i2--) {
+      if (s1[i1] == s2[i2]) {
+       cache[i1][i2] = 1 + cache[i1+1][i2+1];
+      } else {
+        r1 = cache[i1][i2+1];
+        r2 = cache[i1+1][i2];
+        cache[i1][i2] = (r1 &gt; r2) ? r1 : r2;
+      }
+    }
+  }
+  return cache[0][0]; 
+}
+</pre></td></table></center><p>
+
+This is much faster than the previous code:
+
+<pre>
+UNIX> <font color=darkred><b>time subseq5 `cat sub-big.txt `</b></font>
+891
+0.052u 0.036s 0:00.09 88.8% 0+0k 40+0io 0pf+0w
+UNIX> <font color=darkred><b></b></font>
+</pre>
+
+Finally, we can perform step 4 on this by only keeping two rows, and performing 
+the arithmetic on <i>i1</i> mod 2.  Now, the cache only contains <b>(2*s2.size())</b> 
+entries.  The
+code is in <b><a href=subseq6.cpp>subseq6.cpp</a></b>:
+
+<p><center><table border=3 cellpadding=3><td><pre>
+int Subseq::LCS()
+{
+  int r1, r2, i, i1, i2, index, other;
+
+  cache.resize(2);
+  for (i = 0; i &lt; cache.size(); i++) cache[i].resize(s2.size()+1, 0);
+
+  for (i1 = s1.size()-1; i1 &gt;= 0; i1--) {
+    index = i1%2;
+    other = (i1+1)%2;
+    for (i2 = s2.size()-1; i2 &gt;= 0; i2--) {
+      if (s1[i1] == s2[i2]) {
+       cache[index][i2] = 1 + cache[other][i2+1];
+      } else {
+        r1 = cache[index][i2+1];
+        r2 = cache[other][i2];
+        cache[index][i2] = (r1 &gt; r2) ? r1 : r2;
+      }
+    }
+  }
+  return cache[0][0]; 
+}
+</pre></td></table></center><p>
+
+It runs at the same speed as before, but uses much less memory:
+
+<pre>
+UNIX> <font color=darkred><b>time subseq6 `cat sub-big.txt `</b></font>
+891
+0.052u 0.000s 0:00.05 100.0%  0+0k 0+0io 0pf+0w
+UNIX> <font color=darkred><b></b></font>
+</pre>
+
+Here's a curiousity -- take a look at the timings and the output and see if you can figure
+out what's going on:
+
+<pre>
+UNIX> <font color=darkred><b>wc sub-big.txt</b></font>
+   2    2 5353 sub-big.txt
+UNIX> <font color=darkred><b>wc sub-big-2.txt</b></font>
+   2    2 5186 sub-big-2.txt
+UNIX> <font color=darkred><b>time subseq4 `cat sub-big-2.txt`</b></font>
+2592
+0.000u 0.036s 0:00.04 75.0% 0+0k 0+0io 0pf+0w
+UNIX> <font color=darkred><b>time subseq5 `cat sub-big-2.txt`</b></font>
+2592
+0.060u 0.020s 0:00.08 100.0%  0+0k 0+0io 0pf+0w
+UNIX> <font color=darkred><b>time subseq6 `cat sub-big-2.txt`</b></font>
+2592
+0.044u 0.004s 0:00.05 80.0% 0+0k 0+0io 0pf+0w
+UNIX> <font color=darkred><b></b></font>
+</pre>
+
+Why is this interesting?  Well, 
+<b><a href=sub-big-2.txt>sub-big-2.txt</a></b> is nearly the same size as
+<b><a href=sub-big.txt>sub-big.txt</a></b>.  <b>subseq5</b> and <b>subseq6</b> take
+about the same amount of time to run on it, but <b>subseq4</b> is <i>much</i> faster.
+Why would that be the case?
+<p>
+Take a look at the output -- the maximum subsequence size is 2592, pretty much half the
+size of the input file.  You can confirm that the two strings are in fact the same:
+
+<pre>
+UNIX> <font color=darkred><b>sort -u sub-big-2.txt | wc</b></font>
+      1       1    2593
+UNIX> <font color=darkred><b></b></font>
+</pre>
+
+Why would <b>subseq4</b> be so much faster than the others -- well, because it simply
+does the one recursion at every step, ending after 2592 recursive calls.  <b>subseq5</b>, 
+on the other hand, builds that 2592x2592 cache without realizing that pretty much none of
+the cache is getting used.  Same with <b>subseq6</b>, except it only stores the last two
+rows.  
+
+<hr>
+<h3>Some Call Graphs</h3>
+
+In case some pictures help, here's the call graph of calling <b>subseq1.cpp</b>
+on "Dog" and "Dodger".    You should see how this gives us an answer of three.
+
+<p><center><table border=3><td><img src=Dog-Dodger.jpg></td></table></center><p>
+
+I have a much larger call graph for "AbbbcccFyy" and "FxxxyyyAc" below (click on it
+to see the full-size picture).  In this graph, the red edges are calls when the first
+characters don't match, and the blue edges are when they do match.  The calls go down 
+and to the right.  I have widened the calls that lead to the correct answer.
+
+<p><center><table border=3><td><a href=FCC.jpg><img src=FCC.jpg width=600></a></td></table></center><p>

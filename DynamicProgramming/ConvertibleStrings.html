@@ -1,0 +1,146 @@
+<title>CS302 Lecture Notes</title>
+<h2>CS302 Lecture Notes - Dynamic Programming<br>Example program #4: ConvertibleStrings</h2>
+<h3>James S. Plank</h3>
+Original Notes: Thu Nov 14 21:59:54 EST 2013.<br>
+Latest revision: Tue Nov 15 01:02:49 EST 2016.
+<p>This is from Topcoder SRM 591, Division 2, 500-point problem.
+<br><a href=http://community.topcoder.com/stat?c=problem_statement&pm=12754&rd=15703>Problem Statement</a>.
+<hr>
+
+This one screams dynamic programming.  As always, the hard part is to
+spot the recursion.  Here's how I thought about it.  You have your
+two strings, A and B.  Consider the first character of each.  Either
+you are going to remove that character from each string, or you are going to keep
+the character, which means that you'll match the character in A with the character in B.
+In either case, you can solve a smaller sub-problem, and use that solution to solve
+your problem.
+<p>
+Let's think about it in terms of a concrete example.  I work Example 2 to completion
+below, but I'm going to start with a harder one here to motivate the recursion.
+I've put this in the main as example 4.
+<center><p>
+A = "DEFDEDFFDEED",  B = "WYZYXYWYZYXY"
+</center><p>
+
+Now, consider the first character of each string -- this is the character 'D' for A,
+and 'W' for B.  Our solution is going to be one of the following:
+
+<UL>
+<LI> Either remove those first characters from both strings, and solve the subproblem
+of A = "EFDEDFFDEED",  B = "YZYXYWYZYXY".   The total number of character removals will
+be the solution to the subproblem, plus one for removing the initial 'D' and 'W'.
+<p>
+<LI> Or, we match 'D' to 'W'.  This will have implications for the rest of the two strings.
+Whenever we see an 'D' in A or a 'W' in B, we need to consider the fact that we have matched
+'D' to 'W'.    Let's take a look at the two strings, and the D's and W's:
+<pre>
+    "DEFDEDFFDEED"
+     |  | || |  |
+     |  | || |  |
+     M  X XX X  X
+     |  | || |  |
+     |  | || |  |
+    "WYZYXYWYZYXY"
+</pre>
+There are six indices <i>i</i> where either A[i] equals 'D' or B[i] equals W.  In all but the
+first, the D's and W's don't match.  That means that if we match 'D' and 'W', we are going to
+have to remove those five characters from both strings, incurring a penalty of five.
+<p>
+Now, to make the recursive call, we should remove all six occurrences, basically getting rid of
+all of the D's and W's.  We will make a recursive call with A = "EFEFEE" and B = "YZXYYX", and
+add five to the answer.  
+</UL>
+
+Whichever of these approaches yields the smaller number will be the answer.
+<hr>
+Let's run through a second example, this time all the way to completion.  This is 
+example 2 from the Topcoder problem:
+
+<center><p>
+A = "AAIAIA".  B = "BCDBEE"
+</center><p>
+Suppose we remove the first character from A and B.  
+Then the number of overall removals is going to be one plus the minimum number
+of removals when you set A to "AIAIA" and B to "CDBEE".    
+<p>
+Now suppose instead that we don't remove the first character.  Then
+'A' in A will match with 'B' in B.  So, we run through both strings,
+and whenever there is an 'A' in A, or a 'B' in B, we'll have to decide
+whether this will cause us to remove the characters, or whether they
+match appropriately.  Let's draw the same picture as above:
+<pre>
+    "AAIAIA"
+     || | |
+     || | |
+     MX M X
+     || | |
+     || | |
+    "BCDBEE"
+</pre>
+As you can see, two of them match, and two of them must be removed.  For the recursive
+call, we'll remove all of those indices, leaving us with A = "II" and B = "DE".  We'll
+add two to the recursive call, because of the two non-matching characters above.
+<p>
+So, to summarize, we are going to do two things with the first characters of A
+and B:
+<OL>
+<LI> Remove them from both strings and solve the subproblem.  The answer is
+the solution to the sub-problem, plus one.
+<LI> Match them.  This may cause us to remove other non-matching characters
+in the remainder of the string.  Let's call the number of such removals <i>R</i>.  
+Create the sub-problem by deleting all instances
+of the first character in A (and their corresponding characters in B), 
+and all instances of the first character in B (and their corresponding characters in A).
+The answer is the solution to the sub-problem, plus <i>R</i>.
+</OL>
+
+Whichever of these solutions is the minimum is our answer.
+
+<p>
+There's your recursion.  Now, this is a dynamic program, so you have to memoize.  
+I had my cache be a map that I key on a concatenation 
+of A and B.  With the example above, the first key is "AAIAIABCDBEE".
+<p>
+Hack it up.  This one is a really nice practice DP problem.
+<p>
+My solution is <a href=ConvertibleStrings.cpp>here</a> (there is a <b>main()</b> in that
+program so that you can run it from the command line).
+<hr>
+If you want to walk through this in detail, the picture below shows the call graph
+of example 2.  Each node makes two recursive calls, which are represented by edges to
+other nodes.  When the edges leave the bottom of a node, it's because we are removing the 
+first characters and recursively calling the procdure on the remaining characters.  For
+that reason, the edge weights are always one.  
+<p>
+When the edge leaves the right of a node, it's because we are matching the first characters,
+and then we have to remove any non-matching characters in the remaining strings.  The edge
+weights are variable now.  For the starting node, the weight of the edge to its right has
+a weight of two, because we have to change two characters when we match 'A' to 'B'.
+For the node "IA EE", the edge to the right goes to the empty string with a weight of one, because
+when you assign 'I' to 'E', you have to remove the 'A'.
+
+<p><center><table border=3><td><a href=CS-Ex2.jpg><img src=CS-Ex2.jpg width=500></a></td></table></center><p>
+<hr>
+<h3>"But Dr. Plank, is this Dynamic Programming, Topological Sort, or Dijkstra's Algorithm?"</h3>
+
+Good question.  You'll note that the graph above is a directed acyclic graph, and you are looking
+for the shortest path from the starting node to the node with the null string.  
+
+So you can solve it in three different ways:
+<UL>
+<LI> <b>As a shortest path problem</b>.  In fact, I'm guessing that this is truly the most efficient
+way to solve the problem, because what you do in this instance is create the graph as you
+process Dijkstra's algorithm.   You start just with the starting node ("AAIAIA BCDBEE") and 
+put it onto the Dijkstra map.  Then you process the map.  When you process a node, you process
+both edges, creating the nodes if necessary, and putting them onto the map.  In this way,
+you don't actually have to create all of the nodes, because Dijkstra's algorithm terminates
+when it finds the minimum path.  
+<p>
+<LI> <b>As a topological sort</b>.  Each time you remove a node, 
+you know the node's minimum distance
+to the starting node.  When you remove the last node, you have your answer.
+You know, this is really the "step 3" solution to the problem -- removing the recursion.
+<p>
+<LI> <b>As a dynamic program</b>.  If you think about it, the dynamic program is like a DFS on an 
+acyclic graph. That's pretty cool.
+</UL>

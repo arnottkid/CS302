@@ -1,0 +1,273 @@
+<title>CS302 Lecture Notes - Dynamic Programming </title>
+<h2>CS302 Lecture Notes - Dynamic Programming<br>Example Program #2: The Coin Problem</h2>
+<UL>
+<LI> November 18, 2009
+<LI> James S. Plank
+<LI> Directory: <b>/home/plank/cs302/Notes/DynamicProgramming</b>
+</UL>
+<hr>
+
+Here's the problem: Given a list of <i>N</i> coin denominations (V1, V2, ..., VN), 
+and a sum <i>S</i>. Find the minimum number of coins the sum of which is <i>S</i> 
+(we can use as many coins of one denomination as we want), 
+or report that it's not possible to select coins in such a way that they sum up to <i>S</i>. 
+<p>
+We start with <b>Step 1:</b> finding the recursion.  Often the best way to do this is to
+try some examples.  I think its easier to think of postage stamps instead of coins, because
+they can come in wacky denominations.  And then I think of the sum as a total amount of postage,
+and I'm trying to put stamps on the package to equal the amount of postage.
+So, for example, suppose our denominations are 1, 5, 6 and 10, and our sum is 11.  The 
+minimum way of constructing the sum is one 5 and one 6, or one 10 and one 1.  Since the problem asks for
+the minimum number of "coins", the answer is 2.  Similarly, if our sum is 18, the answer is three: three 6's.
+<p>
+Let's make a quick table of sums and answers:
+<p>
+<center>
+<table border=3>
+<tr>
+<td align=left><i>S</i></td>
+<td align=center><i>1</i></td>
+<td align=center><i>2</i></td>
+<td align=center><i>3</i></td>
+<td align=center><i>4</i></td>
+<td align=center><i>5</i></td>
+<td align=center><i>6</i></td>
+<td align=center><i>7</i></td>
+<td align=center><i>8</i></td>
+<td align=center><i>9</i></td>
+<td align=center><i>10</i></td>
+<td align=center><i>11</i></td>
+<td align=center><i>12</i></td>
+<td align=center><i>13</i></td>
+<td align=center><i>14</i></td>
+<td align=center><i>15</i></td>
+<td align=center><i>16</i></td>
+<td align=center><i>17</i></td>
+<td align=center><i>18</i></td></tr>
+<tr>
+<td align=left><i>Answer</i></td>
+<td align=center><i>1</i></td>
+<td align=center><i>2</i></td>
+<td align=center><i>3</i></td>
+<td align=center><i>4</i></td>
+<td align=center><i>1</i></td>
+<td align=center><i>1</i></td>
+<td align=center><i>2</i></td>
+<td align=center><i>3</i></td>
+<td align=center><i>4</i></td>
+<td align=center><i>1</i></td>
+<td align=center><i>2</i></td>
+<td align=center><i>2</i></td>
+<td align=center><i>3</i></td>
+<td align=center><i>4</i></td>
+<td align=center><i>2</i></td>
+<td align=center><i>2</i></td>
+<td align=center><i>3</i></td>
+<td align=center><i>3</i></td></tr>
+<tr>
+<td align=left><i>Coins</i></td>
+<td align=center><i>1</i></td>
+<td align=center><i>1,1</i></td>
+<td align=center><i>1,1,1</i></td>
+<td align=center><i>1,1,1,1</i></td>
+<td align=center><i>5</i></td>
+<td align=center><i>6</i></td>
+<td align=center><i>6,1</i></td>
+<td align=center><i>6,1,1</i></td>
+<td align=center><i>6,1,1,1</i></td>
+<td align=center><i>10</i></td>
+<td align=center><i>5,6</i></td>
+<td align=center><i>6,6</i></td>
+<td align=center><i>6,6,1</i></td>
+<td align=center><i>6,6,1,1</i></td>
+<td align=center><i>10,5</i></td>
+<td align=center><i>10,6</i></td>
+<td align=center><i>10,6,1</i></td>
+<td align=center><i>6,6,6</i></td></tr></table></center>
+<p>
+There doesn't appear to be a nice pattern, but think recursively.  If I want to make the sum <i>S</i>,
+and my coins are 1, 5, 6 and 10, then I can make the sum in four ways:
+<p>
+<UL>
+<LI> I can make the sum <i>S-1</i> and add a 1 coin.
+<LI> I can make the sum <i>S-5</i> and add a 5 coin.
+<LI> I can make the sum <i>S-6</i> and add a 6 coin.
+<LI> I can make the sum <i>S-10</i> and add a 10 coin.
+</UL>
+So, let's suppose my procedure is <i>M(S)</i>.  If I define it recursively, then my answer is
+going to be the minimum of <i>M(S-1)+1</i>, <i>M(S-5)+1</i>, <i>M(S-6)+1</i> and <i>M(S-10)+1</i>.
+<p>
+See how to write the procedure?  You loop through all the values, making recursive calls.
+It's in 
+<b><a href=coins1.cpp>coins1.cpp</a></b>.  I use <i>s+1</i> as a sentinel value for the minimum,
+and if the sum cannot be constructed, then I return -1.
+
+<p><center><table border=3 cellpadding=3><td><pre>
+#include &lt;iostream&gt;
+#include &lt;cstdlib&gt;
+#include &lt;vector&gt;
+using namespace std;
+
+class Coins {
+  public:
+    vector &lt;int&gt; v;
+    int M(int i);
+};
+
+int Coins::M(int s)
+{
+  int i, j, min, sv;
+
+  <font color=blue>/* We initialize the minimum by sentinelizing it to an impossible value. */</font>
+
+  min = s+1;
+
+  <font color=blue>/* Loop through all of the coins. */</font>
+
+  for (i = 0; i &lt; v.size(); i++) {
+
+    <font color=blue>/* If our sum equals a coin, then we're done -- return one. */</font>
+
+    if (s == v[i]) return 1;
+
+    <font color=blue>/* Otherwise, simulate using the coin by calling M() on the
+       sum minus the coin's value.   If that's better than 
+       our current minimum, update the minimum. */</font>
+
+    if (s &gt; v[i]) {
+      j = M(s-v[i]) + 1;
+      if (j != 0 && j &lt; min) min = j;
+    }
+  }
+
+  <font color=blue>/* The min equals the sentinel, then it's impossible, return -1. 
+     Otherwise, return the minimum. */</font>
+
+  if (min == s+1) return -1;
+  return min;
+}
+
+int main(int argc, char **argv)
+{
+  Coins c;
+  int i;
+  int sum;
+
+  if (argc != 2) {
+    cerr &lt;&lt; "usage: coins s -- values on standard input\n";
+    exit(1);
+  }
+  sum = atoi(argv[1]);
+  while (cin &gt;&gt; i) c.v.push_back(i);
+
+  cout &lt;&lt; c.M(sum) &lt;&lt; endl;
+}
+</pre></td></table></center><p>
+
+A quick test shows that it works:
+<pre>
+UNIX> <b>sh</b>
+> <b>for i in 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 ; do echo $i `echo 1 5 6 10 | coins1 $i`; done</b>
+1 1
+2 2
+3 3
+4 4
+5 1
+6 1
+7 2
+8 3
+9 4
+10 1
+11 2
+12 2
+13 3
+14 4
+15 2
+16 2
+17 3
+18 3
+>
+</pre>
+
+However, like most simple recursive implementations, it is too slow.  It bogs down when <i>S</i> reaches the
+high 40's.  So, we do a simple memoization.  This looks pretty much just like the memoization in
+the Fibonacci numbers, although I use two sentinel values in the cache:  If <b>cache[s]</b> equals -2, then
+I have not calculated the value.  If <b>cache[s]</b> equals -1, then it is impossible to make the sum <b>s</b>.
+Here is the <b>M()</b> method
+(in <b><a href=coins2.cpp>coins2.cpp</a></b>):
+
+<p><center><table border=3 cellpadding=3><td><pre>
+int Coins::M(int s)
+{
+  int i, j, min, sv;
+
+  if (cache.size() &lt;= s) cache.resize(s+1, -2);
+  if (cache[s] != -2) return cache[s];
+
+  if (s == 0) {
+    cache[s] = 0;
+    return 0;
+  }
+
+  min = s+1;
+
+  for (i = 0; i &lt; v.size(); i++) {
+    if (s &gt;= v[i]) {
+      j = M(s-v[i]) + 1;
+      if (j != 0 && j &lt; min) min = j;
+    }
+  }
+  if (min == s+1) min = -1;
+  cache[s] = min;
+  return min;
+}
+</pre></td></table></center><p>
+
+This is much faster:
+
+<pre>
+UNIX> <b>echo 1 5 6 10 | coins2 505</b>
+51
+UNIX> <b>echo 1 5 6 10 | coins2 5057</b>
+507
+UNIX> <b></b>
+</pre>
+
+For <b>Step 3</b>, as with the Fibonacci numbers, we make the observation that we are always
+making recursive calls from larger <b>s</b> to smaller <b>s</b>.  Thus, we can build the cache
+from low to high values of <b>s</b> without using recursion.  
+The code is in <b><a href=coins3.cpp>coins3.cpp</a></b>.  Note how similar it is to 
+<b><a href=coins2.cpp>coins2.cpp</a></b> - the difference is that it looks into the cache
+instead of making recursive calls, and it builds the cache from low to high rather than
+making recursive calls from high to low.  I also removed the cache from the <b>Coins</b> class
+and made it a local variable to <b>M()</b>:
+
+<p><center><table border=3 cellpadding=3><td><pre>
+int Coins::M(int s)
+{
+  int i, j, val, min, sv;
+  vector &lt;int&gt; cache;
+
+  cache.resize(s+1);
+
+  cache[0] = 0;
+  
+  for (j = 1; j &lt;= s; j++) {
+    min = s+1;
+
+    for (i = 0; i &lt; v.size(); i++) {
+      if (j &gt;= v[i]) {
+        val = cache[j-v[i]] + 1;
+        if (val != 0 && val &lt; min) min = val;
+      }
+    }
+    if (min == s+1) min = -1;
+    cache[j] = min;
+  }
+  return cache[s];
+}
+</pre></td></table></center><p>
+
+Finally, there is a way to do step four if you think about it.  This about that last call above --
+"<b>echo 1 5 6 10 | coins2 5057</b>".  Does your cache really need 5057 elements?
+If you don't see the answer, ask me in class -- this is a good test question.

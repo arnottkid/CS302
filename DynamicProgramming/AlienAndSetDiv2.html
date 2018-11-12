@@ -1,0 +1,506 @@
+<title>CS302 Lecture Notes</title>
+<h2>CS302 Lecture Notes - Dynamic Programming<br>Example program #6: AlienAndSetDiv2</h2>
+<h3>James S. Plank</h3>
+Original notes: Wed Nov 19 15:34:24 EST 2014.<br>
+Latest revision:
+Wed Nov 16 14:57:50 EST 2016
+<p>This is from Topcoder SRM 605, Division 2, 1000-point problem.
+<br><a href=https://community.topcoder.com/stat?c=problem_statement&pm=12954&rd=15838>Problem Statement</a>.
+<hr>
+
+This is another tricky dynamic program, where the hard part is spotting the recursion.  After
+you spot the recursion, you can make your solution more efficient by using bit arithmetic.
+<p>
+Let's start with a really brain-dead recursion.  We will maintain two vectors in our
+class -- <b>A</b> and <b>B</b>.  And we'll write a recursive dynamic programming function:
+
+<p><center><table border=3 cellpadding=3><td><pre>
+int DP(int next);
+</pre></td></table></center><p>
+
+This will return the number of ways to put the numbers from <i>next</i> to <i>N*2</i> into
+the two vectors subject to the rules.  Since it is recursive, it will need to have a base
+case -- that will be when <i>next > 2*N</i>, which means that <b>A</b> and <b>B</b> have
+<i>N</i> elements each, in ascending order, and <i>|A[i]-B[i]| &le; K</i>.  In that case, 
+return 1.
+<p>
+When we are not in the base case, what we do is test to see whether we can put <i>next</i> 
+onto <b>A</b>.  If we can, we do so, call <i>DP(next+1)</i> and add the result to our total.
+Then we remove the element from <b>A</b>, and do the same thing with <b>B</b>.  
+You'll note, this is pretty much identical to how we solve Sudoku in CS140, and earlier
+in CS302.  For each element, we simply try it one way, and then undo what we've done and
+try the other way.
+<p>
+We initially call <i>DP()</i> with <i>next</i> equal to one, and both <b>A</b> and <b>B</b>
+empty.  Here's the code, in 
+<b><a href=alien-1.cpp>alien-1.cpp</a></b>.
+This code has a <b>main()</b>
+which lets you set <i>N</i> and <i>K</i> from the command line.
+
+<p><center><table border=3 cellpadding=3><td><pre>
+class AlienAndSetDiv2 {
+  public:
+    int N, K;
+    vector &lt;int&gt; A; 
+    vector &lt;int&gt; B;
+    int DP(int next);
+    int getNumber(int n, int k);
+};
+
+<font color=blue>/* DP is a very simple procedure, which is like the Sudoku problem
+   from CS140, (and CS302). It tests to see if it can insert the
+   number onto A, and if so, it does so and makes a recursive call to
+   DP(next+1) to count how many solutions start this way.  It does
+   the same thing with B. Its base case is when we are at 2N+1. In
+   that case, we've come up with an answer, and we'll return one.  */</font>
+
+int AlienAndSetDiv2::DP(int next)
+{
+  int total;
+  int i;
+
+
+  <font color=blue>/* Base case -- if we have inserted all numbers from 1 to 2n, 
+     then we're done, and can return 1. */</font>
+
+  if (next == 2*N+1) return 1;
+
+  <font color=blue>/* Otherwise, we're going to count solutions with recursion. */</font>
+
+  total = 0;
+
+  <font color=blue>/* First, we test to see if we can insert the number onto A.  
+     If so, we do so, make a recursive call, and then remove the
+     number from A. */</font>
+
+  if ((A.size() &gt;= B.size() && A.size() &lt; N) ||
+      (A.size() &lt; B.size() && next - B[A.size()] &lt;= K)) {
+    A.push_back(next);
+    total += DP(next+1);
+    A.pop_back();
+  }
+
+  <font color=blue>/* We do the same thing with B. */</font>
+
+  if ((B.size() &gt;= A.size() && B.size() &lt; N) ||
+      (B.size() &lt; A.size() && next - A[B.size()] &lt;= K)) {
+    B.push_back(next);
+    total += DP(next+1);
+    B.pop_back();
+  }
+
+  <font color=blue>/* When we're done, we print next, A and B, and the total. */</font>
+
+  printf("Next:%d A:{", next);
+  for (i = 0; i &lt; A.size(); i++) printf("%s%d", (i == 0) ? "" : ",", A[i]);
+  printf("} B:{");
+  for (i = 0; i &lt; B.size(); i++) printf("%s%d", (i == 0) ? "" : ",", B[i]);
+  printf("}  -- %d\n", total);
+
+  <font color=blue>/* And return the total. */</font>
+
+  return total;
+}
+
+<font color=blue>/* getNumber() sets N and K in the class.  It clears the vectors A and B
+   (which will probabaly be empty anyway), and then calls DP(1) to start
+   inserting numbers with 1. */</font>
+
+int AlienAndSetDiv2::getNumber(int n, int k)
+{
+  N = n;
+  K = k;
+
+  A.clear();
+  B.clear();
+  
+  return DP(1);
+}
+</pre></td></table></center><p>
+
+Take a look at those <b>if</b> statements.  They have two parts:
+<OL>
+<LI> "if ((A.size() &gt;= B.size() && A.size() &lt; N)" - this says that when <b>A</b> has
+more elements than <b>B</b> and there's room on <b>A</b>, go ahead and put <i>next</i> on <b>A</b>.
+You'll note that this allows illegal values to go on <b>A</b> -- for example, if <i>K=1</i>,
+and we have <b>A</b> = { 1 }. then this code will append 2 to <b>A</b>, even though that means
+we'll never be able to match any element of <b>B</b> with 1.  That's ok -- because we'll discover
+that and return 0 later.
+<p>
+<LI> "|| (A.size() &lt; B.size() && next - B[A.size()] &lt;= K)) {" -- This says that
+if <b>B</b> has more elements than <b>A</b>, you can put <i>next</i> onto <b>A</b> so long 
+as the difference between it and the first unmatched element of <b>B</b> is less than or equal
+to <i>K</i>.
+</OL>
+
+Let's run this on some examples:
+
+<pre>
+UNIX> <font color=darkred><b>alien-1 2 1</b></font>
+Next:3 A:{1,2} B:{}  -- 0
+Next:4 A:{1,3} B:{2}  -- 1
+Next:4 A:{1} B:{2,3}  -- 1
+Next:3 A:{1} B:{2}  -- 2
+Next:2 A:{1} B:{}  -- 2
+Next:4 A:{2,3} B:{1}  -- 1
+Next:4 A:{2} B:{1,3}  -- 1
+Next:3 A:{2} B:{1}  -- 2
+Next:3 A:{} B:{1,2}  -- 0
+Next:2 A:{} B:{1}  -- 2
+Next:1 A:{} B:{}  -- 4
+4
+UNIX> <font color=darkred><b>alien-1 3 1 | tail -n 1</b></font>
+8
+UNIX> <font color=darkred><b>alien-1 4 2 | tail -n 1</b></font>
+44
+UNIX> <font color=darkred><b>alien-1 10 10 | tail -n 1</b></font>
+184756
+UNIX> <font color=darkred><b>time sh -c "alien-1 10 10 | tail -n 1"</b></font>
+184756
+2.782u 0.035s 0:01.45 193.7%	0+0k 20+0io 0pf+0w
+UNIX> <font color=darkred><b></b></font>
+</pre>
+
+
+Well, the good thing is that we're getting correct answers.  It's not a bad idea to trace
+through that first output to make sure that everything makes sense.
+The bad thing is that we're
+getting some exponential blow-up, and there's no way we're going to get the <b>N=50, K=10</b>
+case to run in time.
+
+<hr>
+<h3>Fix #1: If the two sizes are equal</h3>
+
+When the sizes of <b>A</b> and <b>B</b> are equal, you should see that we're going to get the same
+answer when we insert <i>next</i> into <b>A</b>, and when we insert <i>next</i> into <b>B</b>.
+So, let's only insert it into <b>A</b>, and multiply the result by two.  That fix
+is in 
+<b><a href=alien-2.cpp>alien-2.cpp</a></b>.
+I've also anticipated a problem with overflow problem, by having
+<b>total</b> be a <b>long long</b>, and taking it modulo 1,000,000,007 at the end.  
+
+<p><center><table border=3 cellpadding=3><td><pre>
+int AlienAndSetDiv2::DP(int next)
+{
+  long long total;
+
+  <font color=blue>/* Base case -- if we have inserted all numbers from 1 to 2n, 
+     then we're done, and can return 1. */</font>
+
+  if (next == 2*N+1) return 1;
+
+  <font color=blue>/* Otherwise, we're going to count solutions with recursion. */</font>
+
+  total = 0;
+
+  <font color=blue>/* If the sets are the same size, just push next onto A, and
+     multiply the answer by two. */</font>
+
+  if (A.size() == B.size()) {
+    A.push_back(next);
+    total += 2*DP(next+1);
+    A.pop_back();
+  }
+
+  <font color=blue>/* Otherwise, if there's room on A, try the value on A. */</font>
+
+  if (A.size() &gt; B.size() && A.size() &lt; N) {
+    A.push_back(next);
+    total += DP(next+1);
+    A.pop_back();
+  }
+
+  <font color=blue>/* We only push onto B if A is bigger, and if the value is legal. */</font>
+
+  if (B.size() &lt; A.size() && next - A[B.size()] &lt;= K) {
+    B.push_back(next);
+    total += DP(next+1);
+    B.pop_back();
+  }
+
+  .....
+
+  <font color=blue>/* Return the total, mod 1,000,000,007. */</font>
+
+  return total % 1000000007;
+}
+</pre></td></table></center><p>
+
+
+When we run it, it's making far fewer calls, and example 3 (<i>N = K = 10</i>) is much faster:
+
+<pre>
+UNIX> <font color=darkred><b>alien-2 2 1 </b></font>
+Next:3 A:{1,2} B:{}  -- 0
+Next:4 A:{1,3} B:{2}  -- 1
+Next:3 A:{1} B:{2}  -- 2
+Next:2 A:{1} B:{}  -- 2
+Next:1 A:{} B:{}  -- 4
+4
+UNIX> <font color=darkred><b>alien-2 3 1 | tail -n 1</b></font>
+8
+UNIX> <font color=darkred><b>alien-2 4 2 | tail -n 1</b></font>
+44
+UNIX> <font color=darkred><b>alien-2 10 10 | tail -n 1</b></font>
+184756
+UNIX> <font color=darkred><b>time sh -c "alien-2 10 10 | tail -n 1"</b></font>
+184756
+0.348u 0.008s 0:00.19 178.9%	0+0k 16+0io 0pf+0w
+UNIX> <font color=darkred><b></b></font>
+</pre>
+
+Unfortunately, trying <i>N = 50</i> and <i>K = 10</i> doesn't complete, so we still have
+some work to do.
+
+<hr>
+<h3>Fix #2: If elements of A and B are matched, who cares what their values are?</h3>
+
+To motivate this fix, let's suppose that <i>K</i> equals 3, <i>N</i> is some large number,
+and we are calling <b>DP(5)</b>.  We'll look at four cases of <b>A</b> and <b>B</b>:
+
+<UL>
+<LI> Case 1: <b>A</b> is { 0, 1, 4 } and <b>B</b> is { 2, 3 }.
+<LI> Case 2: <b>A</b> is { 0, 2, 4 } and <b>B</b> is { 1, 3 }.
+<LI> Case 3: <b>A</b> is { 0, 3, 4 } and <b>B</b> is { 1, 2 }.
+<LI> Case 4: <b>A</b> is { 1, 2, 4 } and <b>B</b> is { 0, 3 }.
+</UL>
+
+I am going to assert that in each of these cases, <b>DP(5)</b> will return the same
+value.  The reason is that you are only considering the unmatched values of <b>A</b>.
+You don't care what the matched ones are.  And in each of these cases, <b>A</b> has
+exactly one unmatched value: 4.  Put another way, the only thing
+that matters is that <b>A</b>'s size is one bigger than <b>B</b>'s size, and that
+the last value in <b>A</b> is 4.  
+
+<p>
+This observation is really nice, because it gives us a way to limit complexity, and
+to memoize.  To be specific, we don't need to keep track of <b>B</b> any more, because
+there will never be any unmatched values on <b>B</b>.  Let's instead turn <b>A</b> into
+a deque, and when we would previously call <b>B.push_back()</b> to put a value on <b>B</b>,
+we'll now call <b>pop_front()</b> on <b>A</b>.  We'll have to store that value, so that
+we can put it back after making the recursive call.
+<p>
+Also, we can turn <b>next</b> and <b>A</b> into a string and memoize on the string.
+<p>
+We do both of these in.
+<b><a href=alien-3.cpp>alien-3.cpp</a></b>:
+
+<p><center><table border=3 cellpadding=3><td><pre>
+<font color=blue>/* We've removed B, changed A into a deque, and added a memoization Cache. */</font>
+class AlienAndSetDiv2 {
+  public:
+    int N, K;
+    deque &lt;int&gt; A; 
+    int DP(int next);
+    int getNumber(int n, int k);
+    map &lt; string, int &gt; Cache;
+};
+
+int AlienAndSetDiv2::DP(int next)
+{
+  long long total;
+  int i ;
+  int saved;
+  string key;
+  char buf[8];
+
+  <font color=blue>/* Base case -- if we have inserted all numbers from 1 to 2n, 
+     then we're done.  Return 1. */</font>
+
+  if (next == 2*N+1) return 1;
+  
+  <font color=blue>/* Create a memoization key from next and A, and check the cache. */</font>
+
+  sprintf(buf, "%d", next);
+  key = buf;
+  for (i = 0; i &lt; A.size(); i++) {
+    sprintf(buf, "-%d", A[i]);
+    key += buf;
+  }
+  if (Cache.find(key) != Cache.end()) return Cache[key];
+  
+  <font color=blue>/* Otherwise, we're going to count solutions with recursion. */</font>
+
+  total = 0;
+
+  <font color=blue>/* If the sets are the same size, that means that A is empty.
+     Push the value onto A and multiply the answer by two. */</font>
+
+  if (A.size() == 0) {
+    A.push_back(next);
+    total += 2*DP(next+1);
+    A.pop_back();
+  }
+
+  <font color=blue>/* Otherwise, if there's room on A, try the value on A. 
+     We have to calcluate "room on A" differently, since we are not
+     keeping matches.  We need to make sure that if we push the value on
+     A, that there are enough values left on B. */</font>
+
+  if (A.size() &gt; 0 && (N*2+1 - next) &gt; A.size()) {
+    A.push_back(next);
+    total += DP(next+1);
+    A.pop_back();
+  }
+
+  <font color=blue>/* Now, instead of pushing the value on B, we'll remove the 
+     first value from A, and put it back when the recursion is done. */</font>
+
+  if (A.size() &gt; 0 && next - A[0] &lt;= K) {
+    saved = A[0];
+    A.pop_front();
+    total += DP(next+1);
+    A.push_front(saved);
+  }
+
+  <font color=blue>/* Return the total, mod 1,000,000,007. */</font>
+
+  Cache[key] = total % 1000000007;
+  return Cache[key];
+}
+</pre></td></table></center><p>
+
+I don't show the code, but I print the memoization cache after calling <b>DP(1)</b>.
+Here are the examples:
+
+<pre>
+UNIX> <font color=darkred><b>alien-3 2 1</b></font>
+1                              :          4
+2-1                            :          2
+3                              :          2
+3-1-2                          :          0
+4-3                            :          1
+4
+UNIX> <font color=darkred><b>alien-3 3 1 | tail -n 1</b></font>
+8
+UNIX> <font color=darkred><b>alien-3 4 2 | tail -n 1</b></font>
+44
+UNIX> <font color=darkred><b>alien-3 10 10 | tail -n 1</b></font>
+184756
+UNIX> <font color=darkred><b>time sh -c "alien-3 10 10 | tail -n 1"</b></font>
+184756
+0.018u 0.006s 0:00.02 50.0%	0+0k 7+0io 0pf+0w
+UNIX> <font color=darkred><b>time sh -c "alien-3 50 10 | tail -n 1"</b></font>
+153890414
+4.876u 0.044s 0:04.70 104.4%	0+0k 0+0io 0pf+0w
+UNIX> <font color=darkred><b></b></font>
+</pre>
+
+Well, we're now fast enough that we can do the worst case or <i>N</i> equal 50 and
+<i>K</i> equal 10 and it completes.  But it's still not fast enough.
+
+<hr>
+<h3>Fix #3: Don't add to A when it's impossible. </h3>
+
+This next fix is a good one -- suppose that <i>N</i> is some large number, and 
+<i>K</i> is 3.  And suppose that you call <b>DP(4)</b>, when <b>A</b> is equal to { 1, 2, 3 }.
+You should see that pushing 4 at the end of <b>A</b> will make the problem unsolvable.  Why?
+because any subsequent value of <b>next</b> will be greater than 4, and will be too big to 
+push onto B.  
+<p>
+So, let's fix that in
+<b><a href=alien-4.cpp>alien-4.cpp</a></b>.  Here's the relevant code in <b>DP()</b>:
+
+<p><center><table border=3 cellpadding=3><td><pre>
+  <font color=blue>/* Otherwise, if there's room on A, and next is not too big, 
+     try the value on A.  We have to calcluate "room on A" differently, 
+     since we are not keeping matches.  */</font>
+
+  if (A.size() &gt; 0 && next-A[0] &lt; K && (N*2+1 - next) &gt; A.size()) {
+    A.push_back(next);
+    total += DP(next+1);
+    A.pop_back();
+  }
+</pre></td></table></center><p>
+
+When we try this, we see that it has eliminated some cases from the previous
+solution.  In particular, the cache key "3-1-2" corresponds to <b>next=3</b> and
+<b>A</b> = { 1, 2 }.  This is avoided in <b>alien-4</b>, because it makes it impossible
+to put a value onto <b>B</b>:
+
+<pre>
+UNIX> <font color=darkred><b>alien-4 2 1</b></font>
+1                              :          4
+2-1                            :          2
+3                              :          2
+4-3                            :          1
+4
+UNIX> <font color=darkred><b>alien-4 3 1 | tail -n 1</b></font>
+8
+UNIX> <font color=darkred><b>alien-4 4 2 | tail -n 1</b></font>
+44
+UNIX> <font color=darkred><b>alien-4 10 10 | tail -n 1</b></font>
+184756
+UNIX> <font color=darkred><b>alien-4 50 10 | tail -n 1</b></font>
+153890414
+UNIX> <font color=darkred><b>time sh -c "alien-4 50 10 | tail -n 1"</b></font>
+153890414
+0.389u 0.008s 0:00.38 100.0%	0+0k 0+0io 0pf+0w
+UNIX> <font color=darkred><b></b></font>
+</pre>
+
+Even better yet, it solves the biggest case in 0.389 seconds -- we can submit to 
+Topcoder!!!!
+
+<hr>
+<h3>A final fix -- Bit arithmetic!!</h3>
+
+I'll only go over this solution if there's time.  The memoization key seems clunky,
+doesn't it?  So, here's another idea:
+
+<p>
+Instead of storing <b>A</b> as a set of values, store it as a set of differences from 
+<b>next</b>.   How does that work?  Whenever you push a value onto <b>A</b>, you
+don't push <b>next</b>, but instead you push <b>0</b>.  Then, when you call <b>DP(next+1)</b>,
+you increase every value in A by one.
+<p>
+That sounds inefficient, doesn't it?  Well, it's not if you use bit arithmetic to store <b>A</b>.
+When you "push 0", you simply set <b>A</b> to <b>(A|1)</b>.  When you "increase every value
+in <b>A</b> by one," you set <b>A</b> to <b>(A << 1)</b>.  When you want to test to see
+whether you can legally push a value onto <b>A</b>, you can simply check to see if <b>A</b>
+is bigger than <b>(1 << K)</b>.  
+<p>
+The only operation that is kind of a pain is when you 
+previously called <b>A.pop_front()</b>.  That takes a little work.  However, since <b>K</b>
+is capped at 10, <b>A</b> will never be bigger than 2048.  You can even turn <b>next</b> 
+and <b>A</b> into a single integer for memoization:  <b>key = (next << 12) | A</b>.
+<p>
+How fun is that?
+<p>
+The code is in 
+<b><a href=alien-5.cpp>alien-5.cpp</a></b>, and after the initial call to <b>DP()</b>
+returns, we print the cache,
+extracting <b>next</b> and <b>A</b> from the memoization key.  
+I don't include it here, but it is commented, 
+and if you want to have some fun, give it a read.  Then
+try to code it up yourself!
+<p>
+To time this vs. <b>alien-4.cpp</b>, I removed the print statements:
+
+<pre>
+UNIX> <font color=darkred><b>g++ -O3 -o alien-4 alien-4.cpp</b></font>
+UNIX> <font color=darkred><b>g++ -O3 -o alien-5 alien-5.cpp</b></font>
+UNIX> <font color=darkred><b>time alien-4 50 10</b></font>
+153890414
+0.093u 0.001s 0:00.09 100.0%	0+0k 0+0io 0pf+0w
+UNIX> <font color=darkred><b>time alien-5 50 10</b></font>
+153890414
+0.017u 0.001s 0:00.01 100.0%	0+0k 0+0io 0pf+0w
+UNIX> <font color=darkred><b></b></font>
+</pre>
+
+I have an even faster version in
+<b><a href=alien-6.cpp>alien-6.cpp</a></b> -- this one uses a two-dimensional
+vector for the cache.  I don't have it commented yet, but I suspect no one will
+be reading it anyway.  Someday when I'm bored, I'll comment it:
+
+<pre>
+UNIX> <font color=darkred><b>time alien-6 50 10</b></font>
+153890414
+0.001u 0.000s 0:00.00 0.0%	0+0k 0+0io 0pf+0w
+UNIX> <font color=darkred><b></b></font>
+</pre>
+
+<p>
+If you want a fun challenge that requires you to use bit arithmetic, try the Division 1, 
+500-point version of this problem!

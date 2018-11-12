@@ -1,0 +1,94 @@
+<title>CS302 Lecture Notes</title>
+<h2>CS302 Lecture Notes - Dynamic Programming</h2>
+<UL>
+<LI> November 18, 2009
+<LI> Latest update: November, 2016
+<LI> James S. Plank
+<LI> Directory: <b>/home/plank/cs302/Notes/DynamicProgramming</b>
+</UL>
+<hr>
+
+<h3>Reference Material and Topcoder Problems</h3>
+To augment this lecture, there are 
+two sets of tutorials on dynamic programming from Topcoder.  They are 
+excellent:
+
+<p>
+<UL>
+<LI> <a href=http://www.topcoder.com/tc?module=Static&d1=tutorials&d2=dynProg>"Dynamic Programming: From Novice to Advanced," 
+   by Dumitru</a>
+<LI> <a href=http://www.topcoder.com/tc?module=Static&d1=features&d2=040104>"Dynamic Programming," by vorthys</a>
+</UL>
+<p>
+<p>
+These are Topcoder problems where I give you hints, but no code -- these are good 
+practice for you to work on Dynamic Programming on your own:
+<UL>
+<LI> <a href=http://web.eecs.utk.edu/~plank/topcoder-writeups/2014/SplitStoneGame/index.html>SplitStoneGame</a> - This is a really straightforward dynamic program.  Good practice.
+<LI> <a href=http://web.eecs.utk.edu/~plank/topcoder-writeups/2016/EllysSocks/index.html>EllysSocks</a> - This is another straightforward dynamic program.
+<LI> <a href=http://web.eecs.utk.edu/~plank/topcoder-writeups/2016/PartisanGame/index.html>PartisanGame</a> -- I walk you through this one in a series of steps.
+<LI> <a href=../../Topcoder/QuickSort.html>QuickSort</a> - This is a fairly straightforward
+  DP where you use a string as the memoization key. 
+<LI> <a href=http://web.eecs.utk.edu/~plank/plank/classes/cs302/Notes//Mafia/>Mafia</a> -
+This is a dynamic program where you turn the state of your simulation into a string,
+and then make recursive calls on modified strings.  Obviously, you memoize on the
+string too. 
+<LI> <a href=../../Topcoder/CtuRobots.html>CtuRobots</a> - This is a wonderful dynamic program,
+  where you have to reason your way to the solution.
+<LI> <a href=../../Topcoder/StringWeightDiv2.html>StringWeightDiv2</a> - This is a counting 
+  problem where again, the tricky part is using recursion to help you.
+</UL>
+And finally, these are Topcoder problems where I give you explanations and code:
+<UL>
+<LI> <a href=http://web.eecs.utk.edu/~plank/topcoder-writeups/2009/CountGame/index.html>CountGame</a> - This is a small program, and is a good one for you to try on your own.  You'll be tempted
+to think about the game strategy, but using dynamic programming is much easier (and less 
+bug-prone)!
+<LI> <a href=http://web.eecs.utk.edu/~plank/topcoder-writeups/2017/CheeseSlicing/index.html>CheeseSlicing</a>.  A pretty classic, straightforward dynamic program.
+<LI> <a href=http://web.eecs.utk.edu/~plank/topcoder-writeups/2016/SubsetSumExtreme/index.html>SubsetSumExtreme</a> - Dynamic programming with bit arithmetic to represent sets.  How does it get
+any better than this problem? 
+<LI> <a href=http://web.eecs.utk.edu/~plank/topcoder-writeups/2017/RemovingParenthesis/index.html>RemovingParenthesis</a> - A straightforward dynamic program for counting strings. 
+<LI> <a href=http://web.eecs.utk.edu/~plank/topcoder-writeups/2016/LastDigit/index.html>LastDigit</a> - Dynamic programming with really large integers. 
+</UL>
+
+If you want more dynamic programming practice, simply go to
+<a href=http://web.eecs.utk.edu/~plank/topcoder-writeups/>http://web.eecs.utk.edu/~plank/topcoder-writeups/</b> and search for "dynamic" -- there are tons of problems with and without solutions.
+
+<hr>
+<h2>Dynamic Programming in a Nutshell</h2>
+
+Dynamic programming is nothing more than the following:
+
+<UL>
+<LI> <b>Step 1</b>: You spot a recursive solution to a problem.  
+When you program that solution, it will be correct, but
+you'll find that it's incredibly slow, because it makes many duplicate procedure
+calls.
+<p><LI> <b>Step 2</b>: You cache the answers to recursive calls so that when they are repeated, you can return from them instantly.
+This is called <i>memoization</i>.
+<p><LI> <b>Step 3</b>: If you want to, you can typically figure out how to eliminate the recursive calls, 
+and instead populate the cache with one or more <b>for</b> loops.  This is faster than memoization, but usually
+not by much.
+
+<p><LI> <b>Step 4</b>: Sometimes, you can eliminate the cache completely.  This makes the program even faster
+and more memory efficient.
+</UL>
+<p>
+I find that steps 3 and 4 are often optional.  However, they usually represent the best solutions to a problem.
+<p>
+I will illustrate with many examples.  
+<hr>
+<h3>Dynamic Programming Example Programs</h3>
+
+Each of these has its own set of lecture notes.  There is a makefile in this
+directory which makes all of the examples.
+
+<UL>
+<LI><a href=Fibonacci.html>Example #1: Fibonacci numbers</a>
+<LI><a href=Coins.html>Example #2: The Coins Program</a>
+<LI><a href=Subsequence.html>Example #3: Maximum Subsequences</a>
+<LI><a href=ConvertibleStrings.html>Example #4: Convertible Strings</a>
+<LI><a href=PageNumbers.html>Example #5: Page Numbers</a>
+<LI><a href=AlienAndSetDiv2.html>Example #6: Alien-And-Set-Div2</a>
+<LI><a href=http://web.eecs.utk.edu/~plank/topcoder-writeups/2016/BracketSequenceDiv1/index.html>Example #7: BracketSequenceDiv1</a>
+<LI><a href=Apples.html>Example #8 (which I usually skip.  It's good reading, though): Apples</a>
+</UL>

@@ -1,0 +1,149 @@
+<title>CS302 Lecture Notes - Dynamic Programming </title>
+<h2>CS302 Lecture Notes - Dynamic Programming<br>Example Program #1: Fibonacci Numbers</h2>
+<UL>
+<LI> November 18, 2009
+<LI> James S. Plank
+<LI> Directory: <b>/home/plank/cs302/Notes/DynamicProgramming</b>
+</UL>
+<hr>
+
+This is one of the simplest and cleanest dynamic programming problems.
+<p>
+Fibonacci numbers have a recursive definition:
+<p>
+<center>
+Fib(0) = 1<br>
+Fib(1) = 1</br>
+If <i>n</i> > 1, Fib(<i>n</i>) =
+Fib(<i>n-1</i>) +
+Fib(<i>n-2</i>)
+</center>
+<p>
+
+
+This definition maps itself to a simple recursive function, which you've seen before in CS140.  However,
+we'll go through it again.  This is <b>Step 1</b>: writing a recursive answer to a problem.
+I bundle this into a class because it makes steps 2 and 3 easier.
+It's in <b><a href=fib1.cpp>fib1.cpp</a></b>:
+
+<p><center><table border=3 cellpadding=3><td><pre>
+#include &lt;iostream&gt;
+#include &lt;vector&gt;
+using namespace std;
+
+class Fib {
+  public:
+    int find_fib(int n);
+};
+
+int Fib::find_fib(int n)
+{
+  if (n == 0 || n == 1) return 1;
+  return find_fib(n-1) + find_fib(n-2);
+}
+
+main(int argc, char **argv)
+{
+  Fib f;
+
+  if (argc != 2) {
+    cerr &lt;&lt; "usage: fib n\n";
+    exit(1);
+  }
+
+  cout &lt;&lt; f.find_fib(atoi(argv[1])) &lt;&lt; endl;
+}
+</pre></td></table></center><p>
+
+The problem with this is that its performance  blows up exponentially, so that, for example,
+calculating Fib(45) takes quite a long period of time.  When we teach
+this in CS140, we turn it into a <b>for()</b> loop that starts with Fib(0)
+and Fib(1) and builds up to Fib(<i>n</i>).  
+<p>
+However, with dynamic programming, we proceed to step two: memoization.  
+We accept the recursive definition, but simply create a cache for the
+answers to that after the first time Fib(<i>i</i>) is called for some <i>i</i>,
+it returns its answer from the cache.  
+We implement it in 
+<b><a href=fib2.cpp>fib2.cpp</a></b> below.  We initialize the cache with -1's to 
+denote empty values.
+
+<b><a href=fib2.cpp>fib2.cpp</a></b>
+
+<p><center><table border=3 cellpadding=3><td><pre>
+#include &lt;iostream&gt;
+#include &lt;vector&gt;
+using namespace std;
+
+class Fib {
+  public:
+    int find_fib(int n);
+    vector &lt;int&gt; cache;
+};
+
+int Fib::find_fib(int n)
+{
+  if (cache.size() == 0) cache.resize(n+1, -1);
+  if (cache[n] != -1) return cache[n];
+  if (n == 0 || n == 1) {
+    cache[n] = 1;
+  } else {
+    cache[n] = find_fib(n-1) + find_fib(n-2);
+  }
+  return cache[n];
+}
+</pre></td></table></center><p>
+Next, we perform <b>Step 3</b>, which makes the observation that whenever we call <b>find_fib(<i>n</i>)</b>,
+it only makes recursive calls to values less than <i>n</i>.  That means that we can build the cache from zero
+up to <i>n</i> with a <b>for</b> loop (<b><a href=fib3.cpp>fib3.cpp</a></b>):
+
+<p><center><table border=3 cellpadding=3><td><pre>
+#include &lt;iostream&gt;
+#include &lt;vector&gt;
+using namespace std;
+
+class Fib {
+  public:
+    int find_fib(int n);
+    vector &lt;int&gt; cache;
+};
+
+int Fib::find_fib(int n)
+{
+  int i;
+  if (n == 0 || n == 1)  return 1;
+
+  cache.resize(n+1, -1);
+
+  cache[0] = 1;
+  cache[1] = 1;
+  for (i = 2; i &lt;= n; i++) cache[i] = cache[i-1] + cache[i-2];
+
+  return cache[n];
+}
+</pre></td></table></center><p>
+
+Finally, when we reflect that we only ever look at the last two values in the
+cache, we can omit the cache completely.  This is <b>Step 4</b> (in
+<b><a href=fib4.cpp>fib4.cpp</a></b>):
+
+<p><center><table border=3 cellpadding=3><td><pre>
+int Fib::find_fib(int n)
+{
+  int v[3];
+  int i;
+
+  if (n == 0 || n == 1) return 1;
+
+  v[0] = 1;
+  v[1] = 1;
+  for (i = 2; i &lt;= n; i++) {
+    v[2] = v[0] + v[1];
+    v[0] = v[1];
+    v[1] = v[2];
+  }
+
+  return v[2];
+}
+</pre></td></table></center><p>
+

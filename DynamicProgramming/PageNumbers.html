@@ -1,0 +1,417 @@
+<title>CS302 Lecture Notes</title>
+<h2>CS302 Lecture Notes - Dynamic Programming<br>Example program #5: PageNumbers</h2>
+<h3>James S. Plank</h3>
+Original Notes: Thu Nov 20 09:06:39 EST 2014<br>
+Latest Revision: Wed Nov 16 09:39:48 EST 2016
+<p>This is from the 2009 Topcoder Algorithm Qualifier, Round 2, 500-pointer.
+<br><a href=http://community.topcoder.com/stat?c=problem_statement&pm=10329&rd=13757>Problem Statement</a>.
+<hr>
+
+This was a tricky one, that only 20 percent of the coders got in the qualification 
+tournament.  It shows the power of thinking recursively, and of dynamic programming.
+<p>
+The simplest solution would be to loop from 1 to <i>N</i>, call
+<b>sprintf()</b> and add up the digits.  The problem with that solution is that
+it is linear in <i>N</i>, and <i>N</i> can be as big as 1,000,000,000.  So that
+won't do.
+<p>
+What we're going to do is structure our recursion on the first digit of the number.
+Our base case will be when <i>N</i> is a one-digit number.  We can solve that case
+directly.  In fact, let's do that first.
+<p>
+As with the other problems in these lecture notes, I solve this incrementally with a number
+of programs.  The first is
+<b><a href=page-numbers-1.cpp>page-numbers-1.cpp</a></b>.  I have a <b>main()</b> in this
+file which reads <i>N</i> from the command line, and then uses the Topcoder structure to
+call <b>PageNumbers::getCounts()</b>:
+
+<p><center><table border=3 cellpadding=3><td><pre>
+#include &lt;string&gt;
+#include &lt;vector&gt;
+#include &lt;iostream&gt;
+#include &lt;cstdio&gt;
+#include &lt;cstdlib&gt;
+using namespace std;
+
+class PageNumbers {
+  public:
+   vector &lt;int&gt; getCounts(int N);
+};
+
+vector &lt;int&gt; PageNumbers::getCounts(int N)
+{
+  vector &lt;int&gt; rv;
+  int i;
+
+  <font color=blue>/* We're only solving the base case -- when N is a one-digit number. */</font>
+
+  if (N &lt; 10) {
+    rv.resize(10, 0);
+    for (i = 1; i &lt;= N; i++) rv[i] = 1;
+    return rv;
+  }
+ 
+  printf("We haven't solved the problem for N &gt;= 10 yet.\n");
+  return rv; 
+}
+
+<font color=blue>/* Our main() reads N from the command line, and calls getCounts().
+   It prints the return vector. */</font>
+
+int main(int argc, char **argv)
+{
+  int i;
+  PageNumbers c;
+  int N, d;
+  vector &lt;int&gt; retval;
+
+  if (argc != 2) {
+    fprintf(stderr, "usage: PageNumbers N\n");
+    exit(1);
+  }
+
+  N = atoi(argv[1]);
+
+  retval = c.getCounts(N);
+  if (retval.size() == 0) exit(0);
+  printf("Answer:");
+  for (i = 0; i &lt; retval.size(); i++) printf(" %d", retval[i]);
+  cout &lt;&lt; endl;
+
+  exit(0);
+}
+</pre></td></table></center><p>
+
+We test it out, and it looks good.  That's good for our self-esteem:
+
+<pre>
+UNIX> <font color=darkred><b>make page-numbers-1</b></font>
+g++ -o page-numbers-1 page-numbers-1.cpp 
+UNIX> <font color=darkred><b>page-numbers-1 0</b></font>
+Answer: 0 0 0 0 0 0 0 0 0 0
+UNIX> <font color=darkred><b>page-numbers-1 3</b></font>
+Answer: 0 1 1 1 0 0 0 0 0 0
+UNIX> <font color=darkred><b>page-numbers-1 9</b></font>
+Answer: 0 1 1 1 1 1 1 1 1 1
+UNIX> <font color=darkred><b>page-numbers-1 10</b></font>
+We haven't solved the problem for N >= 10 yet.
+UNIX> <font color=darkred><b></b></font>
+</pre>
+
+Now, suppose <i>N</i> is two digits or more.  As I said above, 
+we're going to structure our recursion 
+around the first digit of <i>N</i>.  Let's call that <b>first_digit</b>.  We're going
+to use <b>first_digit</b> to define another number, which we'll call <b>middle_number</b>.
+This number has the same number of digits as <i>N</i> (which we'll call <b>digits</b>),
+and it has the same <b>first_digit.</b>
+However, its remaining digits are zeros.  Finally, we'll define another number called
+<b>remainder</b>, which is defined to be (<i>N</i> - <b>middle_number</b>). 
+<p>
+Let's give an example.  Suppose <i>N</i> is 3659.  Then <b>first_digit</b> is 3, <b>digits</b> is 4, <b>middle_number</b> is 3000, and <b>remainder</b> is 659.
+<p>
+Let's write the code to set these variables.  That is in 
+<b><a href=page-numbers-2.cpp>page-numbers-2.cpp</a></b>.  Here's <b>getCounts()</b>.
+
+<p><center><table border=3 cellpadding=3><td><pre>
+vector &lt;int&gt; PageNumbers::getCounts(int N)
+{
+  vector &lt;int&gt; rv;
+  int i;
+  char buf[20];
+  string n_str;
+  int first_digit;        <font color=blue>/* The first digit of N. */</font>
+  int digits;             <font color=blue>/* The number of digits in N. */</font>
+  int middle_number;      <font color=blue>/* This number has the same first digit of N, followed by zeros. */</font>
+  int remainder;          <font color=blue>/* This is (N-middle_number). */</font>
+
+  <font color=blue>/* Base case -- when N is a single-digit number. */</font>
+
+  if (N &lt; 10) {
+    rv.resize(10, 0);
+    for (i = 1; i &lt;= N; i++) rv[i] = 1;
+    return rv;
+  }
+ 
+  <font color=blue>/* Convert N to a string using sprintf(). */</font>
+
+  sprintf(buf, "%d", N);
+  n_str = buf;
+
+  <font color=blue>/* Now calculate first_digit, digits, middle_number and remainder. */</font>
+
+  first_digit = n_str[0] - '0';
+  digits = n_str.size();
+  for (i = 1; i &lt; digits; i++) n_str[i] = '0';
+  middle_number = atoi(n_str.c_str());
+  remainder = N - middle_number;
+
+  <font color=blue>/* Print them out and exit. */</font>
+
+  printf("First digit   = %10d\n", first_digit);
+  printf("Digits        = %10d\n", digits);
+  printf("Middle number = %10d\n", middle_number);
+  printf("Remainder     = %10d\n", remainder);
+
+  return rv;
+}
+</pre></td></table></center><p>
+
+As you can see, I used <b>sprintf()</b> to convert <i>N</i> to a string, and then
+<b>atoi</b> to create <b>middle_number</b> from the string.  You could use stringstreams
+to do this, or you could use div and mod.  It's up to you.
+<p>
+Again, we test it and see that all is as it should be:
+
+<pre>
+UNIX> <font color=darkred><b>make page-numbers-2</b></font>
+g++ -o page-numbers-2 page-numbers-2.cpp 
+UNIX> <font color=darkred><b>page-numbers-2 3659</b></font>
+First digit   =          3
+Digits        =          4
+Middle number =       3000
+Remainder     =        659
+Answer:
+UNIX> <font color=darkred><b>page-numbers-2 987654321</b></font>
+First digit   =          9
+Digits        =          9
+Middle number =  900000000
+Remainder     =   87654321
+Answer:
+UNIX> <font color=darkred><b>page-numbers-2 10</b></font>
+First digit   =          1
+Digits        =          2
+Middle number =         10
+Remainder     =          0
+Answer:
+UNIX> <font color=darkred><b></b></font>
+</pre>
+
+Now, we're going to split our problem into three cases:
+
+<OL>
+<LI> Calculate the page numbers for pages from 1 to (<b>middle_number</b>-1).
+<LI> Calculate the page numbers for <b>middle_number</b>.
+<LI> Calculate the page numbers for page (<b>middle_number</b>+1) to <i>N</i>.
+</OL>
+
+Hopefully, you can see that the first one is a simple call to <b>getCounts(middle_number-1)</b>.
+The second one you can do directly from <b>first_digit</b> and the size of <b>n_str</b>.
+<p>
+The third one is a little more tricky, so let's solve the second one and test it.  
+That code is in
+<b><a href=page-numbers-3.cpp>page-numbers-3.cpp</a></b>
+
+<p><center><table border=3 cellpadding=3><td><pre>
+  <font color=blue>/* Calculate the answer for middle_number and return it.  */</font>
+
+  rv.resize(10, 0);
+  rv[first_digit]++;
+  for (i = 0; i < digits-1; i++) rv[0]++;
+
+  return rv;
+}
+</pre></td></table></center><p>
+
+We test it, and all looks good:
+
+<pre>
+UNIX> <font color=darkred><b>make page-numbers-3</b></font>
+g++ -o page-numbers-3 page-numbers-3.cpp 
+UNIX> <font color=darkred><b>page-numbers-3 3659</b></font>
+First digit   =          3
+Digits        =          4
+Middle number =       3000
+Remainder     =        659
+Answer: 3 0 0 1 0 0 0 0 0 0
+UNIX> <font color=darkred><b>page-numbers-3 987654321</b></font>
+First digit   =          9
+Digits        =          9
+Middle number =  900000000
+Remainder     =   87654321
+Answer: 8 0 0 0 0 0 0 0 0 1
+UNIX> <font color=darkred><b>page-numbers-3 10</b></font>
+First digit   =          1
+Digits        =          2
+Middle number =         10
+Remainder     =          0
+Answer: 1 1 0 0 0 0 0 0 0 0
+UNIX> <font color=darkred><b></b></font>
+</pre>
+
+
+Ok -- let's do the hard case -- solving the problem for the pages
+from (<b>middle_number</b>+1) to <i>N</i>.  First, how many of these
+numbers are there?  The answer is <b>remainder</b>.  Second, what digit
+do they all start with?  The answer is <b>first_digit</b>.  So, we
+can add <b>remainder</b> digits whose values are <b>first_digit</b> to the
+return value, and now we only have to worry about the remaining digits.
+<p>
+These make up a subproblem which is almost like <b>getCounts()</b>.  You 
+want to calculate digits for all of the pages from 1 to <b>remainder</b>, however
+you need to include leading zeros.  Think about the case where <i>N</i> is 1002.
+Then, <b>remainder</b> is 2, and when you want to solve the subproblem from 
+pages 1001 to 1002.  You'll do that by adding two '1' digits, and then you'd like
+to call <b>getCount(2)</b>.  However, you need those four zeros, and <b>getCount(2)</b>
+is not going to calculate them.
+<p>
+What you do is use the following observation:
+You know exactly how many digits are going to be in pages
+(<b>middle_number</b>+1) to <i>N</i>: (<b>remainder</b> * <b>digits</b>).  
+We've already demonstrated that the <b>remainder</b> of these are equal to 
+<b>first_digit</b>.  To calculate the rest, we can call <b>getCount(remainder)</b>. 
+The return vector of that call will have all of the digits except for those leading
+zeros.  Since you know how many total digits there should be, you know that the
+ones not calculated by the recursive <b>getCount(remainder)</b> call must be zeros.
+That lets you solve the problem.
+<p>
+Let's use 3659 as an example.  We're going to solve the three subproblems as follows:
+<OL>
+<LI> We'll call <b>getCounts(2999)</b> to get all of the page numbers from 
+1 to (<b>middle_number</b>-1).
+<LI> We'll add one to <b>rv[3]</b> and three zeros to <b>rv[0]</b> to account for
+<b>middle_number</b>.
+<LI> We'll add 659 to <b>rv[3]</b>, and then we'll call <b>getCounts(659)</b> recursively.
+We'll add up the digits in that return vector and subtract that number from (3*659).
+That is the number of extra zeros that we add to <b>rv[0]</b>.
+</OL>
+
+This code is in 
+<b><a href=page-numbers-4.cpp>page-numbers-4.cpp</a></b>.  Here is the relevant
+code:
+
+<p><center><table border=3 cellpadding=3><td><pre>
+vector &lt;int&gt; PageNumbers::getCounts(int N)
+{
+  vector &lt;int&gt; rv, rv2;  <font color=blue>/* I've added rv2 for the recursion. */</font>
+
+  ...
+
+  <font color=blue>/* Make the first recursive call to middle_number-1 */</font>
+
+  rv = getCounts(middle_number-1);
+
+  <font color=blue>/* Add in the answer for middle_number. */</font>
+
+  rv[first_digit]++;
+  for (i = 0; i &lt; digits-1; i++) rv[0]++;
+
+  <font color=blue>/* Add the first digit of (middle_number+1) to N: */</font>
+
+  rv[first_digit] += remainder;
+
+  <font color=blue>/* Now, call this recursively on remainder, and count up how
+     many digits that is.  Subtract this from (digits-1)*remainder 
+     to get the number of leading zeros that you're missing.  
+     Then add everything to the final return value. */</font>
+
+  rv2 = getCounts(remainder);
+  d = 0;
+  for (i = 0; i &lt; rv2.size(); i++) d += rv2[i];
+  rv[0] += ((digits-1)*remainder - d);
+  for (i = 0; i &lt; rv2.size(); i++) rv[i] += rv2[i];
+
+  return rv;
+}
+</pre></td></table></center><p>
+
+We'll test it on examples 1-3 from Topcoder.  Example 3, where <i>N</i> equals 999, makes
+a ton of recursive calls, so I just print out the last line, to confirm that we have
+the right answer:
+
+<pre>
+UNIX> <font color=darkred><b>make page-numbers-4</b></font>
+g++ -o page-numbers-4 page-numbers-4.cpp 
+UNIX> <font color=darkred><b>page-numbers-4 11</b></font>
+First digit   =          1
+Digits        =          2
+Middle number =         10
+Remainder     =          1
+Answer: 1 4 1 1 1 1 1 1 1 1
+UNIX> <font color=darkred><b>page-numbers-4 19</b></font>
+First digit   =          1
+Digits        =          2
+Middle number =         10
+Remainder     =          9
+Answer: 1 12 2 2 2 2 2 2 2 2
+UNIX> <font color=darkred><b>page-numbers-4 999 | tail -n 1</b></font>
+Answer: 189 300 300 300 300 300 300 300 300 300
+UNIX> <font color=darkred><b>page-numbers-4 999 | wc</b></font>
+     397    1397   10740
+UNIX> <font color=darkred><b></b></font>
+</pre>
+
+Looks like we have to memoize.  This turns out to be really easy, because
+<b>getCounts()</b> only returns its answer in one place after the base case.
+The final code is in
+<b><a href=page-numbers-5.cpp>page-numbers-5.cpp</a></b>:
+
+<p><center><table border=3 cellpadding=3><td><pre>
+<font color=blue>/* Add a cache to PageNumbers */</font>
+
+class PageNumbers {
+  public:
+   vector &lt;int&gt; getCounts(int N);
+   map &lt; int, vector &lt;int&gt; &gt; Cache;    
+};
+
+vector &lt;int&gt; PageNumbers::getCounts(int N)
+{
+  <font color=darkgreen>[... Variable declarations]</font>
+
+  <font color=blue>/* Base case -- when N is a single-digit number. */</font>
+
+  if (N &lt; 10) {
+    rv.resize(10, 0);
+    for (i = 1; i &lt;= N; i++) rv[i] = 1;
+    return rv;
+  }
+
+  <font color=blue>/* Get the answer from the Cache if it's there. */</font>
+
+  if (Cache.find(N) != Cache.end()) return Cache[N];
+
+  <font color=darkgreen>[... The rest of the code]</font>
+
+  <font color=blue>/* Insert the answer into the cache before returning. */</font>
+
+  Cache[N] = rv;
+
+  return rv;
+}
+}
+</pre></td></table></center><p>
+
+<pre>
+UNIX> <font color=darkred><b>make page-numbers-5</b></font>
+g++ -o page-numbers-5 page-numbers-5.cpp 
+UNIX> <font color=darkred><b>page-numbers-5 11</b></font>
+First digit   =          1
+Digits        =          2
+Middle number =         10
+Remainder     =          1
+Answer: 1 4 1 1 1 1 1 1 1 1
+UNIX> <font color=darkred><b>page-numbers-5 19</b></font>
+First digit   =          1
+Digits        =          2
+Middle number =         10
+Remainder     =          9
+Answer: 1 12 2 2 2 2 2 2 2 2
+UNIX> <font color=darkred><b>page-numbers-5 999 | tail -n 1</b></font>
+Answer: 189 300 300 300 300 300 300 300 300 300
+UNIX> <font color=darkred><b>page-numbers-5 999 | wc</b></font>
+      73     263    1992
+UNIX> <font color=darkred><b>page-numbers-5 543212345 | tail -n 1</b></font>
+Answer: 429904664 541008121 540917467 540117067 533117017 473117011 429904664 429904664 429904664 429904664
+UNIX> <font color=darkred><b>page-numbers-5 543212345 | wc</b></font>
+     301    1061    8208
+UNIX> <font color=darkred><b></b></font>
+</pre>
+
+<h3>What's the running time complexity?</h3>
+
+Well, your first set of recursive calls are always going to be to numbers of the
+form <i>d99999</i>...  With <i>N</i> capped at 1,000,000,000, there are only 99 of
+those.  The second set of recursive calls is going to be restricted to suffixes of
+<i>N</I>.  For example, when <i>N</i> is 3658, then you will make recursive calls
+to 658, 58 and 8.  So, it looks like there will be only 110 or so entries in the
+cache.  That's pretty efficient!
