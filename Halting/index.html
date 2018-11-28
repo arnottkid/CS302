@@ -1,0 +1,97 @@
+<title>CS302 Lecture Notes</title>
+<h2>CS302 Lecture Notes - The Halting Problem</h2>
+<UL>
+<LI> April 21, 2008
+<LI> James S. Plank
+<LI> Directory: <b>/home/plank/cs302/Notes/Halting</b>
+</UL>
+
+<hr>
+This is by no means meant to be a complete treatment of the halting problem.
+However, the halting problem is an important problem for you to see, and this
+introduction will let you either:
+<p>
+<OL>
+<LI> Have an easier time with it when you get the full treatment later in life.
+<LI> Pretend to friends, family and potential employers that you actually understand
+     the halting problem.
+</OL>
+<p>
+Let's couch the halting problem as a cruel lab:
+<p>
+Write the procedure:
+<p><center><table border=3 cellpadding=3><td><pre>
+string halt(char *program, char *input);
+</pre></td></table></center><p>
+Its first parameter, <b>program</b> is the name of a C++ program
+which, when compiled, will execute, reading from standard input.
+<p>
+The program <b>halt</b> must return in a finite amount of time, and what it returns
+depends on what happens when <b>program</b> is compiled and executes on the contents
+of the file <b>input</b> as standard input.  
+If <b>program</b> finishes in a finite amount of time, then <b>halt</b>
+should return "halt".  Otherwise, <b>halt</b> should return <b>"infinite loop"</b>
+and exit.  
+<p>
+<b>halt()</b> is not allowed to ever go into an infinite loop.  In other words, it
+must eventually finish.
+<p>
+If you cannot write <b>halt()</b>, prove to me why?
+
+<hr>
+<h3>This is the halting problem</h3>
+
+The proof is a bit hinky, but it is sound.  Suppose you can write <b>halt()</b>.
+Then you can write the following procedure called <b>selfhalt</b>:
+
+<p><center><table border=3 cellpadding=3><td><pre>
+string selfhalt(char *f)
+{
+  return halt(f, f);
+}
+</pre></td></table></center><p>
+
+Next, you can write the program <b>hproblem.cpp</b>, 
+which takes just one command line argument, the name of a C++ program:
+
+<p><center><table border=3 cellpadding=3><td><pre>
+#include &lt;iostream&gt;
+#include &lt;string&gt;
+using namespace std;
+
+int main(int argc, char **argv)
+{
+  if (argc != 1) {
+    cerr &lt;&lt; "usage: hproblem program\n";
+    exit(1);
+  }
+
+  if (selfhalt(argv[1]) == "halt") while(1);
+  exit(0);
+}
+</pre></td></table></center><p>
+
+Now, we compile and run <b>hproblem</b> on itself, and we have problems:
+
+<pre>
+UNIX> <b>hproblem hproblem.cpp</b>
+</pre>
+
+If this program were to exit in a finite period of time, then 
+<b>selfhalt("hproblem.cpp")</b> would have returned "infinite loop", which 
+means that "<b>hproblem hproblem.cpp</b>" should never return.
+<p>
+On the other hand, if this program were to loop forever, then
+<b>selfhalt("hproblem.cpp")</b> would have returned "halt", which 
+means that <b>hproblem hproblem.cpp</b>" should return in a finite
+period of time.
+<p>
+This contradiction is why you cannot write <b>halt()</b> -- if this 
+seems like the stuff of puzzle books for precocious 11-year olds,
+you're right, but the logic is tight.  If you are interested in 
+further theory along these lines, try 
+<a href=http://en.wikipedia.org/wiki/Halting_problem>Wikipedia's Halting Problem Page</a>, 
+not to mention 
+<a href=http://en.wikipedia.org/wiki/G%C3%B6del%27s_incompleteness_theorem>Wikipedia's page on 
+Godel's incompleteness theorem</a>.  
+

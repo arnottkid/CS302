@@ -1,0 +1,275 @@
+<title>CS302 Lecture notes -- NP Completeness</title>
+<body bgcolor=ffffff>
+<h1>CS302 Lecture notes -- NP Completeness</h1>
+<UL>
+<li> James S. Plank
+<li> December 1, 2009.
+<LI> Latest revision: Dec  2 01:05:24 EST 2015
+</UL>
+</b></a>
+<hr>
+
+This is not a complete treatment of NP-Completeness.  Like the Halting Problem
+lecture notes, they introduce you to a concept that you will see later in 
+your CS careers and will provide you with fodder for endless conversations
+around the family dinner table.
+<p>
+As always, you can spend quite a bit of time reading Wikipedia on the 
+subject.  Their page is
+in <a href=http://en.wikipedia.org/wiki/P_versus_NP_problem>here</a>.
+This is not required reading, but (as of 2015) is a nice treatment of the topic.
+<p>
+P, NP, NP-Complete and NP-Hard are sets of problems, defined as follows:
+<UL>
+<LI> <b>P</b>: problems whose solution is polynomial time in the size of their inputs.
+<LI> <b>NP</b>: problems whose solutions can be verified in polynomial time.
+(NP stands for <i>non-deterministic polynomial time</i>).
+<LI> <b>NP-Complete</b>: A collection of problems in NP whose solutions may or may not
+polynomial time.  We don't know.  However, if we can prove that one of them may be solved
+in polynomial time, then all of them can.
+<LI> <b>NP-Hard</b>: A collection of problems that do not have to be in NP, 
+whose solutions are at least as hard as the NP-Complete problems.  
+</UL>
+<p>
+
+In this lecture, we are going to see what it takes to prove that problems belong
+to these sets.  
+Suppose you have a problem to solve, and you want to know its complexity class.
+This takes two steps:
+<OL>
+<LI> <i>Prove that it is in NP</i>.  Typically the problem is couched as
+a <b>yes</b> or <b>no</b> problem involving a data structure, such 
+as ``does there exist a simple cycle through a
+given directed graph that visits all the nodes?''  
+To prove it is in NP, you need to show that 
+a <b>yes</b> solution can be checked in polynomial time.  
+In the above example, you can check to see if a given path through the graph
+is indeed a simple cycle in linear time.  Therefore, the problem is in 
+<b>NP</b>.  You don't have to prove anything about the <b>no</b> solutions,
+and you don't have to prove anything about how you'd calculate a solution.
+<p>
+<LI> <i>Transform a known NP-Complete problem to this one in polynomial time</i>.  
+Suppose the problem in question is <b>Q</b>,
+and that <b>L</b> is a well-known NP-Complete problem like 
+the <i>3-satisfiability</i> problem.  You need to show that if you have
+any instance of problem <b>L</b>, you can transform it into an instance
+of problem <b>Q</b> in polynomial time.  Thus, if you could solve problem
+<b>Q</b> in polynomial time, you could solve problem <b>L</b> in polynomial
+time.
+</OL>
+
+If  you can do both of these things, then you have proved that a problem is
+NP-Complete.  If you can prove that either of these things cannot be done, then you
+have proved that a problem is not NP-Complete.  Sometimes you can't do come up
+with good proofs, and you just don't know.  
+<p>
+The complexity classes P and NP-Hard may be put in terms of the above:
+<p>
+<UL>
+<LI> <b>P</b>: If we can prove that the solution to a problem may be calculated
+in polynomial time, then the problem is in P.  All of the algorithms that we
+have studied in this class, with the exception of enumeration, are in <b>P</b>.
+<p>
+<LI> <b>NP-Hard</b>: These are problems that are not in NP; however, we can 
+perform the transformation in step 2 of a known NP-Complete problem to these
+problems.  Thus, they are <i>at least as hard</i> as the NP-Complete problems.
+</UL>
+
+
+
+<hr>
+<h3>3-SAT - A Canonical NP-Complete Problem</h3>
+
+3-SAT is a very simple NP-Complete problem.  You are given a boolean expression, 
+which is a big AND (&and;) of <i>clauses</i>:
+<center>
+<p>
+<i>E = C<sub>0</sub> &and; 
+C<sub>1</sub> &and; ... &and;
+C<sub>m-1</sub></i>
+<p>
+</center>
+Each clause <i>C<sub>i</sub></i> is the OR (&or;) of three <i>literals</i>, where a literal is
+either a variable <i>x<sub>i</sub></i> or the negation of a variable <i>&not; x<sub>i</sub></i>
+(or sometimes the negation of <i>a</i> is denoted <i><span style="text-decoration:overline">a</span></i>).
+Here is an example with three clauses and three variables.  To make it easier to read, I'm simply
+calling the variables <i>a</i>, <i>b</i> and <i>c</i> .
+<center>
+<p>
+<i>E = ( a &or; b &or; c ) 
+&and;
+( <span style="text-decoration:overline">a</span>  &or; 
+  <span style="text-decoration:overline">b</span>  &or; 
+  <span style="text-decoration:overline">c</span>  )
+&and;
+(                                        a         &or; 
+  <span style="text-decoration:overline">b</span>  &or; 
+  <span style="text-decoration:overline">c</span>  )
+</i><p>
+</center>
+Given this definition, 3-SAT is simple -- is there an assignment of the variables so that <i>E</i>
+is true?  In the above example, it's easy to find such an assignment.  For example, set <i>a</i>
+and <i>c</i> to TRUE and <i>b</i> to FALSE (I'm coloring the true statements red -- you can 
+see that there is always at least one TRUE in each clause).
+<center>
+<p>
+<i>E = ( <font color=red>a</font> &or; b &or; <font color=red>c</font> ) 
+&and;
+( <span style="text-decoration:overline">a</span>  &or; 
+ <font color=red> <span style="text-decoration:overline">b</span></font>  &or; 
+  <span style="text-decoration:overline">c</span>  )
+&and;
+(                                        <font color=red>a</font>         &or; 
+  <font color=red><span style="text-decoration:overline">b</span></font>  &or; 
+  <span style="text-decoration:overline">c</span>  )
+</i><p></center>
+In general, 3-SAT can be a very difficult problem to solve.  Here's a harder example
+with seven clauses and four variables.  
+<center>
+<p>
+<i>E = ( a &or; b &or; c ) 
+&and;
+( <span style="text-decoration:overline">a</span>  &or; 
+  <span style="text-decoration:overline">b</span>  &or; 
+  <span style="text-decoration:overline">d</span>  )
+&and;
+(                                        a         &or; 
+  <span style="text-decoration:overline">c</span>  &or; 
+  <span style="text-decoration:overline">d</span>  )
+&and;
+( <span style="text-decoration:overline">b</span>  &or; 
+  c &or; 
+  d  )
+&and;
+( <span style="text-decoration:overline">a</span>  &or; 
+  <span style="text-decoration:overline">b</span>  &or; 
+  c  )
+&and;
+( b  &or; 
+  <span style="text-deboration:overline">c</span>  &or; 
+  d  )
+&and;
+( b  &or; 
+  c  &or; 
+  <span style="text-decoration:overline">d</span>  )
+</i><p>
+</center>
+One correct assignment is setting <i>a</i> and <i>c</i> to FALSE,
+and <i>b</i> and <i>d</i> to TRUE:
+<center>
+<p>
+<i>E = ( a &or; <font color=red>b</font> &or; c ) 
+&and;
+( <font color=red><span style="text-decoration:overline">a</span></font>  &or; 
+  <span style="text-decoration:overline">b</span>  &or; 
+  <span style="text-decoration:overline">d</span>  )
+&and;
+(                                        a         &or; 
+  <font color=red><span style="text-decoration:overline">c</span></font>  &or; 
+  <span style="text-decoration:overline">d</span>  )
+&and;
+( <span style="text-decoration:overline">b</span>  &or; 
+  c &or; 
+  <font color=red>d</font>  )
+&and;
+( <font color=red><span style="text-decoration:overline">a</span></font>  &or; 
+  <span style="text-decoration:overline">b</span>  &or; 
+  c  )
+&and;
+( b  &or; 
+  <span style="text-deboration:overline">c</span>  &or; 
+  <font color=red>d</font>  )
+&and;
+( <font color=red>b</font>  &or; 
+  c  &or; 
+  <span style="text-decoration:overline">d</span>  )
+</i><p>
+</center>
+From our lecture notes on enumeration, we can 
+answer whether an instance of 3-SAT is true or false by crafting a
+solution that is exponential in the number of variables. Call that number <i>n</i>.  
+View each setting of the variables as
+an <i>n-</i>bit number, where bit <i>i</i> represents the assignment of variable
+<i>x<sub>1</sub></i>.  There are <i>2<sup>n</sup></i> of these numbers, and they represent
+all possible settings of the variables.  So, enumerate them and test to see if <i>E</i> is true.
+However, is there a polynomial time solution?  No one knows.
+<p>
+It is an easy matter to prove that 3-SAT is in NP.  How many different clauses can there
+be?  (4/3) * n * (n-1) * (n-2) --  we'll go over that in class.  That's a polynomial of
+<i>n</i>.  If we have a solution, we can test its validity by simply setting the variables and
+seeing if <i>E</i> is true.  That test is polynomial time, so 3-SAT is in NP.
+<p>
+As for proving that 3-SAT is NP-Complete, that is well beyond the scope of this class.  However,
+3-SAT is a very popular problem for proving that other problems are NP-Complete.
+<hr>
+<h3>How would we do that?</h3>
+
+Suppose I have a problem, like 
+<a href="http://en.wikipedia.org/wiki/Independent_set_(graph_theory)"><b>The Independent Set Decision Problem (ISDP)</b></a>: Given a graph  <i>G</i>
+and a number <i>k</i>, can we find a set of <i>k</i> vertices in <i>G</i> such that there are
+no edges between any two of the vertices.
+Here's how we use 3-SAT to prove it is NP-Complete.
+<p>
+First, prove it's in NP: If you give me a set of <i>k</i> vertices, I can easily check to verify
+that there are no edges between two nodes in <i>k</i>.  That will be <i>O(|E|)</i> in the 
+worst case, which is most definitely polynomial in <i>|V|</i>.
+<p>
+Next, I need to figure out how to take an instance of 3-SAT, and convert it into an instance
+of ISDP, so that if you can solve the ISDP instance in polynomial time, then you can solve the
+instance of 3-SAT in polynomial time.  Here's one way:
+<UL>
+<LI> Turn each clause into three nodes, and label the nodes with their literals (including
+the not).  Add an edge between each of these nodes.
+<LI> For every pair of nodes with the same, but negated, literals, add an edge between that
+pair of nodes.
+<LI> Any independent set of size <i>k=n</i> will correspond to an assignment of the literals for
+which the 3-SAT expression is true.
+</UL>
+
+Here's the simple three-clause 3-SAT problem above, converted to a graph, with an example
+3-node independent set colored magenta.  You'll note that the set corresponds to a setting of
+the variables that makes the 3-SAT equation true:
+
+<p><center><table border=3><td><img src=Easy.jpg></td></table></center><p>
+
+Below, I also convert the more complicated 7-node expression to a graph for the ISDP
+problem.
+I have the clauses clumped together going clockwise around the graph, starting at roughly 
+1:00.  I also have colored inter-clause edges according to the literals that they connect:
+
+<p><center><table border=3><td><img src=ISDP.jpg></td></table></center><p>
+
+I've colored the nodes in the Independent Set gray.  You should be able to verify that:
+
+<UL>
+<LI> The set is indeed independent.
+<LI> The assignment of literals makes the expression true.
+</UL>
+
+This works because you can only have one node per clause in the Independent Set.  Moreover,
+if you have <i>a</i> in the set, then you cannot have 
+  <i><span style="text-decoration:overline">a</span> </i> and vice versa.
+<p>
+Finally, think about the size of the graph.  It will have <i>3m</i> nodes, and a maximum 
+of something like <i>3m + 3(m/2)(m/2-1)/2</i> edges, which is clearly polynomial in <i>m</i>.
+Thus, if I can solve ISDP in polynomial time, then I can solve 3-SAT in polynomial time.
+Neat, no?
+
+<h3>Who Cares?</h3>
+
+NP-Complete problems usually have easy-to-write exponential solutions.  However, we cannot prove
+that they do not have polynomial time solutions.  This is embodied in the equation:
+<p>
+<center>
+<i>P = NP?</i>
+</center>
+<p>
+It is a famous open question in theoretical computer science.  Does its solution have practical
+worth?  Maybe -- a lot of these problems pop up very naturally (Spellseeker from Lab B
+comes to mind...), and if we could solve them in polynomial time rather than
+exponential, then that would be something!
+<p>
+<hr>
+<UL>
+<LI> <a href=http://www.youtube.com/watch?v=GSIodz9GWxc>Amusing youtube video on P = NP...</a>
+</UL>
