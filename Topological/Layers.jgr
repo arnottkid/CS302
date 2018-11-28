@@ -1,0 +1,13 @@
+newgraph xaxis min 0 max 50000  size 5 hash_labels fontsize 12 
+   label fontsize 14 : n
+yaxis min 0 size 2
+   hash_labels fontsize 12
+   label fontsize 14 : Shortest Path Time (s)
+
+newline linethickness 2 label : Topological Sort
+  pts shell : sh layeravg.sh topo 500
+
+newline linethickness 2 color 1 0 0 label : Dijkstra
+  pts shell : sh layeravg.sh dijkstra 500
+
+legend defaults fontsize 14 hjl vjt x 1000 y .06

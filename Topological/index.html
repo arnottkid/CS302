@@ -1,0 +1,243 @@
+<title>CS302 Lecture Notes - Topological Soft</title>
+<h2>CS302 Lecture Notes - Topological Sort</h2>
+<UL>
+<LI> November 19, 2013. 
+<LI> Latest Revision: November, 2018
+<LI> James S. Plank
+<LI> Directory: <b>/home/plank/cs302/Notes/Topological</b>
+</UL>
+<hr>
+Some additional material:
+<UL>
+<LI> <a href=http://en.wikipedia.org/wiki/Topological_sorting>Wikipedia's page on Topological Sort</a>, which is very nice.
+<LI> Topcoder problem: <a href=http://web.eecs.utk.edu/~plank/topcoder-writeups/2007/IncreasingSubsequences/index.html>IncreasingtSubsequences</a>, which uses topological sorting to count paths.
+<LI> Topcoder problem: <a href=http://web.eecs.utk.edu/~plank/plank/classes/cs302/Notes/DynamicProgramming/ConvertibleStrings.html>ConvertibleStrings</a> - this is presented in the lecture notes
+on Dynamic Programming, but you can solve it with Topological sort.
+</UL>
+<hr>
+
+Topological sorts work on directed, acyclic graphs, and they are very simple.
+It is a sorting of the vertices of a graph, such that if there is an edge from
+<i>a</i> to <i>b</i>, then <i>a</i> comes before <i>b</i> in the sorting.
+Since the graph is acyclic, a topological sort is guaranteed to exist, although it
+is not guaranteed to be unique.
+<p>
+For example, consider the following graph (from the Topcoder problem
+<a href=http://web.eecs.utk.edu/~plank/plank/classes/cs302/Notes/DynamicProgramming/ConvertibleStrings.html>ConvertibleStrings</a>, which we use as an example of Dynamic progrmaming).
+The numbers in green show a valid topological sort of the graph:
+
+<p><center><table border=3><td><a href=CS-Ex2a.jpg><img src=CS-Ex2a.jpg width=500></a></td></table></center><p>
+
+As I said before, the sortings do not have to be unique.  For example, you could swap
+the 3rd and 4th nodes in the sort, and you would still have a valid sort.
+
+<p>
+To perform a topological sort, you maintain a list of nodes with no incoming edges.
+Then, until that list is empty, you do the following:
+<UL>
+<LI> Remove a node from the list and append it to the topological sorting.
+<LI> For each edge coming out of the node, remove the edge from the graph.  If that
+edge was to a node that now has no more incoming edges, put that node on the list.
+</UL>
+
+That's how I got the ordering in the graph above.
+<p>
+This is guaranteed to work, because the graph is acyclic.   The running time is
+<i>O(|V|+|E|)</i>.  Like DFS and BFS, it visits each node once, and each edge once.
+<p>
+There are some problems that you can solve with topological sort:
+<UL>
+<LI> <b>Scheduling</b>.  Often the graphs represent precedence.  For example, maybe the nodes are
+CS courses, and the edges are prerequisite relationships.  A topological sorting is a valid
+way to schedule the classes without violating the prerequisites.
+<p>
+<LI> <b>Shortest path from a source node</b>.  You start with all nodes having distance &infin;
+from the source, except the source, which has a distance 0.  Then you do a topological sort.
+When you remove an edge from <i>a</i> to <i>b</i>, update the minimum distance to <i>b</i>
+if it is improved by going through <i>a</i>.
+When you process a node, you have processed all nodes
+before it in the graph, so you know the shortest path to that node.
+<p>
+Is that better than Dijkstra's algorithm?  Yes and no.  See the analysis below.
+<p>
+<LI> <b>Number of distinct paths from the source to each node</b>.  
+There is one path to the source.  Set the number of paths to each other node to zero.  Then
+do a topological sort.  When you remove an edge from <i>a</i> to <i>b</i>, 
+add the number of paths to <i>a</i> to the number of paths to <i>b</i>.  
+This one is in the topcoder problem <a href=http://web.eecs.utk.edu/~plank/plank/classes/cs302/Notes//IncreasingSubsequences/SRM-348-D2-1000.html>IncreasingSubsequences</a>, for which I have
+lecture notes.
+</UL>
+<hr>
+<h3> Shortest paths with Dijkstra or Topological Sort?</h3>
+
+If our graph is directed and acyclic, then we can calculate shortest paths
+using either Dijkstra's algorithm or with topological sort.  
+If all we cared about was worst-case running time, we'd use topological sort, because
+<i>O(|E|+|V|)</i> is a better than <i>O(|E|log|V|)</i>.  However, we are not always dealing
+with worst-case running times.  Think about it:
+<p>
+<UL>
+<LI> Topological sort has to process every node and edge between the source and the 
+destination.
+<LI> Dijkstra's algorithm has to process every path that is less than or equal to the
+shortest path, but it doesn't process any path that is greater.
+</UL>
+Let's explore this a little.
+<p>
+What I've done is write two programs: 
+<b><a href=topo.cpp>topo.cpp</a></b>
+and 
+<b>dijkstra.cpp</b> (I don't let you see dijkstra.cpp -- for myself, see my 
+personal 302 page for how to get dijkstra.cpp back..).
+<p>
+These take the following command line arguments:
+
+<p><center><table border=3 cellpadding=3><td><pre>
+topo|dijkstra n maxcap mincap window seed print(y|n)
+</pre></td></table></center><p>
+
+The programs create random directed, acyclic graphs with <b>n</b> nodes, numbered 0 through <i>n-1</i>.
+The edges all have random capacities uniformly distributed between <b>mincap</b> and <b>maxcap</b>.
+<p>
+The structure of the graph depends on <b>window</b>:
+
+<UL>
+<LI> If <b>window</b> is positive, then 
+each node <i>i</i> has edges to nodes <i>i+1</i> through <i>i+<b>window</b></i>.
+<LI> If <b>window</b> is negative, then we partition the nodes into <b>n/window</b>
+layers, and between layers, the nodes are fully connected.  I'll have pictures later
+in the lecture.
+</UL>
+
+Let's focus firt on the graphs where <b>window</b> is positive. 
+For example, take a look at a small graph:
+
+<p><center><table border=3 cellpadding=3>
+<td>
+<pre>
+UNIX> <font color=darkred><b>topo 4 50 1 2 1 y</b></font>
+Node 0: [1,35][2,44]
+Node 1: [2,26][3,6]
+Node 2: [3,48]
+Node 3: 
+Total edges in graph:           5
+Shortest Path:                 41
+Edges Processed:                5
+Graph Creation Time:        0.000
+Shortest Path Time:         0.000
+UNIX> <font color=darkred><b>dijkstra 4 50 1 2 1 n</b></font>
+Total edges in graph:           5
+Shortest Path:                 41
+Edges Processed:                4
+Graph Creation Time:        0.000
+Shortest Path Time:         0.000
+UNIX> <font color=darkred><b></b></font>
+</pre></td>
+<td><img src=TE1.jpg></td></table></center><p>
+
+It's pretty easy to see that the shortest path is 0 -> 1 -> 3.  And you can see the difference
+between topological sort and Dijkstra -- topological sort has to process every edge.
+Dijkstra on the other hand, does not visit node 2, because the shortest path to node 3
+is shorter than the one to node 2.  For that reason, the edge from 2 to 3 is not processed.
+
+<p>
+Let's look at a larger example to see a class of graphs where Dijkstra's algorithm will 
+outperform topological sort: Those where <b>window</b> equals <b>n</b>.  Here's an 
+example where <b>n</b> equals 8:
+
+<pre>
+UNIX> <font color=darkred><b>topo 8 10 1 8 8 y</b></font>
+Node 0: [1,7][2,7][3,1][4,10][5,3][6,9][7,4]
+Node 1: [2,7][3,5][4,3][5,3][6,2][7,6]
+Node 2: [3,5][4,7][5,1][6,2][7,4]
+Node 3: [4,3][5,6][6,1][7,2]
+Node 4: [5,4][6,6][7,5]
+Node 5: [6,8][7,3]
+Node 6: [7,1]
+Node 7: 
+Total edges in graph:          28
+Shortest Path:                  3
+Edges Processed:               28
+Graph Creation Time:        0.000
+Shortest Path Time:         0.000
+UNIX> <font color=darkred><b>dijkstra 8 10 1 8 8 n</b></font>
+Total edges in graph:          28
+Shortest Path:                  3
+Edges Processed:               14
+Graph Creation Time:        0.000
+Shortest Path Time:         0.000
+UNIX> <font color=darkred><b></b></font>
+</pre>
+
+To help visualize this, I'm drawing the graph below, where the edges are colored according
+to their weights:
+
+<p><center><table border=3><td><img src=TE2.jpg></td></table></center><p>
+
+What you can see here is that while topological sort has to process all 28 edges, 
+Dijkstra's algorithm only processes the edges from nodes 0, 3 and 6.  Let's
+extrapolate and time.  In each of these tests, <b>maxcap</b> is 1000, <b>mincap</b>
+is one, <b>window</b>
+is equal to <b>n</b>.  
+
+<p><center><table border=3><td><img src=Bushy.jpg width=500></td></table></center><p>
+
+I'm not super-proud of that graph, BTW -- the Dijkstra numbers are averages of 
+50 runs each, but there's still so enough randomness in the graphs that you see
+wavy lines.  However, what you are seeing is that Dijkstra's algorithm process
+so many fewer edges than topological sort, that it is over ten times faster
+on the larger graphs.
+<p>
+Now, let's instead construct graphs that favor topological sort.  Let's make
+<b>n</b> big, but limit <b>window</b> to 64.  Here's an example:
+
+<pre>
+UNIX> <font color=darkred><b>topo 10000 1000 1 64 1 n</b></font>
+Total edges in graph:      637920
+Shortest Path:               2102
+Edges Processed:           637920
+Graph Creation Time:        0.048
+Shortest Path Time:         0.010
+UNIX> <font color=darkred><b>dijkstra 10000 1000 1 64 1 n</b></font>
+Total edges in graph:      637920
+Shortest Path:               2102
+Edges Processed:           635321
+Graph Creation Time:        0.053
+Shortest Path Time:         0.015
+UNIX> <font color=darkred><b></b></font>
+</pre>
+
+Now, you can see that Dijkstra's algorithm is processing nearly all of the edges
+on the graph.  Since it has to do map operations, which are <i>O(log m)</i> 
+(where <i>m</i> is the size of the map), it is slower than topological sort, 
+which is doing <i>O(1)</i> operations for each edge.
+<p>
+Let's look at how the timings scale with <b>n</b> when we keep <b>window</b>
+fixed at 64:
+
+<p><center><table border=3><td><img src=64.jpg width=500></td></table></center><p>
+
+It's no longer a 10-fold improvement, but the topological sort clearly 
+outperforms Dijkstra.  
+<p>
+These are nice examples of showing how the structure of the graph
+impacts the performance of the two algorithms.
+
+<hr>
+If we give a negative window size to <b>topo</b> and <b>dijkstra</b>, then the
+graph is composed of <i>w</i> fully-connected layers.  For example, if I specify
+<i>n</i> to be 52 and <i>w</i> to be -5, then the graph looks like this:
+
+<p><center><table border=3><td><img src=layer-drawing.jpg width=600></td></table></center><p>
+
+I'd like to use this graph to demonstrate topological sort outperforming Dijkstra,
+but I'm having a hard time, so I'll just leave this text here.  When the number of
+layers is 500, and <b>mincap/maxcap</b> are both large values, topological sort
+definitely outperforms Dijkstra:
+
+<p><center><table border=3><td><img src=Layers.jpg width=600></td></table></center><p>
+
+Again, this is because both Dijkstra and topological sort 
+process similar numbers of edges.  Interestingly, when I shrink the number of layers,
+Dijkstra's performance relative to topological sort improves to the point where
+it's better.  I may have to look at that in more detail some day.

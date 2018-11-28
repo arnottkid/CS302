@@ -1,0 +1,14 @@
+newgraph xaxis min 0 max 4000  size 5 hash_labels fontsize 12 
+   label fontsize 14 : n
+yaxis min 0 size 2
+   hash_labels fontsize 12
+   label fontsize 14 : Shortet Path Time (s)
+
+newline linethickness 2 label : Topological Sort
+  pts include Topo-Bushy.txt
+
+newline linethickness 2 color 1 0 0 label : Dijkstra
+  pts include Dijkstra-Bushy.txt
+
+
+legend defaults fontsize 14 hjl vjt x 200 y .105
