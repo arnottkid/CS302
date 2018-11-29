@@ -30,7 +30,8 @@ P, NP, NP-Complete and NP-Hard are sets of problems, defined as follows:
 polynomial time.  We don't know.  However, if we can prove that one of them may be solved
 in polynomial time, then all of them can.
 <LI> <b>NP-Hard</b>: A collection of problems that do not have to be in NP, 
-whose solutions are at least as hard as the NP-Complete problems.  
+whose solutions are at least as hard as the NP-Complete problems.  If a problem is in NP, and
+it's NP hard, then it is also NP-Complete.
 </UL>
 <p>
 
@@ -72,9 +73,12 @@ The complexity classes P and NP-Hard may be put in terms of the above:
 in polynomial time, then the problem is in P.  All of the algorithms that we
 have studied in this class, with the exception of enumeration, are in <b>P</b>.
 <p>
-<LI> <b>NP-Hard</b>: These are problems that are not in NP; however, we can 
-perform the transformation in step 2 of a known NP-Complete problem to these
-problems.  Thus, they are <i>at least as hard</i> as the NP-Complete problems.
+<LI> <b>NP-Hard</b>: These are problems that are at least as hard to solve as NP-Complete
+problems.  If they are in NP, then they are NP-complete problems. 
+We prove that a problem is NP-Hard by 
+performing the transformation in step 2 of a known NP-Complete problem the problem
+at hand.  That is how we demonstrate that they are "at least as hard to solve as NP-Complete
+problems."
 </UL>
 
 
