@@ -4,7 +4,9 @@
 <UL>
 <li> James S. Plank
 <li> December 1, 2009.
-<LI> Latest revision: Dec  2 01:05:24 EST 2015
+<LI> Latest revision: <i>
+Wed Nov 28 20:09:28 EST 2018
+</i>
 </UL>
 </b></a>
 <hr>
@@ -60,7 +62,7 @@ time.
 
 If  you can do both of these things, then you have proved that a problem is
 NP-Complete.  If you can prove that either of these things cannot be done, then you
-have proved that a problem is not NP-Complete.  Sometimes you can't do come up
+have proved that a problem is not NP-Complete.  Sometimes you can't come up
 with good proofs, and you just don't know.  
 <p>
 The complexity classes P and NP-Hard may be put in terms of the above:
@@ -186,13 +188,14 @@ and <i>b</i> and <i>d</i> to TRUE:
 </i><p>
 </center>
 From our lecture notes on enumeration, we can 
-answer whether an instance of 3-SAT is true or false by crafting a
-solution that is exponential in the number of variables. Call that number <i>n</i>.  
-View each setting of the variables as
-an <i>n-</i>bit number, where bit <i>i</i> represents the assignment of variable
-<i>x<sub>1</sub></i>.  There are <i>2<sup>n</sup></i> of these numbers, and they represent
-all possible settings of the variables.  So, enumerate them and test to see if <i>E</i> is true.
-However, is there a polynomial time solution?  No one knows.
+answer whether an instance of 3-SAT is true or false with a simple power
+set enumeration.  That enumerates all possible true/false settings of the literals,
+and for each setting, you can test to see whether the expression is true.
+Of course, if there are <i>n</i> literals, the power set enumeration will
+enumerate <i>2<sup>n</sup></i> settings, so this is definitely not polynomial
+time.  
+<p>
+Is there a polynomial time solution?  No one knows.
 <p>
 It is an easy matter to prove that 3-SAT is in NP.  How many different clauses can there
 be?  (4/3) * n * (n-1) * (n-2) --  we'll go over that in class.  That's a polynomial of
@@ -207,8 +210,16 @@ As for proving that 3-SAT is NP-Complete, that is well beyond the scope of this 
 Suppose I have a problem, like 
 <a href="http://en.wikipedia.org/wiki/Independent_set_(graph_theory)"><b>The Independent Set Decision Problem (ISDP)</b></a>: Given a graph  <i>G</i>
 and a number <i>k</i>, can we find a set of <i>k</i> vertices in <i>G</i> such that there are
-no edges between any two of the vertices.
-Here's how we use 3-SAT to prove it is NP-Complete.
+no edges between any two of the vertices.  Here's an example:
+
+<p><center><table border=3><td><img src=ISDP-Example.jpg width=200></td></table></center><p>
+
+The yellow nodes are an independent set of size 5.  There is no independent set of size 6.
+<p>
+
+
+
+Here's how we use 3-SAT to prove that ISDP is NP-Complete.
 <p>
 First, prove it's in NP: If you give me a set of <i>k</i> vertices, I can easily check to verify
 that there are no edges between two nodes in <i>k</i>.  That will be <i>O(|E|)</i> in the 
