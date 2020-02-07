@@ -4,6 +4,11 @@
 #include <iostream>
 using namespace std;
 
+/* This program makes a big mistake, and does not allocate enough 
+   memory for the sprintf() call.  In particular, buf2 is only
+   eight bytes, and the sprintf() call writes at least 10 bytes,
+   and maybe more. */
+
 int main()
 {
   char buf1[8];
@@ -21,6 +26,8 @@ int main()
   printf("buf1: %s\n", buf1);
   printf("buf2: %s\n", buf2);
   printf("buf3: %s\n", buf3);
+
+  /* Here is where sprintf() overruns the bytes allocated for buf2. */
 
   sprintf(buf2, "%d %d %d %d %d", i, i+1, i+2, i+3, i+4);
 

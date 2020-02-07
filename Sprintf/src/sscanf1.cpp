@@ -4,18 +4,16 @@
 #include <iostream>
 using namespace std;
 
+/* Read the integer 100 from the string "100" using sscanf(). */
+
 int main()
 {
-  char buf[100];
   string s;
   int i;
 
-  cin >> i;
-
-  sprintf(buf, "%d %d %d %d %d", i, i+1, i+2, i+3, i+4);
-  s = buf;
-
-  cout << s << endl;
+  s = "100";
+  sscanf(s.c_str(), "%d", &i);
+  printf("i = %d\n", i);
 
   return 0;
 }

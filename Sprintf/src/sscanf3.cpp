@@ -8,7 +8,6 @@ int main()
 {
   string l;
   int h, m, s, n;
-  double d;
   
   getline(cin, l);
   n = sscanf(l.c_str(), "%d:%d:%d", &h, &m, &s);
