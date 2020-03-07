@@ -1,46 +1,48 @@
-ALL = c_str \
-      buffer_changes \
-      bad_c_str \
-      good_c_str_2 \
-      bad_c_str_2 \
-      sprintf1 \
-      sprintf2 \
-      sscanf1 \
-      sscanf2 \
-      sscanf3
+ALL = bin/c_str \
+      bin/buffer_changes \
+      bin/bad_c_str \
+      bin/good_c_str_2 \
+      bin/bad_c_str_2 \
+      bin/sprintf1 \
+      bin/sprintf2 \
+      bin/sscanf1 \
+      bin/sscanf2 \
+      bin/sscanf3
+
+CFLAGS ?= -std=c++98 -Wall -Wextra 
 
 all: $(ALL)
 
 clean:
-	rm -f a.out *.o $(ALL)
+	rm -f a.out bin/*
 
-bad_c_str: bad_c_str.cpp
-	g++ -std=c++98 -o bad_c_str bad_c_str.cpp
+bin/bad_c_str: src/bad_c_str.cpp
+	g++ $(CFLAGS)-o bin/bad_c_str src/bad_c_str.cpp
 
-bad_c_str_2: bad_c_str_2.cpp
-	g++ -std=c++98 -o bad_c_str_2 bad_c_str_2.cpp
+bin/bad_c_str_2: src/bad_c_str_2.cpp
+	g++ $(CFLAGS)-o bin/bad_c_str_2 src/bad_c_str_2.cpp
 
-buffer_changes: buffer_changes.cpp
-	g++ -std=c++98 -o buffer_changes buffer_changes.cpp
+bin/buffer_changes: src/buffer_changes.cpp
+	g++ $(CFLAGS)-o bin/buffer_changes src/buffer_changes.cpp
 
-c_str: c_str.cpp
-	g++ -std=c++98 -o c_str c_str.cpp
+bin/c_str: src/c_str.cpp
+	g++ $(CFLAGS)-o bin/c_str src/c_str.cpp
 
-good_c_str_2: good_c_str_2.cpp
-	g++ -std=c++98 -o good_c_str_2 good_c_str_2.cpp
+bin/good_c_str_2: src/good_c_str_2.cpp
+	g++ $(CFLAGS)-o bin/good_c_str_2 src/good_c_str_2.cpp
 
-sprintf1: sprintf1.cpp
-	g++ -std=c++98 -o sprintf1 sprintf1.cpp
+bin/sprintf1: src/sprintf1.cpp
+	g++ $(CFLAGS)-o bin/sprintf1 src/sprintf1.cpp
 
-sprintf2: sprintf2.cpp
-	g++ -std=c++98 -o sprintf2 sprintf2.cpp
+bin/sprintf2: src/sprintf2.cpp
+	g++ $(CFLAGS)-o bin/sprintf2 src/sprintf2.cpp
 
-sscanf1: sscanf1.cpp
-	g++ -std=c++98 -o sscanf1 sscanf1.cpp
+bin/sscanf1: src/sscanf1.cpp
+	g++ $(CFLAGS)-o bin/sscanf1 src/sscanf1.cpp
 
-sscanf2: sscanf2.cpp
-	g++ -std=c++98 -o sscanf2 sscanf2.cpp
+bin/sscanf2: src/sscanf2.cpp
+	g++ $(CFLAGS)-o bin/sscanf2 src/sscanf2.cpp
 
-sscanf3: sscanf3.cpp
-	g++ -std=c++98 -o sscanf3 sscanf3.cpp
+bin/sscanf3: src/sscanf3.cpp
+	g++ $(CFLAGS)-o bin/sscanf3 src/sscanf3.cpp
 

@@ -3,7 +3,7 @@
 <UL>
 <LI> August 28, 2012
 <LI> Latest revision:
-Tue Aug 23 13:57:44 EDT 2016
+Thu Feb  6 17:26:53 EST 2020
 <LI> James S. Plank
 <LI> Directory: <b>/home/plank/cs302/Notes/STL-Review</b>
 </UL>
@@ -12,26 +12,180 @@ In class, we went over three topcoder problems.  In these lecture notes,
 I'll reiterate some points made in class.
 
 <hr>
+<h3>How this lecture is related to Topcoder</h3>
+
+(This is new as of 2020).  Since Topcoder's servers are sporadic, I have
+made these lecture notes independent of Topcoder.  The organization of the code
+is different from Topcoder as well, because I'd rather adhere to a more
+structured coding format with include files and compilation into object
+files.  In each case, you can implement this yourself in <b><i>problem</i>-mine.cpp</b>,
+and the makefile will let you compile it.  You can test yourself with 
+<b>scripts/test_<i>problem</i>.sh</b> with my program and with your program.
+The outputs should be identical.  See below for examples.
+
+<hr>
 <h3>SRM 347, D2, 250-pointer: CarBuyer</h3>
 
-Read over the problem.  It's on their web server at: <a href=http://community.topcoder.com/stat?c=problem_statement&pm=7652&rd=10671>http://community.topcoder.com/stat?c=problem_statement&pm=7652&rd=10671</a>.
-I have a program that includes <b>CarBuyer.cpp</b> and lets you test the examples
-in 
-<b><a href=CB-Main.cpp>CB-Main.cpp</a></b>.  Compile and test by copying your implementation
-to <b>CarBuyer.cpp</b> and then calling <b>g++ -std=c++98</b> on <b>CB-Main.cpp</b>:
+The problem's original description may be found on Topcoder's web
+servers at: <a href=http://community.topcoder.com/stat?c=problem_statement&pm=7652&rd=10671>http://community.topcoder.com/stat?c=problem_statement&pm=7652&rd=10671</a>.
+I will summarize the problem as follows:
+
+<UL>
+<LI> You are buying a car, and you have determined a formula to allow you to
+estimate a car's expense to you over some number of years.  This 
+formula is:
+<i>
+expense = price + tax + fuel.
+</i>
+<LI> You are given information about cars in a vector of strings called <i>cars</i>.
+<LI> Each string in <i>cars</i> represents one car.
+<LI> Each string contains three integers separated by single spaces.
+<LI> The three integers are <i>price</i>, <i>yearly_tax</i> and
+     <i>fuel_efficiency</i> of the specified cars.
+<LI> Each car's <i>price</i> is between 1 and 100,000.
+<LI> Each car's <i>yearly_tax</i> is between 1 and 1,000.
+<LI> Each car's <i>fuel_efficiency</i> is between 1 and 100.
+<LI> You are also given as parameters, three more integers:
+<OL>
+<p>
+<LI> <i>fuel_price</i> is the price of fuel (an integer between 1 and 100).
+<LI> <i>annual_distance</i> is the average distance that you will drive each
+     year (an integer between 1 and 100,000).
+<LI> <i>years</i> is the number of years that you will own the car (an 
+     integer between 1 and 100).
+<p>
+</OL>
+<LI> You calculate fuel as:
+<i> fuel = fuel_price * annual_distance / fuel_efficiency.  </i>
+
+<LI> Your job is to return, as a <b>double</b>, the lowest expense of all
+     of the cars in <i>cars</i>.
+</UL>
+
+<hr>
+<h3>Examples</h3>
+
+<p><table border=3 cellpadding=10>
+<td valign=top><pre>
+Example 0:
+---------
+fuel_price: 2
+annual_distance: 5000
+years: 2
+Car     0: 10000 50 50
+Car     1: 12000 500 10
+Car     2: 15000 100 65
+Car     3: 20000 20 80
+Car     4: 25000 10 90
+Return value: 10500.00
+</pre></td><td valign=top><pre>
+Example 1:
+---------
+fuel_price: 8
+annual_distance: 25000
+years: 10
+Car     0: 10000 50 50
+Car     1: 12000 500 10
+Car     2: 15000 100 65
+Car     3: 20000 20 80
+Car     4: 25000 10 90
+Return value: 45200.0
+</pre></td><td valign=top><pre>
+Example 2:
+---------
+fuel_price: 33
+annual_distance: 8673
+years: 64
+Car     0: 8426 774 19
+Car     1: 29709 325 31
+Car     2: 30783 853 68
+Car     3: 27726 4 81
+Car     4: 20788 369 69
+Car     5: 17554 359 34
+Car     6: 6264 230 69
+Car     7: 14151 420 65
+Car     8: 25115 528 70
+Car     9: 2050 926 40
+Car    10: 18618 714 29
+Car    11: 173 358 57
+Return value: 254122.444444
+</table><p>
+
+<hr>
+<h3>Header File and Main</h3>
+
+I have included a header file in
+<b><a href=include/car_buyer.hpp>include/car_buyer.hpp</a></b>:
+
+<p><center><table border=3 cellpadding=3><td><pre>
+<font color=blue>/* CS302 Header file for Topcoder SRM 347, D2, 250-Pointer: CarBuyer. */</font>
+
+#include &lt;string&gt;
+#include &lt;vector&gt;
+
+class CarBuyer {
+  public:
+    double lowestCost(const std::vector &lt;std::string&gt; &cars, 
+                      int fuel_price, 
+                      int annual_distance, 
+                      int years);
+};
+</pre></td></table></center><p>
+
+Your job is to implement the class.
+
+<p> To help you understand compilation, I have a skeleton 
+implementation in 
+<b><a href=src/car_buyer_skeleton.cpp>src/car_buyer_skeleton.cpp</a></b>.  It simply 
+prints its arguments and returns zero.    
+<p>I also have a driver program in
+<b><a href=src/car_buyer_main.cpp>src/car_buyer_main.cpp</a></b>.
+   If you call it with an argument of 0, 1 or 2, it does that
+   topcoder example.  If you call it with "-", then you enter
+   fuel_price, annual_distance, and years, and then the information
+   for the cars.  If you call it with a different numerical argument,
+   then it uses the number to seed a random number generator, and
+   it generates random input, which can be quite large.
+<p>
+You can use the <b>makefile</b> to compile:
 
 <pre>
-UNIX> <font color=darkred><b>cp CarBuyer-ss.cpp CarBuyer.cpp</b></font>
-UNIX> <font color=darkred><b>vi CB-Main.cpp</b></font>
-UNIX> <font color=darkred><b>g++ -std=c++98 CB-Main.cpp</b></font>
-UNIX> <font color=darkred><b>./a.out 0</b></font>
-10500.000000
-UNIX> <font color=darkred><b>./a.out 1</b></font>
-45200.000000
-UNIX> <font color=darkred><b>./a.out 2</b></font>
-254122.444444
-UNIX> <font color=darkred><b></b></font>
+UNIX> <font color=darkred><b>make bin/car_buyer_skeleton</b></font>
+g++ -std=c++98 -Wall -Wextra -Iinclude -c -o obj/car_buyer_skeleton.o src/car_buyer_skeleton.cpp
+g++ -std=c++98 -Wall -Wextra -Iinclude -c -o obj/car_buyer_main.o src/car_buyer_main.cpp
+g++ -std=c++98 -Wall -Wextra -Iinclude -o bin/car_buyer_skeleton obj/car_buyer_skeleton.o obj/car_buyer_main.o
+UNIX> <font color=darkred><b>bin/car_buyer_skeleton 0</b></font>  <font color=blue> # This is example 0.</font>
+fuel_price: 2
+annual_distance: 5000
+years: 2
+Car     0: 10000 50 50
+Car     1: 12000 500 10
+Car     2: 15000 100 65
+Car     3: 20000 20 80
+Car     4: 25000 10 90
+0.000000                   <font color=blue> # It always returns zero.</font>
+UNIX> <font color=darkred><b>echo 4 100 5 10000 25 28 | bin/car_buyer_skeleton -</b></font> <font color=blue> # Here I enter input on standard input:</font>
+fuel_price: 4
+annual_distance: 100
+years: 5
+Car     0: 10000 25 28
+0.000000
+UNIX>
 </pre>
+
+When you type <b>make</b>, it will compile the following programs:
+
+<UL>
+<LI> <b>src/car_buyer_skeleton.cpp</b> - A "solution" that compiles, but doesn't work.
+<LI> <b>src/car_buyer_stringstream.cpp</b> - A solution that uses stringstreams.
+<LI> <b>src/car_buyer_sscanf.cpp</b> - A solution that uses sscanf.
+<LI> <b>src/car_buyer_mine.cpp</b> - This is like the skeleton solution.  It compiles, but
+     doesn't work.  The intent is for you to practice with this program, modifying it 
+     so that it works.
+</UL>
+
+<hr>
+<h3>CarBuyer: A solution with stringstreams</h3>
 
 The reason I did this problem was to review stringstreams.  Solving this problem 
 is pretty straightforward.  First, convert all of those ints to doubles, since you'll
@@ -49,27 +203,27 @@ because I'm doing floating point arithmetic, and we don't ever use floats, becau
 their precision is poor.
 </UL>
 
-Here's the code
-
-(<b><a href=CarBuyer.cpp>CarBuyer.cpp</a></b>)
+Here's the code, in
+<b><a href=src/car_buyer_stringstream.cpp>src/car_buyer_stringstream.cpp</a></b>:
 
 <p><center><table border=3 cellpadding=3><td><pre>
+#include "car_buyer.hpp"
 #include &lt;string&gt;
 #include &lt;vector&gt;
 #include &lt;sstream&gt;
-#include &lt;cstdio&gt;
-#include &lt;cstdlib&gt;
-#include &lt;iostream&gt;
 using namespace std;
 
-class CarBuyer {
-  public:
-    double lowestCost(vector &lt;string&gt; cars, int fuelPrice, int annualDistance, int years);
-};
+<font color=blue>/* This program uses a stringstream to extract the values from each of
+   the car strings.  I then calculate the projected cost of each car,
+   and return the minimum.  I convert all integers to doubles, because
+   we will be performing floating point operations. */</font>
 
-double CarBuyer::lowestCost(vector &lt;string&gt; cars, int fuelPrice, int annualDistance, int years)
+double CarBuyer::lowestCost(const vector &lt;string&gt; &cars, 
+                            int fuelPrice, 
+                            int annualDistance, 
+                            int years)
 {
-  int i;
+  size_t i;
   istringstream ss;
   double fp, ad, y, price, tax, efficiency, cost, min;
  
@@ -82,17 +236,52 @@ double CarBuyer::lowestCost(vector &lt;string&gt; cars, int fuelPrice, int annua
   <font color=blue>/* Use a stringstream to extract the values from each string, 
      and compute the cost.  Keep track of the minimum cost. */</font>
 
-  min = -1;
+  min = -1;  <font color=blue>/* I don't technically need this line, but some compilers
+                will yell at me if I don't have it. */</font>
+
   for (i = 0; i &lt; cars.size(); i++) {
     ss.clear();
     ss.str(cars[i]);
     ss &gt;&gt; price &gt;&gt; tax &gt;&gt; efficiency;
     cost = price + (y * tax) + (y * ad * fp / efficiency);
-    if (min == -1 || cost &lt; min) min = cost;
+    if (i == 0 || cost &lt; min) min = cost;
   }
   return min;
 }
 </pre></td></table></center><p>
+
+Here it is in action.  You can verify that it gets the three examples correct.
+The shell script in 
+<b><a href=scripts/test_car_buyer.sh>scripts/test_car_buyer.sh</a></b>
+runs it with arguments from 0 to 50 -- below, I show the first five lines,
+and then I pipe it to "openssl md5", which prints out its MD5 hash.  I can
+use that to test my next implementation and make sure it's identical.
+
+<pre>
+UNIX> <font color=darkred><b>make bin/car_buyer_stringstream</b></font>
+g++ -std=c++98 -Wall -Wextra -Iinclude -c -o obj/car_buyer_stringstream.o src/car_buyer_stringstream.cpp
+g++ -std=c++98 -Wall -Wextra -Iinclude -c -o obj/car_buyer_main.o src/car_buyer_main.cpp
+g++ -std=c++98 -Wall -Wextra -Iinclude -o bin/car_buyer_stringstream obj/car_buyer_stringstream.o obj/car_buyer_main.o
+UNIX> <font color=darkred><b>bin/car_buyer_stringstream 0</b></font>
+10500.000000
+UNIX> <font color=darkred><b>bin/car_buyer_stringstream 1</b></font>
+45200.000000
+UNIX> <font color=darkred><b>bin/car_buyer_stringstream 2</b></font>
+254122.444444
+UNIX> <font color=darkred><b>sh scripts/test_car_buyer.sh bin/car_buyer_stringstream | head -n 5</b></font>
+10500.000000
+45200.000000
+254122.444444
+2217138.040000
+236390.000000
+UNIX> <font color=darkred><b>sh scripts/test_car_buyer.sh bin/car_buyer_stringstream | openssl md5</b></font>
+(stdin)= 88113b1f919987b342786171bca7ff09
+UNIX> <font color=darkred><b></b></font>
+</pre>
+
+
+<hr>
+<h3>CarBuyer: A solution with sscanf()</h3>
 
 In class, I showed you how to use <b>sscanf()</b> in place of the stringstream.  
 Here's that code.  Since <b>sscanf()</b> does not use reference variables, you have
@@ -102,13 +291,23 @@ return value of <b>sscanf()</b> tells you how many matches were made correctly. 
 program, that would be three, since Topcoder guarantees that your input is correct.
 
 (This code is in
-<b><a href=CarBuyer-sscanf.cpp>CarBuyer-sscanf.cpp</a></b>):
+<b><a href=src/car_buyer_sscanf.cpp>src/car_buyer_sscanf.cpp</a></b>):
 
 <p><center><table border=3 cellpadding=3><td><pre>
-double CarBuyer::lowestCost(vector &lt;string&gt; cars, int fuelPrice, int annualDistance, int years)
-{
-  int i;
+#include "car_buyer.hpp"
+#include &lt;string&gt;
+#include &lt;vector&gt;
+#include &lt;sstream&gt;
+using namespace std;
 
+<font color=blue>/* This program uses sscanf() instead of the stringstream. */</font>
+
+double CarBuyer::lowestCost(const vector &lt;string&gt; &cars, 
+                            int fuelPrice, 
+                            int annualDistance, 
+                            int years)
+{
+  size_t i;
   double fp, ad, y, price, tax, efficiency, cost, min;
  
   fp = fuelPrice;
@@ -119,69 +318,233 @@ double CarBuyer::lowestCost(vector &lt;string&gt; cars, int fuelPrice, int annua
   for (i = 0; i &lt; cars.size(); i++) {
     sscanf(cars[i].c_str(), "%lf %lf %lf", &price, &tax, &efficiency);
     cost = price + (y * tax) + (y * ad * fp / efficiency);
-    if (min == -1 || cost &lt; min) min = cost;
+    if (i == 0 || cost &lt; min) min = cost;
   }
   return min;
 }
 </pre></td></table></center><p>
 
-<h4>Bottom Lines From This Program</h4>
+As you can see, the output of 
+<b><a href=scripts/test_car_buyer.sh>scripts/test_car_buyer.sh</a></b>, when piped
+to "openssl md5" is the same as before.  That means that the outputs are identical
+(with exceptionally high probability, if you want to get technical about it):
+
+<pre>
+UNIX> <font color=darkred><b>make bin/car_buyer_sscanf</b></font>
+g++ -std=c++98 -Wall -Wextra -Iinclude -c -o obj/car_buyer_sscanf.o src/car_buyer_sscanf.cpp
+g++ -std=c++98 -Wall -Wextra -Iinclude -o bin/car_buyer_sscanf obj/car_buyer_sscanf.o obj/car_buyer_main.o
+UNIX> <font color=darkred><b>bin/car_buyer_sscanf 0</b></font>
+10500.000000
+UNIX> <font color=darkred><b>bin/car_buyer_sscanf 1</b></font>
+45200.000000
+UNIX> <font color=darkred><b>bin/car_buyer_sscanf 2</b></font>
+254122.444444
+UNIX> <font color=darkred><b>sh scripts/test_car_buyer.sh bin/car_buyer_sscanf | openssl md5</b></font>
+(stdin)= 88113b1f919987b342786171bca7ff09
+UNIX> <font color=darkred><b></b></font>
+</pre>
+
+<hr>
+<h4>CarBuyer: Bottom Lines From This Program</h4>
 
 This was just about input processing: Practice with stringstreams and <b>sscanf()</b>.
+You can program this yourself in <b>src/car_buyer_mine.cpp</b>, and the makefile will
+compile it -- use 
+<b><a href=scripts/test_car_buyer.sh>scripts/test_car_buyer.sh</a></b> to test and
+verify that it is correct.
+
 <hr>
 <h3>SRM 551, D2, 250-Pointer: ColorfulBricks</h3>
 
-Go ahead and read the description from Topcoder or 
+The problem's original description may be found on Topcoder's web
+servers at: 
 <a href=http://community.topcoder.com/stat?c=problem_statement&pm=12136&rd=15173>http://community.topcoder.com/stat?c=problem_statement&pm=12136&rd=15173</a>.
-What you should see relatively 
-quickly that this problem amounts to counting the number of distinct letters
-in <b>bricks</b>.  If that number is two, return two.  If that number is one,
-return one.  If that number is anything else, return zero.
+I will summarize the problem as follows:
+
+<UL>
+<LI> You are implementing a class called <b>ColorfulBricks</b> with a method called
+     <b>countLayouts()</b>.
+<LI> <b>CountLayouts</b> is given a string called <i>bricks</i> composed of upper-case letters.
+<LI> The topcoder description limits <i>bricks</i> to 50 characters, but my code will generate
+     strings up to 1,000,000 characters.  
+<LI> A string is "nice" if the characters are arranged such that there is at most
+     one pair of adjacent characters that are different.
+<LI> You are to return the number of ways that you can arrange the characters of 
+     <i>bricks</i> into nice strings.
+</UL>
+
+<hr>
+<h3>Examples</h3>
+
+<p><table border=3 cellpadding=10>
+<td valign=top><pre>
+Example 0:
+---------
+bricks: "ABAB"
+Return value: 2
+
+The strings are
+"AABB" and "BBAA".
+</pre></td><td valign=top><pre>
+Example 1:
+---------
+bricks: "AAA"
+Return value: 1
+
+There is only one way
+to arrange the string,
+and it is "nice."
+</pre></td><td valign=top><pre>
+Example 2:
+---------
+bricks: "WXYZ"
+Return value: 0
+</table><p>
+
+<hr>
+<h3>Header File and Main</h3>
+
+The header file for the problem is in 
+<b><a href=include/colorful_bricks.hpp>include/colorful_bricks.hpp</a></b>:
+
+<p><center><table border=3 cellpadding=3><td><pre>
+<font color=blue>/* Header file for Topcoder SRM 551, D2, 250-Pointer: ColorfulBricks */</font>
+
+#include &lt;string&gt;
+
+class ColorfulBricks {
+  public:
+    int countLayouts(const std::string &bricks);
+};
+</pre></td></table></center><p>
+
+I have written 
+<b><a href=src/colorful_bricks_main.cpp>src/colorful_bricks_main.cpp</a></b>, which is
+like the main program for <b>CarBuyer</b>.  If you give it the arguments 0, 1 or 2, it
+will do the examples above.  If you give it a dash for an argument, then it will read the
+<i>bricks</i> string from standard input.  Any other number will seed a random number
+generator and generate random input.  Some of these will be quite large.  For example,
+giving an argument of 50 yields a string with roughly 584,000 characters, and 51's string
+has roughly 800,000 characters.
+<p>
+When you type <b>make</b>, it will make the following programs:
+
+<hr>
+<h3> Sorting the string to count the distinct letters. </h3>
+
+<p>
+It should be pretty clear that the solution here is to determine the number of
+distinct letters in <i>bricks</i>.  One distinct letter means one nice string.
+Two distinct letters mean two nice strings.  More than two distinct letters means
+no nice strings.  
 <p>
 Now, determining the number of distinct letters is an easy matter, and there
 are a lot of ways to write <b>ColorfulBricks</b>.  In my opinion, the easiest
 is to sort <b>bricks</b>, and then count the number of times adjacent letters
 don't equal each other.  That's in 
-<b><a href=Colorful-Sort.cpp>Colorful-Sort.cpp</a></b>. Remember, you need to
-include <b>algorithm</b> to use the STL's <b>sort()</b> procedure.
+<b><a href=src/colorful_1_sort.cpp>src/colorful_1_sort.cpp</a></b>.
+Remember, you need to
+include <b>algorithm</b> to use the STL's <b>sort()</b> procedure:
 
 <p><center><table border=3 cellpadding=3><td><pre>
-int ColorfulBricks::countLayouts(string bricks)
-{
-  int i, nc;
+<font color=blue>/* ColorfulBricks solution #1: Sort the bricks, and determine how
+   many adjacent characters differ. */</font> 
 
-  sort(bricks.begin(), bricks.end());
+#include "colorful_bricks.hpp"
+#include &lt;string&gt;
+#include &lt;algorithm&gt;
+#include &lt;iostream&gt;
+using namespace std;
+
+int ColorfulBricks::countLayouts(const string &bricks)
+{
+  size_t i;
+  int nc;
+  string sorted_bricks; <font color=blue>// Since bricks is const, I have to make a copy to sort.</font>
+
+  <font color=blue>/* Sort the bricks using sort() from the C++ algorithms library. */</font>
+
+  sorted_bricks = bricks;
+  sort(sorted_bricks.begin(), sorted_bricks.end());
+
+  <font color=blue>/* Determine how many different characters there are by
+     examining adjacent characters in the sorted string. */</font>
 
   nc =  1;
-  for (i = 1; i &lt; bricks.size(); i++) if (bricks[i] != bricks[i-1]) nc++;
+  for (i = 1; i &lt; sorted_bricks.size(); i++) {
+    if (sorted_bricks[i] != sorted_bricks[i-1]) nc++;
+  }
+
+  <font color=blue>/* There are three outcomes: 
+      - One character = one nice string.
+      - Two characters = two nice strings.
+      - More than two characters = zero nice strings. */</font>
+
   if (nc == 1) return 1;
   if (nc == 2) return 2;
   return 0;
 }
 </pre></td></table></center><p>
 
-To test this, copy it to <b>ColorfulBricks.cpp</b> and compile <b>Colorful-Main.cpp</b>:
+As highlighted in the comments, you have to make a copy of <i>bricks</i> in order to
+sort it.  Keep that in the back of your mind.
+
+Let's compile and test:
 
 <pre>
-UNIX> <font color=darkred><b>cp Colorful-Sort.cpp ColorfulBricks.cpp</b></font>
-UNIX> <font color=darkred><b>g++ -std=c++98 Colorful-Main.cpp </b></font>
-UNIX> <font color=darkred><b>./a.out 0</b></font>
-2
-UNIX> <font color=darkred><b>./a.out 1</b></font>
+UNIX> <font color=darkred><b>make bin/colorful_1_sort</b></font>
+g++ -std=c++98 -Wall -Wextra -Iinclude -c -o obj/colorful_1_sort.o src/colorful_1_sort.cpp
+g++ -std=c++98 -Wall -Wextra -Iinclude -c -o obj/colorful_bricks_main.o src/colorful_bricks_main.cpp
+g++ -std=c++98 -Wall -Wextra -Iinclude -o bin/colorful_1_sort obj/colorful_1_sort.o obj/colorful_bricks_main.o
+UNIX> <font color=darkred><b>bin/colorful_1_sort 0      </b><font color=blue> # The examples match topcoder.</font></font>
+2                                <font color=blue> # It really doesn't take us much testing to convince</font>
+UNIX> <font color=darkred><b>bin/colorful_1_sort 1      </b><font color=blue> # ourselves that this is working</font></font>
 1
-UNIX> <font color=darkred><b>./a.out 2</b></font>
+UNIX> <font color=darkred><b>bin/colorful_1_sort 2</b></font>
+0                                <font color=blue> # The test script does 300 tests:</font>
+UNIX> <font color=darkred><b>sh scripts/test_colorful_bricks.sh bin/colorful_1_sort | wc</b></font>
+UNIX> <font color=darkred><b>sh scripts/test_colorful_bricks.sh bin/colorful_1_sort | head -n 10</b></font>
+2
+1
 0
+2
+0
+0
+2
+2
+1
+1                                <font color=blue> # We can use the MD5 hash to test correctness of later solutions.</font>
+UNIX> <font color=darkred><b>sh scripts/test_colorful_bricks.sh bin/colorful_1_sort | openssl md5</b></font>
+(stdin)= b3f7a19dc41d8e46a7ffa7cea70daca9
+UNIX> <font color=darkred><b>time sh -c "sh scripts/test_colorful_bricks.sh bin/colorful_1_sort > /dev/null"</b></font>
+                      <font color=blue> # I'm using bash as my shell, so this is the timing output.</font>
+real	0m1.604s      <font color=blue> # Does that seem slow or fast to you?</font>
+user	0m0.939s
+sys	0m0.410s
 UNIX> <font color=darkred><b></b></font>
 </pre>
 
-Alternatively, you can use a <b>set</b> to store the characters in <b>bricks</b>, and
-the size of the set will be the number of distinct characters.  This is in:
-<b><a href=Colorful-Set.cpp>Colorful-Set.cpp</a></b>:
+<hr>
+<h3>Using a set to count distinct letters</h3>
+
+Alternatively, you can use a <b>set</b> to store the characters in <i>bricks</i>, and
+the size of the set will be the number of distinct characters.  This is in
+<b><a href=src/colorful_2_set.cpp>src/colorful_2_set.cpp</a></b>:
 
 <p><center><table border=3 cellpadding=3><td><pre>
-int ColorfulBricks::countLayouts(string bricks)
+<font color=blue>/* Here we create a set of the characters in bricks.  Since
+   sets do not store duplicate elements, the size of the set
+   will equal the number of distinct characters. */</font>
+
+#include "colorful_bricks.hpp"
+#include &lt;string&gt;
+#include &lt;set&gt;
+#include &lt;iostream&gt;
+using namespace std;
+
+int ColorfulBricks::countLayouts(const string &bricks)
 {
-  int i;
+  size_t i;
   set &lt;char&gt; s;
 
   for (i = 0; i &lt; bricks.size(); i++) s.insert(bricks[i]);
@@ -193,40 +556,89 @@ int ColorfulBricks::countLayouts(string bricks)
 
 Remember, sets don't store duplicate values and maps don't store duplicate
 keys -- use multisets and multimaps if you want that functionality.  Here,
-we don't want duplicates.
+we don't want duplicates, so a <b>set</b> is what we want.  We use the MD5 hash
+of the testing script to determine that this program works the same as 
+<b>src/colorful_1_sort.cpp</b>.  It's slower, though:
+
+<pre>
+UNIX> <font color=darkred><b>sh scripts/test_colorful_bricks.sh bin/colorful_2_set | openssl md5</b></font>
+(stdin)= b3f7a19dc41d8e46a7ffa7cea70daca9
+UNIX> <font color=darkred><b>time sh -c "sh scripts/test_colorful_bricks.sh bin/colorful_2_set > /dev/null"</b></font>
+
+real	0m2.157s
+user	0m1.444s
+sys	0m0.439s
+UNIX> <font color=darkred><b></b></font>
+</pre>
+
+<hr>
+<h3>Using a map for convenience</h3>
+
 <p>
 You can use a map, too, instead of a set, which allows you to leverage the
 syntax where you can treat the map like an associative array. 
-That's in 
-<b><a href=Colorful-Map.cpp>Colorful-Map.cpp</a></b>
+The code is in <b><a href=src/colorful_3_map.cpp>src/colorful_3_map.cpp</a></b>:
 
 <p><center><table border=3 cellpadding=3><td><pre>
-int ColorfulBricks::countLayouts(string bricks)
+<font color=blue>/* This solution is like the set, but uses a map because the
+   syntax is easier.  The map counts occurrences of each 
+   character, but that's not used to solve the problem. */</font>
+
+#include "colorful_bricks.hpp"
+#include &lt;string&gt;
+#include &lt;map&gt;
+#include &lt;iostream&gt;
+using namespace std;
+
+int ColorfulBricks::countLayouts(const string &bricks)
 {
-  int i;
+  size_t i;
   map &lt;char, int&gt; s;
 
-  <font color=blue>/* This treats the map like an associate array, inserting
-     bricks[i] into the map if it is not there already. */</font>
-
   for (i = 0; i &lt; bricks.size(); i++) s[bricks[i]]++;
-
   if (s.size() == 1) return 1;
   if (s.size() == 2) return 2;
   return 0;
 }
 </pre></td></table></center><p>
-<p>
+
+It works, and is faster than the set, but slower than sorting:
+
+<pre>
+UNIX> <font color=darkred><b>sh scripts/test_colorful_bricks.sh bin/colorful_3_map | openssl md5</b></font>
+(stdin)= b3f7a19dc41d8e46a7ffa7cea70daca9
+UNIX> <font color=darkred><b>time sh -c "sh scripts/test_colorful_bricks.sh bin/colorful_3_map > /dev/null"</b></font>
+
+real	0m1.908s
+user	0m1.254s
+sys	0m0.394s
+UNIX> <font color=darkred><b></b></font>
+</pre>
+
+<hr>
+<h3>Using a vector to count the number of strings</h3>
+
 You can instead leverage the fact that there are only
-26 potential values of <b>bricks[i]</b>, to use a vector.
-In the code below, (<b><a href=Colorful-Vec1.cpp>Colorful-Vec1.cpp</a></b>), we have a
+26 potential values of <i>bricks[i]</i>, to use a vector.
+In the code below, (<b><a href=src/colorful_4_vec.cpp>src/colorful_4_vec.cpp</a></b>), we have a
 vector <b>s</b>, where we set <b>s[i]</b> to one if <b>('A'+i)</b> is in the string:
 Then you count up the elements of <b>s</b> which equal one:
 
 <p><center><table border=3 cellpadding=3><td><pre>
-int ColorfulBricks::countLayouts(string bricks)
+<font color=blue>/* In this implementation, we maintain an array indexed by characters,
+   and set a character's value to 1 when we see it.  At the end, we count
+   up the characters that have ones to determine the answer. */</font>
+
+#include "colorful_bricks.hpp"
+#include &lt;string&gt;
+#include &lt;vector&gt;
+#include &lt;iostream&gt;
+using namespace std;
+
+int ColorfulBricks::countLayouts(const string &bricks)
 {
-  int i, nc;
+  size_t i;
+  int nc;
   vector &lt;int&gt; s;
 
   s.resize(26, 0);
@@ -241,15 +653,12 @@ int ColorfulBricks::countLayouts(string bricks)
 
 You can tweak the above to use the characters themselves as indices into
 <b>s</b>
-(<b><a href=Colorful-Vec2.cpp>Colorful-Vec2.cpp</a></b>).   The maximum character that
+(<b><a href=src/colorful_5_vec.cpp>src/colorful_5_vec.cpp</a></b>).
+The maximum character that
 you'll see is 'Z', so that's why we resize <b>s</b> to be <tt>('Z'+1)</tt>.
 <p>
-<p><center><table border=3 cellpadding=3><td><pre>
-int ColorfulBricks::countLayouts(string bricks)
-{
-  int i, nc;
-  vector &lt;int&gt; s;
 
+<p><center><table border=3 cellpadding=3><td><pre>
   s.resize('Z'+1, 0);
   nc = 0;
   for (i = 0; i &lt; bricks.size(); i++) s[bricks[i]] = 1;
@@ -261,58 +670,153 @@ int ColorfulBricks::countLayouts(string bricks)
 </pre></td></table></center><p>
 
 I'm not sure
-which is easier to read -- this program of the last one.  They are both about the same to me.
-<p>
+which is easier to read -- this program or the last one.  They are both about the same to me.  They are both correct, though, and run at roughly the same
+speed:
+
+<pre>
+UNIX> <font color=darkred><b>sh scripts/test_colorful_bricks.sh bin/colorful_4_vec | openssl md5</b></font>
+(stdin)= b3f7a19dc41d8e46a7ffa7cea70daca9
+UNIX> <font color=darkred><b>sh scripts/test_colorful_bricks.sh bin/colorful_5_vec | openssl md5</b></font>
+(stdin)= b3f7a19dc41d8e46a7ffa7cea70daca9
+UNIX> <font color=darkred><b>time sh -c "sh scripts/test_colorful_bricks.sh bin/colorful_4_vec > /dev/null"</b></font>
+
+real	0m1.603s
+user	0m0.941s
+sys	0m0.401s
+UNIX> <font color=darkred><b>time sh -c "sh scripts/test_colorful_bricks.sh bin/colorful_5_vec > /dev/null"</b></font>
+
+real	0m1.598s
+user	0m0.932s
+sys	0m0.404s
+UNIX> <font color=darkred><b></b></font>
+</pre>
+
+
+<hr>
+<h3>No Data Structures -- Just Two Variables</h3>
 
 Finally, you can simply use one variable to keep track of the first letter
-and another to keep track of the second.  This is in 
-<b><a href=Colorful-L1L2.cpp>Colorful-L1L2.cpp</a></b>:
+and another to keep track of the second.  If you read a character that
+is different from these, then return zero.  This is in 
+<b><a href=src/colorful_6_two_chars.cpp>src/colorful_6_two_chars.cpp</a></b>:
 
 <p><center><table border=3 cellpadding=3><td><pre>
-int ColorfulBricks::countLayouts(string bricks)
-{
-  int i, l1, l2, n;
-  vector &lt;int&gt; s;
+<font color=blue>/* This is the simplest implementation, data-structure wise -- we just
+   keep track of two characters -- the first one that we encounter, and
+   the second one that we encounter that is different from the first.
+   If we see a third character, we're done and return zero.  Otherwise, 
+   we return 1 or 2 depending on whether or not we saw a second character. */</font>
 
-  l1 = bricks[0];
-  n = 1;
+#include "colorful_bricks.hpp"
+#include &lt;string&gt;
+#include &lt;iostream&gt;
+using namespace std;
+
+int ColorfulBricks::countLayouts(const string &bricks)
+{
+  size_t i;
+  int n_distinct;
+  char c1, c2;
+
+  <font color=blue>/* c1 is the first character.
+     c2 is the second character.
+     n_distinct is the number of distinct characters we have seen so far. */</font>
+
+  c1 = bricks[0];
+  n_distinct = 1;
   
   for (i = 1; i &lt; bricks.size(); i++) {
-    if (n == 1 && bricks[i] != l1) {
-      n = 2;
-      l2 = bricks[i];
-    } else if (n == 2 && bricks[i] != l1 && bricks[i] != l2) return 0;
+    if (n_distinct == 1 && bricks[i] != c1) {
+      n_distinct = 2;
+      c2 = bricks[i];
+    } else if (n_distinct == 2 && bricks[i] != c1 && bricks[i] != c2) return 0;
   }
 
-  if (n == 1) return 1;
-  if (n == 2) return 2;
+  if (n_distinct == 1) return 1;
+  if (n_distinct == 2) return 2;
   return 0;
 }
 </pre></td></table></center><p>
 
-They all work, so which is the best?  I'll hedge a bit.  First, let's think about running
-time complexity.  Suppose that there are <i>n</i> elements in <b>bricks</b>.  Then
-the first three implementations are <i>O(n log n)</i>, while the remaining three
-are <i>O(n)</i>.  That would argue for one of the last three.  In terms of raw
-speed, the last one will be the fastest, because it exits quickly when you see the third
-letter.  So is that the best?  
-<p>Well, I'm hedging
-because you need to consider multiple factors when you ask about the "best."
-Speed is one thing.  Memory is another (the last one wins there too).  
-Readability is a third (I think the <b>set</b> solution is the most readable).
-And of course, in Topcoder, speed of programming and disinclination for bugs
-is also important.  Since the constraints ensure that all implementations will
-be super-fast (<i>n</i> is less than or equal to 50), these last considerations
-may be the most important, in which case the one that used sorting is the best.
-That's what I used when I solved this one for fun (it took 3 minutes for 246.70 points).
-<p>
-Regardless of which one is "best," you should be able to tell me the running time
-of all of these.
+This one, of course, works as well, and it is the fastest, but not by
+much:
 
+<pre>
+UNIX> <font color=darkred><b>sh scripts/test_colorful_bricks.sh bin/colorful_6_two_chars | openssl md5</b></font>
+(stdin)= b3f7a19dc41d8e46a7ffa7cea70daca9
+UNIX> <font color=darkred><b>time sh -c "sh scripts/test_colorful_bricks.sh bin/colorful_6_two_chars > /dev/null"</b></font>
+
+real	0m1.462s
+user	0m0.792s
+sys	0m0.408s
+UNIX> <font color=darkred><b></b></font>
+</pre>
+
+<hr>
+<h3> Evaluating all of those solutions </h3>
+
+They all work, so which is the best?  I'll hedge a bit.  First, let's think
+about running time and space complexity.  
+Suppose that there are <i>n</i> elements in
+<i>bricks</i>.    Then here are the running times of the various solutions
+(where <i>n</I> is the number of characters in the string):
+
+<UL>
+<LI> <b>Solution 1: Sorting</b>: This one makes a copy of <i>bricks</i>, so
+its space complexity is <i>O(n)</i>.  The sorting operation is
+<i>O(n log n)</i> so this one seems to be pretty slow.
+<p>
+<LI> <b>Solution 2: Set</b>: Inserting into a set is <i>O(log n)</i> where
+<i>n</i> is the size of the set.  In these examples, the size of the set is
+never greater than four, so this solution is <i>O(n)</i>, and 
+not <i>O(n log n)</i> like you think.  Why is it slower than solution 1?
+I'm not really sure, but remember that <i>1000n</i> is <i>O(n)</i>, and
+<i>n log n</i> is equal to <i>20n</i> when <i>n</i> is 1,000,000.  
+So there are going to be times when <i>O(n)</i> seems slower than
+<i>O(n log n)</i>.  I wish I had a better answer for you than that, but it's 
+what I've got.
+<p>
+<LI> <b>Solution 3: Map</b>: Same as solution 2.
+<p>
+<LI> <b>Solution 4: Vector</b>: This is <i>O(n)</i> and the underlying
+data structure, a vector with 26 elements, is very small.  We'd expect this
+to be faster than the other solutions.
+<p>
+<LI> <b>Solution 5: Vector</b>: This is the same as solution 5.  
+<p>
+<LI> <b>Solution 6: Two Characters</b>: This is the best solution in terms
+of space, as we're only keeping track of a few variables.  It is also the
+best in terms of time, because it exits when it sees the third character,
+unlike the others, which read all of the characters.  That's
+why it's faster than the others.  This is <i>O(n)</i> in the worst case,
+and <i>O(t)</i> in the best case, where <i>t</i> is the index of the third
+distinct character in the string.
+</UL>
+
+If you'd like a visual, here are the "user" times for all of these:
+
+<p><center><table border=3><td><img src=img/graph.jpg width=600></td></table></center><p>
+
+Back to my hedging -- which on is best?  Well,
+I'm hedging because you need to consider multiple factors when you ask about
+the "best." Speed is one thing.  Memory is another (the last one wins on 
+both counts).  Readability is a third (I think the <b>set</b> solution is the most
+readable).  And of course, in Topcoder, speed of programming and disinclination
+for bugs is also important.  Since the Topcoder constraints ensure that all
+implementations will be super-fast (<i>n</i> is less than or equal to 50),
+these last considerations may be the most important, in which case the one that
+used sorting is the best.  That's what I used when I solved this one for fun
+(it took 3 minutes for 246.70 points).  
+
+<p> Regardless of which one is "best,"
+you should be able to tell me the running time of all of these, and you should
+be able to discuss their various characteristics.
+
+<hr>
 <h4>Bottom Lines From This Program</h4>
 
-There are many ways to solve a problem.  The ``best'' way depends on what is important
-for the problem at hand, such as:
+There are many ways to solve a problem.  The "best" way depends on
+what is important for the problem at hand, such as:
 
 <UL>
 <LI> Speed of the program
@@ -325,8 +829,9 @@ for the problem at hand, such as:
 <hr>
 <h3>SRM 353, D1, 250-pointer: Glossary</h3>
 
-Go ahead and read the description, either on Topcoder or 
-<a href=http://community.topcoder.com/stat?c=problem_statement&pm=7838&rd=10710>http://community.topcoder.com/stat?c=problem_statement&pm=7838&rd=10710</a>.
+The problem description is on Topcoder's web site at:
+<a href=http://community.topcoder.com/stat?c=problem_statement&pm=7838&rd=10710>http://community.topcoder.com/stat?c=problem_statement&pm=7838&rd=10710</a>,
+but you can read the description below if you want.
 I know from experience that y'all hate these problems, because there's so 
 much detail in the formatting.  However specifications are specifications.
 What I'm going to do is build this one up and show you how I'd attack it.
@@ -334,13 +839,15 @@ There's a temptation to do everything at once -- build a big data structure
 and then traverse it and print.  That really doesn't work well here.
 Instead, it's better to go small, and build up, testing as you go.
 <p>
-Before starting, though, let me summarize the problem:
+Here's a summary of the problem:
 <UL>
 <LI> You are given a vector of strings.  We'll call each entry of the vector a "term."
-<LI> You want to print a formatted glossary of the terms.
-<LI> The terms will be sorted alphabetically, <i>ignoring case.</i>
-<LI> The output will have two columns.  The first column is for the A-M terms, and the second is for the N-Z terms.
-<LI> Each column will be exacly 19 characters, padded with spaces.. 
+<LI> You want to produce a formatted glossary of the terms, in the form of a
+     vector of strings.
+<LI> In the glossary, the terms will be sorted alphabetically, <i>ignoring case.</i>
+<LI> The glossary will have two columns.
+     The first column is for the A-M terms, and the second is for the N-Z terms.
+<LI> Each column has exactly 19 characters, padded with spaces.
 <LI> The columns are separated by two spaces.
 <LI> If there is a term starting with a letter, then before all of the terms with that letter, there will be a line containing just the upper case letter, and then a line of 19 dashes.
 <LI> The terms are printed with two leading spaces.
@@ -396,6 +903,61 @@ and the output is:
 
 </pre></td></table></center><p>
 <p>
+<hr>
+<h3>Header and Main</h3>
+
+The header is in 
+<b><a href=include/glossary.hpp>include/glossary.hpp</a></b>:
+
+<p><center><table border=3 cellpadding=3><td><pre>
+#include &lt;string&gt;
+#include &lt;vector&gt;
+
+class Glossary {
+  public:
+    std::vector &lt;std::string&gt; buildGlossary(const std::vector &lt;std::string&gt; &items);
+};
+</pre></td></table></center><p>
+
+There is a driver program in <b><a href=src/glossary_main.cpp>src/glossary_main.cpp</a></b>,
+which works like the previous ones:
+
+<UL>
+<LI> If the argument is "-", then it reads the terms from standard input.
+<LI> If the argument is a number between 0 and 4, it does the topcoder example with that number.
+<LI> Otherwise, it generates random input using the arguments as a seed to a RNG.
+     Half of the time, the input will be up to 10 terms.
+     40% of the time, the input will be up to 100 terms.
+     5% of the time, the input will be up to 1,000 terms.
+     5% of the time, the input will be up to 1,000,000 terms.
+</UL>
+
+There is a skeleton implementation in
+<b><a href=src/glossary_skeleton.cpp>src/glossary_skeleton.cpp</a></b>, which simply prints
+the input and exits:
+
+<pre>
+UNIX> <font color=darkred><b>bin/glossary_skeleton 0</b></font>
+Canada
+France
+Germany
+Italy
+Japan
+Russia
+United Kingdom
+United States
+UNIX> <font color=darkred><b>bin/glossary_skeleton 8</b></font>
+PNiscrus
+OxWAPJUF
+MycwqFCi
+IBsxQTjp
+zpIKLEWD
+UNIX> <font color=darkred><b></b></font>
+</pre>
+
+<hr>
+<h3> Solving the problem</h3>
+
 Let's attack the problem:
 <p>
 The first thing to notice is that you have to sort the output, ignoring
@@ -403,43 +965,54 @@ case.  So, the first thing that I'm going to do is read all the terms,
 convert them to uppercase, and then store them in a map.  The key will
 be the uppercase term, and the val is the original term.  Then, I'll
 print it out to make sure I've got it right.  This is in 
-<b><a href=Glossary-1.cpp>Glossary-1.cpp</a></b>:
+<b><a href=src/glossary_1_sort.cpp>src/glossary_1_sort.cpp</a></b>
 
 <p><center><table border=3 cellpadding=3><td><pre>
-vector &lt;string&gt; Glossary::buildGlossary(vector &lt;string&gt; I)
+<font color=blue>/* In my first pass at a solution, I create a map from the items.  I
+   convert each string to upper-case, and then store that string in 
+   the map as a key, with the value being the original string.  I
+   print it out at the end. */</font>
+
+#include "glossary.hpp"
+#include &lt;map&gt;
+#include &lt;iostream&gt;
+#include &lt;cstdio&gt;
+#include &lt;cstdlib&gt;
+using namespace std;
+
+vector &lt;string&gt; Glossary::buildGlossary(const vector &lt;string&gt; &items)
 {
-  int i, j;
+  size_t i, j;
   string s;
   map &lt;string, string&gt; g;
   map &lt;string, string&gt;::iterator git;
-  SVec rv;
+  vector &lt;string&gt; rv;
 
-  <font color=blue>/* Create the map g, which has the strings converted 
-     to upper-case as keys, and the strings themselves as vals. */</font>
-
-  for (i = 0; i &lt; I.size(); i++) {
-    s = I[i];
+  for (i = 0; i &lt; items.size(); i++) {
+    s = items[i];                            <font color=blue>// s is the upper-case string.</font>
     for (j = 0; j &lt; s.size(); j++) {
       if (s[j] &gt;= 'a' && s[j] &lt;= 'z') s[j] += ('A'-'a');
     }
-    g[s] = I[i];
+    g[s] = items[i];                         <font color=blue>// This puts s and items[i] into the map.</font>
   }
 
-  for (git = g.begin(); git != g.end(); git++) {
+  for (git = g.begin(); git != g.end(); git++) {     <font color=blue>// Print the map</font>
     cout &lt;&lt; git-&gt;first &lt;&lt; " " &lt;&lt; git-&gt;second &lt;&lt; endl;
   }
   return rv;
 }
 </pre></td></table></center><p>
 
-Remember, the line "<b>g[s] = I[i]</b>" is equivalent to 
-"<b>g.insert(make_pair(s, I[i]))</b>."  I return an empty vector so that
+Remember, the line "<b>g[s] = items[i]</b>" is equivalent to 
+"<b>g.insert(make_pair(s, items[i]))</b>."  I return an empty vector so that
 everything compiles nicely.  When we run it, it works as anticipated:
 
 <pre>
-UNIX> <font color=darkred><b>cp Glossary-1.cpp Glossary.cpp</b></font>
-UNIX> <font color=darkred><b>g++ -std=c++98 Glossary-Main.cpp</b></font>
-UNIX> <font color=darkred><b>./a.out 0</b></font>
+UNIX> <font color=darkred><b>make bin/glossary_1_sort</b></font>
+g++ -std=c++98 -Wall -Wextra -Iinclude -c -o obj/glossary_1_sort.o src/glossary_1_sort.cpp
+g++ -std=c++98 -Wall -Wextra -Iinclude -c -o obj/glossary_main.o src/glossary_main.cpp
+g++ -std=c++98 -Wall -Wextra -Iinclude -o bin/glossary_1_sort obj/glossary_1_sort.o obj/glossary_main.o
+UNIX> <font color=darkred><b>bin/glossary_1_sort 0</b></font>
 CANADA Canada
 FRANCE France
 GERMANY Germany
@@ -448,119 +1021,106 @@ JAPAN Japan
 RUSSIA Russia
 UNITED KINGDOM United Kingdom
 UNITED STATES United States
-UNIX> <font color=darkred><b>./a.out 1</b></font>
-ALPHA alpha
-BETA beta
-DELTA delta
-GAMMA gamma
-OMEGA omega
+UNIX> <font color=darkred><b>bin/glossary_1_sort 8</b></font>
+IBSXQTJP IBsxQTjp
+MYCWQFCI MycwqFCi
+OXWAPJUF OxWAPJUF
+PNISCRUS PNiscrus
+ZPIKLEWD zpIKLEWD
 UNIX> <font color=darkred><b></b></font>
 </pre>
 
 Next, I'm going to add a second map.  It has single characters as
 its keys, and vectors of strings as vals.  These are the glossary entries.  Since
 we create this by traversing <b>g</b>, we can be guaranteed that the vectors
-are in the proper order.  We print it out in a format similar to what we
-need, and test again.  It's in 
-<b><a href=Glossary-2.cpp>Glossary-2.cpp</a></b>:
+are in the proper order.  
+The code is in
+<b><a href=src/glossary_2_keymap.cpp>src/glossary_2_keymap.cpp</a></b>.  Here are the
+relevant code changes.
 
 <p><center><table border=3 cellpadding=3><td><pre>
-vector &lt;string&gt; Glossary::buildGlossary(vector &lt;string&gt; I)
+vector &lt;string&gt; Glossary::buildGlossary(const vector &lt;string&gt; &items)
 {
-  int i, j;
+  size_t i, j;
   string s;
-  map &lt;string, string&gt; g;
+  map &lt;string, string&gt; g;                    <font color=blue>// Map with upper-case keys, original strings as vals.</font>
   map &lt;string, string&gt;::iterator git;
-  map &lt;char, SVec&gt; bychar;
-  map &lt;char, SVec&gt;::iterator bit;
-  char f;
-  SVec rv;
+  map &lt;char, vector &lt;string&gt; &gt; k;            <font color=blue>// Map with first letters as keys</font>
+  map &lt;char, vector &lt;string&gt; &gt;::iterator kit;
+  vector &lt;string&gt; rv;
 
-  <font color=blue>/* Create the map g, which has the strings converted 
-     to upper-case as keys, and the strings themselves as vals. */</font>
-  
-  for (i = 0; i &lt; I.size(); i++) {
-    s = I[i];
-    for (j = 0; j &lt; s.size(); j++) {
-      if (s[j] &gt;= 'a' && s[j] &lt;= 'z') s[j] += ('A'-'a');
-    }
-    g[s] = I[i];
+  <font color=blue>/* Omitted code to create the first map... */</font>
+
+  <font color=blue>/* Create the second map from the first letters of the upper-case strings: */</font>
+
+  for (git = g.begin(); git != g.end(); git++) {     
+    k[git-&gt;first[0]].push_back(git-&gt;second);
   }
 
-  <font color=blue>/* Now, create the map "bychar", which has the starting
-     letters as keys, and vectors of the original strings as vals. */</font>
-
-  for (git = g.begin(); git != g.end(); git++) {
-    f = git-&gt;first[0];
-    bychar[f].push_back(git-&gt;second);
-  }
-
-  <font color=blue>/* Print out "bychar." */</font>
-
-  for (bit = bychar.begin(); bit != bychar.end(); bit++) {
-    printf("%c\n", bit-&gt;first);
-    printf("-----\n");
-    for (i = 0; i &lt; bit-&gt;second.size(); i++) {
-      printf("  %s\n", bit-&gt;second[i].c_str());
+  for (kit = k.begin(); kit != k.end(); kit++) {     <font color=blue>// Print the second map</font>
+    for (i = 0; i &lt; kit-&gt;second.size(); i++) {
+      cout &lt;&lt; kit-&gt;first &lt;&lt; " " &lt;&lt; kit-&gt;second[i] &lt;&lt; endl;
     }
   }
-    
   return rv;
 }
 </pre></td></table></center><p>
 
+We print out this new map and test again:
+
+<pre>
+UNIX> <font color=darkred><b>make bin/glossary_2_keymap</b></font>
+g++ -std=c++98 -Wall -Wextra -Iinclude -c -o obj/glossary_2_keymap.o src/glossary_2_keymap.cpp
+g++ -std=c++98 -Wall -Wextra -Iinclude -c -o obj/glossary_main.o src/glossary_main.cpp
+g++ -std=c++98 -Wall -Wextra -Iinclude -o bin/glossary_2_keymap obj/glossary_2_keymap.o obj/glossary_main.o
+UNIX> <font color=darkred><b>bin/glossary_2_keymap 0</b></font>
+C Canada
+F France
+G Germany
+I Italy
+J Japan
+R Russia
+U United Kingdom
+U United States
+UNIX> <font color=darkred><b>bin/glossary_2_keymap 8</b></font>
+I IBsxQTjp
+M MycwqFCi
+O OxWAPJUF
+P PNiscrus
+Z zpIKLEWD
+UNIX> <font color=darkred><b></b></font>
+</pre>
+
+
 Now, instead of printing out those entries, let's create strings
 from them that are in the proper format, and then put them into one of
 two vectors -- a vector for A-M, and a vector for N-Z.  This is in 
-<b><a href=Glossary-3.cpp>Glossary-3.cpp</a></b>:
+<b><a href=src/glossary_3_makestrings.cpp>src/glossary_3_makestrings.cpp</a></b>:
 
 <p><center><table border=3 cellpadding=3><td><pre>
-vector &lt;string&gt; Glossary::buildGlossary(vector &lt;string&gt; I)
-{
-  int i, j;
-  string s;
-  map &lt;string, string&gt; g;
-  map &lt;string, string&gt;::iterator git;
-  map &lt;char, SVec&gt; bychar;
-  map &lt;char, SVec&gt;::iterator bit;
-  char f;
-  SVec atm, ntz, rv, *v;
-  char cs[100];
+<font color=blue>/* Here are the new variable declarations: */</font>
+  vector &lt;string&gt; atm, ntz;                  <font color=blue>// The two string vectors for A-M & N-Z</font>
+  vector &lt;string&gt; rv, *v;                    <font color=blue>// Return value and a pointer that makes life easier.</font>
+  char cs[100];                              <font color=blue>// A buffer so we can use sprintf to create strings.</font>
 
-  <font color=blue>/* Create the map g, which has the strings converted 
-     to upper-case as keys, and the strings themselves as vals. */</font>
 
-  for (i = 0; i &lt; I.size(); i++) {
-    s = I[i];
-    for (j = 0; j &lt; s.size(); j++) {
-      if (s[j] &gt;= 'a' && s[j] &lt;= 'z') s[j] += ('A'-'a');
-    }
-    g[s] = I[i];
-  }
-
-  <font color=blue>/* Now, create the map "bychar", which has the starting
-     letters as keys, and vectors of the original strings as vals. */</font>
-
-  for (git = g.begin(); git != g.end(); git++) {
-    f = git-&gt;first[0];
-    bychar[f].push_back(git-&gt;second);
-  }
-
-  <font color=blue>/* Create the formatted strings for each column.  Put the
+  <font color=blue>/* And here is the new code:
+     Create the formatted strings for each column.  Put the
      strings onto a vector for each column. */</font>
 
-  for (bit = bychar.begin(); bit != bychar.end(); bit++) {
-    v = (bit-&gt;first &lt; 'N') ? &atm : &ntz;
-    s.clear();
+  for (kit = k.begin(); kit != k.end(); kit++) {
+
+    v = (kit-&gt;first &lt; 'N') ? &atm : &ntz;    <font color=blue>// V points to the proper string vector.</font>
+    s.clear();                               <font color=blue>// Create the key string and the dashes.</font>
     s.resize(19, ' ');
-    s[0] = bit-&gt;first;
+    s[0] = kit-&gt;first;
     v-&gt;push_back(s);
     s.clear();
     s.resize(19, '-');
     v-&gt;push_back(s);
 
-    for (i = 0; i &lt; bit-&gt;second.size(); i++) {
-      sprintf(cs, "  %-17s", bit-&gt;second[i].c_str());
+    for (i = 0; i &lt; kit-&gt;second.size(); i++) {         <font color=blue>// Now, for each term, format it and push</font>
+      sprintf(cs, "  %-17s", kit-&gt;second[i].c_str());  <font color=blue>// it onto the string vector.</font>
       s = cs;
       v-&gt;push_back(s);
     }
@@ -568,15 +1128,16 @@ vector &lt;string&gt; Glossary::buildGlossary(vector &lt;string&gt; I)
 
   <font color=blue>/* Print the vectors to error check. */</font>
 
+  cout &lt;&lt; "A to M:" &lt;&lt; endl;
   for (i = 0; i &lt; atm.size(); i++) cout &lt;&lt; atm[i] &lt;&lt; endl;
-  cout &lt;&lt; endl;
+  cout &lt;&lt; "N to Z:" &lt;&lt; endl;
   for (i = 0; i &lt; ntz.size(); i++) cout &lt;&lt; ntz[i] &lt;&lt; endl;
-    
+
   return rv;
 }
 </pre></td></table></center><p>
 
-A few things -- first, note how I use a pointer to an <b>SVec</b> to make
+A few things -- first, note how I use a pointer to a vector of strings
 sure that I'm putting the strings onto the correct list.  Second, I'm using
 <b>sprintf()</b> to create the strings for the terms.  I do that because it's
 easier than using an <b>ostringstream</b>.  The only sublety is that I need to
@@ -586,13 +1147,16 @@ be safe.  The string "  %-17s" says to create the string with two spaces, and
 then pad the argument to 17 characters, left justified.  That makes the resulting
 string 19 characters.  Saying "<b>s = cs</b>" creates a C++ string from <b>cs</b>.
 <p>
-When we compile and run it, all looks good.  We can pipe the output to <b>cat -A</b>
+When we compile and run it, all looks good.  We can pipe the output to <b>cat -e</b>
 to make sure that all of the strings are 19 characters:
 
 <pre>
-UNIX> <font color=darkred><b>cp Glossary-3.cpp Glossary.cpp</b></font>
-UNIX> <font color=darkred><b>g++ -std=c++98 Glossary-Main.cpp </b></font>
-UNIX> <font color=darkred><b>./a.out 0 | cat -A</b></font>
+UNIX> <font color=darkred><b>make bin/glossary_3_makestrings</b></font>
+g++ -std=c++98 -Wall -Wextra -Iinclude -c -o obj/glossary_3_makestrings.o src/glossary_3_makestrings.cpp
+g++ -std=c++98 -Wall -Wextra -Iinclude -c -o obj/glossary_main.o src/glossary_main.cpp
+g++ -std=c++98 -Wall -Wextra -Iinclude -o bin/glossary_3_makestrings obj/glossary_3_makestrings.o obj/glossary_main.o
+UNIX> <font color=darkred><b>bin/glossary_3_makestrings 0 | cat -e</b></font>
+A to M:$
 C                  $
 -------------------$
   Canada           $
@@ -608,7 +1172,7 @@ I                  $
 J                  $
 -------------------$
   Japan            $
-$
+N to Z:$
 R                  $
 -------------------$
   Russia           $
@@ -616,6 +1180,24 @@ U                  $
 -------------------$
   United Kingdom   $
   United States    $
+UNIX> <font color=darkred><b>bin/glossary_3_makestrings 8 | cat -e</b></font>
+A to M:$
+I                  $
+-------------------$
+  IBsxQTjp         $
+M                  $
+-------------------$
+  MycwqFCi         $
+N to Z:$
+O                  $
+-------------------$
+  OxWAPJUF         $
+P                  $
+-------------------$
+  PNiscrus         $
+Z                  $
+-------------------$
+  zpIKLEWD         $
 UNIX> <font color=darkred><b></b></font>
 </pre>
 
@@ -624,20 +1206,19 @@ both <b>atm</b> and <b>ntz</b> are the same size, by adding 19-character
 strings to the smaller one.  Then we simply traverse them and create 
 the strings in <b>rv</b> using string concatenation.  The final
 program is in 
-<b><a href=Glossary-4.cpp>Glossary-4.cpp</a></b>.  I only include the loop
+<b><a href=src/glossary_4_finish.cpp>src/glossary_4_finish.cpp</a></b>.
+I only include the loop
 that creates <b>rv</b>:
 
 <p><center><table border=3 cellpadding=3><td><pre>
-vector &lt;string&gt; Glossary::buildGlossary(vector &lt;string&gt; I)
-{
-  .......
-
   <font color=blue>/* Make atm and ntz the same size. */</font>
 
   s.clear();
   s.resize(19, ' ');
   while (atm.size() &lt; ntz.size()) atm.push_back(s);
   while (ntz.size() &lt; atm.size()) ntz.push_back(s);
+
+  <font color=blue>/* Make the final strings. */</font>
 
   s = "  ";
   for (i = 0; i &lt; atm.size(); i++) {
@@ -648,9 +1229,10 @@ vector &lt;string&gt; Glossary::buildGlossary(vector &lt;string&gt; I)
 </pre></td></table></center><p>
 
 <pre>
-UNIX> <font color=darkred><b>cp Glossary-4.cpp Glossary.cpp</b></font>
-UNIX> <font color=darkred><b>g++ -std=c++98 Glossary-Main.cpp</b></font>
-UNIX> <font color=darkred><b>./a.out 0 | cat -A</b></font>
+UNIX> <font color=darkred><b>make bin/glossary_4_finish</b></font>
+g++ -std=c++98 -Wall -Wextra -Iinclude -c -o obj/glossary_4_finish.o src/glossary_4_finish.cpp
+g++ -std=c++98 -Wall -Wextra -Iinclude -o bin/glossary_4_finish obj/glossary_4_finish.o obj/glossary_main.o
+UNIX> <font color=darkred><b>bin/glossary_4_finish 0 | cat -e</b></font>
 C                    R                  $
 -------------------  -------------------$
   Canada               Russia           $
@@ -666,70 +1248,16 @@ I                                       $
 J                                       $
 -------------------                     $
   Japan                                 $
-UNIX> <font color=darkred><b>./a.out 1 | cat -A</b></font>
-A                    O                  $
+UNIX> <font color=darkred><b>bin/glossary_4_finish 8 | cat -e</b></font>
+I                    O                  $
 -------------------  -------------------$
-  alpha                omega            $
-B                                       $
--------------------                     $
-  beta                                  $
-D                                       $
--------------------                     $
-  delta                                 $
-G                                       $
--------------------                     $
-  gamma                                 $
-UNIX> <font color=darkred><b>./a.out 2 | cat -A</b></font>
-A                                       $
--------------------                     $
-  array                                 $
-  AVL tree                              $
-B                                       $
--------------------                     $
-  backtracking                          $
-  balanced tree                         $
-  binary search                         $
-UNIX> <font color=darkred><b>./a.out 3 | cat -A</b></font>
-                     X                  $
-                     -------------------$
-                       XXXXXXXXXXXXXXXXX$
-                     Y                  $
-                     -------------------$
-                       YYYYYYYYYYYYYYYYY$
+  IBsxQTjp             OxWAPJUF         $
+M                    P                  $
+-------------------  -------------------$
+  MycwqFCi             PNiscrus         $
                      Z                  $
                      -------------------$
-                       ZZZZZZZZZZZZZZZZZ$
-UNIX> <font color=darkred><b>./a.out 4 | cat -A</b></font>
-A                    O                  $
--------------------  -------------------$
-  Asteria              Oceanus          $
-  Astraeus             Ophion           $
-  Atlas              P                  $
-C                    -------------------$
--------------------    Phoebe           $
-  Clymene              Prometheus       $
-  Coeus              R                  $
-  Crius              -------------------$
-  Cronus               Rhea             $
-D                    T                  $
--------------------  -------------------$
-  Dione                Tethys           $
-E                      Theia            $
--------------------    Themis           $
-  Epimetheus                            $
-H                                       $
--------------------                     $
-  Helios                                $
-  Hyperion                              $
-I                                       $
--------------------                     $
-  Iapetus                               $
-L                                       $
--------------------                     $
-  Leto                                  $
-M                                       $
--------------------                     $
-  Mnemosyne                             $
+                       zpIKLEWD         $
 UNIX> <font color=darkred><b></b></font>
 </pre>
 
