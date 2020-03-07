@@ -1,8 +1,12 @@
-all: ba_helper
+EXECUTABLES = bin/ba_helper
+
+all: $(EXECUTABLES)
+
+CFLAGS ?= -Wall -Wextra -std=c++98 -Iinclude
 
 clean:
-	rm -f a.out ba_helper
+	rm -f a.out bin/*
 
-ba_helper: ba_helper.cpp
-	g++ -o ba_helper ba_helper.cpp
+bin/ba_helper: src/ba_helper.cpp
+	g++ $(CFLAGS) -o bin/ba_helper src/ba_helper.cpp
 

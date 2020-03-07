@@ -2,7 +2,8 @@
 <h2>CS302 Lecture Notes - Bit Operations</h2>
 <UL>
 <LI> January, 2017
-<LI> Latest Revision: January, 2017
+<LI> Latest Revision: 
+Wed Sep 11 14:34:21 EDT 2019
 <LI> James S. Plank
 <LI> Directory: <b>/home/plank/cs302/Notes/Bits</b>
 </UL>
@@ -14,11 +15,11 @@
 <LI> <a href=https://community.topcoder.com/stat?c=problem_statement&pm=11129&rd=14237>SRM 484 D2 250-pointer (NumberMagicEasy)</a>.  You can solve this with a laundry list of <b>if</b> statements,
 or with a <b>set</b> of integers; however,
 this is a really nice fit with the paradigm of using bits to represent elements of a set.  
-<a href=http://web.eecs.utk.edu/~plank/plank/classes/cs302/Notes/NumberMagicEasy/> I have 
+<a href=http://web.eecs.utk.edu/~jplank/plank/classes/cs302/Notes/NumberMagicEasy/> I have 
 lecture notes for this problem here, and often go over it in class.</a>
-<LI> <a href=https://community.topcoder.com/stat?c=problem_statement&pm=14396&rd=16803>SRM 699 D1 250-pointer (OthersXor)</a>: This is a nice problem that makes you think about bits.  (<a href=http://web.eecs.utk.edu/~plank/topcoder-writeups/2016/OthersXor/index.html>Hints</a>)
-<LI> <a href=https://community.topcoder.com/stat?c=problem_statement&pm=13714&rd=16432>TCO 2015 Q1A 250-pointer (Similars)</a>: Good practice with bits.  (<a href=http://web.eecs.utk.edu/~plank/topcoder-writeups/2015/Similars/index.html>Here's a writeup that walks you through it.</a>)
-<LI> <a href=http://community.topcoder.com/stat?c=problem_statement&pm=12790&rd=15708>SRM 596 D1 250-pointer (IncrementAndDoubling)</a>: You don't really need bit arithmetic here, but it is a good practice problem for it.  (<a href=http://web.eecs.utk.edu/~plank/plank/classes/cs302/Topcoder/IncrementAndDoubling.html>Hints</a>)
+<LI> <a href=https://community.topcoder.com/stat?c=problem_statement&pm=14396&rd=16803>SRM 699 D1 250-pointer (OthersXor)</a>: This is a nice problem that makes you think about bits.  (<a href=http://web.eecs.utk.edu/~jplank/topcoder-writeups/2016/OthersXor/index.html>Hints</a>)
+<LI> <a href=https://community.topcoder.com/stat?c=problem_statement&pm=13714&rd=16432>TCO 2015 Q1A 250-pointer (Similars)</a>: Good practice with bits.  (<a href=http://web.eecs.utk.edu/~jplank/topcoder-writeups/2015/Similars/index.html>Here's a writeup that walks you through it.</a>)
+<LI> <a href=http://community.topcoder.com/stat?c=problem_statement&pm=12790&rd=15708>SRM 596 D1 250-pointer (IncrementAndDoubling)</a>: You don't really need bit arithmetic here, but it is a good practice problem for it.  (<a href=http://web.eecs.utk.edu/~jplank/plank/classes/cs302/Topcoder/IncrementAndDoubling.html>Hints</a>)
 </UL>
 
 
@@ -26,7 +27,7 @@ lecture notes for this problem here, and often go over it in class.</a>
 I'm assuming that bit operations are review for you, but I'm also assuming that you've
 had very little practice programming with them.  This lecture is to show you a little
 programming with bit operations, and to give you a program 
-(<b><a href=ba_helper.cpp>ba_helper.cpp</a></b>) that can help you practice bit
+(<b><a href=src/ba_helper.cpp>src/ba_helper.cpp</a></b>) that can help you practice bit
 operations and hexadecimal.
 
 <p>
@@ -94,11 +95,12 @@ In C and C++, the following are the bit arithmetic operators:
 <p>
 
 <hr>
-<h2> ba_helper.cpp</h2>
+<h2> src/ba_helper.cpp</h2>
 
 I've written the program
-<b><a href=ba_helper.cpp>ba_helper.cpp</a></b>
-to help you practice bit arithmetic and hex.  You enter operations in the form:
+<b><a href=src/ba_helper.cpp>src/ba_helper.cpp</a></b>
+to help you practice bit arithmetic and hex.  You can do two things with the program.  The first is
+to give it a problem in the form:
 <p>
 <center>
 <i>number operator number.</i>
@@ -117,21 +119,31 @@ The operations are <b>AND</b>,
 <b>LS</b>,
 <b>RS</b> and
 <b>ANDNOT</b>.
+<p>
+The second way to use the program is to enter "R<i>w</i>", where <i>w</i> is a number between 1 and 32, or 64.
+When you do that, then the program generates a random problem for you, where the numbers are random <i>w</i>
+bit numbers.
+<p>
 
 The program does the operations, and then prints the inputs and the results in all three
-representations.
+representations.  If you asked for a random problem, then it will wait for you to enter any word before showing
+you the answer.  What I do is enter the word above where the answer will be, so it's easy to check.  
+<p>
 (By the way, ANDNOT does a AND (NOT b).)
 <p>
 Here are some examples:
 
 <pre>
-UNIX> <font color=darkred><b>g++ -o ba_helper -std=c++98 ba_helper.cpp</b></font>
-UNIX> <font color=darkred><b>ba_helper</b></font>
+UNIX> <font color=darkred><b>make clean</b></font>
+rm -f a.out bin/*
+UNIX> <font color=darkred><b>make</b></font>
+g++ -Wall -Wextra -std=c++98 -Iinclude -o bin/ba_helper src/ba_helper.cpp
+UNIX> <font color=darkred><b>bin/ba_helper</b></font>
 When entering numbers, you can enter:
   A normal decimal number as big as 2^{64}-1.
   A number in hex up to 16 digits, starting with 0x.
   A number in binary up to 64 digits, starting with B.
-Enter a problem: number AND|OR|XOR|LS|RS|ANDNOT number:
+Enter a problem: number AND|OR|XOR|LS|RS|ANDNOT number (or Rw for a w-bit random problem):
 <font color=darkred><b>5 AND 9</b></font>
 
 Operator: AND
@@ -139,7 +151,7 @@ A:                            5   0x0000000000000005  00000000000000000000000000
 B:                            9   0x0000000000000009  0000000000000000000000000000000000000000000000000000000000001001
 C:                            1   0x0000000000000001  0000000000000000000000000000000000000000000000000000000000000001
 
-Enter a problem: number AND|OR|XOR|LS|RS|ANDNOT number:
+Enter a problem: number AND|OR|XOR|LS|RS|ANDNOT number (or Rw for a w-bit random problem):
 <font color=darkred><b>B101 XOR 0x9</b></font>
 
 Operator: XOR
@@ -147,7 +159,7 @@ A:                            5   0x0000000000000005  00000000000000000000000000
 B:                            9   0x0000000000000009  0000000000000000000000000000000000000000000000000000000000001001
 C:                           12   0x000000000000000c  0000000000000000000000000000000000000000000000000000000000001100
 
-Enter a problem: number AND|OR|XOR|LS|RS|ANDNOT number:
+Enter a problem: number AND|OR|XOR|LS|RS|ANDNOT number (or Rw for a w-bit random problem):
 <font color=darkred><b>837261 OR 276591827</b></font>
 
 Operator: OR
@@ -155,7 +167,7 @@ A:                       837261   0x00000000000cc68d  00000000000000000000000000
 B:                    276591827   0x00000000107c74d3  0000000000000000000000000000000000010000011111000111010011010011
 C:                    276625119   0x00000000107cf6df  0000000000000000000000000000000000010000011111001111011011011111
 
-Enter a problem: number AND|OR|XOR|LS|RS|ANDNOT number:
+Enter a problem: number AND|OR|XOR|LS|RS|ANDNOT number (or Rw for a w-bit random problem):
 <font color=darkred><b>&lt;CNTL-D&gt;</b></font>
 UNIX> <font color=darkred><b></b></font>
 </pre>
@@ -173,12 +185,12 @@ four and shift the hex.  For example, in the first call, since we are left-shift
 same as left-shifting the hex by 8/4 = 2.  And in the second call, that's the same as right-shifting the hex by 16/4 = 4:
 
 <pre>
-UNIX> <font color=darkred><b>ba_helper</b></font>
+UNIX> <font color=darkred><b>bin/ba_helper</b></font>
 When entering numbers, you can enter:
   A normal decimal number as big as 2^{64}-1.
   A number in hex up to 16 digits, starting with 0x.
   A number in binary up to 64 digits, starting with B.
-Enter a problem: number AND|OR|XOR|LS|RS|ANDNOT number:
+Enter a problem: number AND|OR|XOR|LS|RS|ANDNOT number (or Rw for a w-bit random problem):
 <font color=darkred><b>0x83726987264 LS 8</b></font>
 
 Operator: LS
@@ -186,7 +198,7 @@ A:                9032963748452   0x0000083726987264  00000000000000000000100000
 B:                            8   0x0000000000000008  0000000000000000000000000000000000000000000000000000000000001000
 C:             2312438719603712   0x0008372698726400  0000000000001000001101110010011010011000011100100110010000000000
 
-Enter a problem: number AND|OR|XOR|LS|RS|ANDNOT number:
+Enter a problem: number AND|OR|XOR|LS|RS|ANDNOT number (or Rw for a w-bit random problem):
 <font color=darkred><b>0xabcdef123454 RS 16</b></font>
 
 Operator: RS
@@ -194,7 +206,7 @@ A:              188900967593044   0x0000abcdef123454  00000000000000001010101111
 B:                           16   0x0000000000000010  0000000000000000000000000000000000000000000000000000000000010000
 C:                   2882400018   0x00000000abcdef12  0000000000000000000000000000000010101011110011011110111100010010
 
-Enter a problem: number AND|OR|XOR|LS|RS|ANDNOT number:
+Enter a problem: number AND|OR|XOR|LS|RS|ANDNOT number (or Rw for a w-bit random problem):
 <font color=darkred><b>&lt;CNTL-D&gt;</b></font>
 UNIX> <font color=darkred><b></b></font>
 </pre>
@@ -244,12 +256,12 @@ So the answer is 0x453f36400:
 
 <p>
 <pre>
-UNIX> <font color=darkred><b>ba_helper </b></font>
+UNIX> <font color=darkred><b>bin/ba_helper </b></font>
 When entering numbers, you can enter:
   A normal decimal number as big as 2^{64}-1.
   A number in hex up to 16 digits, starting with 0x.
   A number in binary up to 64 digits, starting with B.
-Enter a problem: number AND|OR|XOR|LS|RS|ANDNOT number:
+Enter a problem: number AND|OR|XOR|LS|RS|ANDNOT number (or Rw for a w-bit random problem):
 <font color=darkred><b>0x8a7e6c8 LS 7</b></font>
 
 Operator: LS
@@ -257,13 +269,51 @@ A:                    145221320   0x0000000008a7e6c8  00000000000000000000000000
 B:                            7   0x0000000000000007  0000000000000000000000000000000000000000000000000000000000000111
 C:                  18588328960   0x0000000453f36400  0000000000000000000000000000010001010011111100110110010000000000
 
-Enter a problem: number AND|OR|XOR|LS|RS|ANDNOT number:
+Enter a problem: number AND|OR|XOR|LS|RS|ANDNOT number (or Rw for a w-bit random problem):
 <font color=darkred><b>&lt;CNTL-D&gt;</b></font>
 UNIX> <font color=darkred><b></b></font>
 </pre>
 
-The nice thing about <b>ba_helper</b> is that you can use it to practice your bit arithmetic.  
-Just try random hex numbers for the inputs, and do all of the operations.
+The nice thing about <b>bin/ba_helper</b> is that you can use it to practice your bit arithmetic.  
+Enter "R<i>w</i>", starting with a pretty small value of <i>w</i>, and then increase that value as you
+get better.  Here, we'll do a 4-bit problem and then two 8 bit problems -- I enter the answer above where
+it will print out, so that it's easy to double-check that it's correct:
+
+<pre>
+UNIX> <font color=darkred><b>bin/ba_helper</b></font>
+When entering numbers, you can enter:
+  A normal decimal number as big as 2^{64}-1.
+  A number in hex up to 16 digits, starting with 0x.
+  A number in binary up to 64 digits, starting with B.
+Enter a problem: number AND|OR|XOR|LS|RS|ANDNOT number (or Rw for a w-bit random problem):
+<font color=darkred><b>R4</b></font>
+
+Operator: AND
+A:                            5   0x0000000000000005  0000000000000000000000000000000000000000000000000000000000000101
+B:                            6   0x0000000000000006  0000000000000000000000000000000000000000000000000000000000000110
+Enter any word to continue:<font color=darkred><b>                        4</b></font>
+C:                            4   0x0000000000000004  0000000000000000000000000000000000000000000000000000000000000100
+
+Enter a problem: number AND|OR|XOR|LS|RS|ANDNOT number (or Rw for a w-bit random problem):
+<font color=darkred><b>R8</b></font>
+
+Operator: OR
+A:                           70   0x0000000000000046  0000000000000000000000000000000000000000000000000000000001000110
+B:                            0   0x0000000000000000  0000000000000000000000000000000000000000000000000000000000000000
+Enter any word to continue:<font color=darkred><b>                       46</b></font>
+C:                           70   0x0000000000000046  0000000000000000000000000000000000000000000000000000000001000110
+
+Enter a problem: number AND|OR|XOR|LS|RS|ANDNOT number (or Rw for a w-bit random problem):
+<font color=darkred><b>R8</b></font>
+
+Operator: LS
+A:                           92   0x000000000000005c  0000000000000000000000000000000000000000000000000000000001011100
+B:                            1   0x0000000000000001  0000000000000000000000000000000000000000000000000000000000000001
+Enter any word to continue:<font color=darkred><b>                       b8</b></font>
+C:                          184   0x00000000000000b8  0000000000000000000000000000000000000000000000000000000010111000
+</pre>
+
+
 <hr>
 <h2>Common things that we do with bit operations</h2>
 
@@ -302,7 +352,7 @@ When entering numbers, you can enter:
   A normal decimal number as big as 2^{64}-1.
   A number in hex up to 16 digits, starting with 0x.
   A number in binary up to 64 digits, starting with B.
-Enter a problem: number AND|OR|XOR|LS|RS|ANDNOT number:
+Enter a problem: number AND|OR|XOR|LS|RS|ANDNOT number (or Rw for a w-bit random problem):
 <font color=darkred><b>1 LS 6</b></font>
 
 Operator: LS
@@ -311,7 +361,7 @@ B:                            6   0x0000000000000006  00000000000000000000000000
 C:                           64   0x0000000000000040  0000000000000000000000000000000000000000000000000000000001000000
 <font color=blue>                                                                                                               ^
                                            As you can see, this creates a number where only bit six is set     |</font>
-Enter a problem: number AND|OR|XOR|LS|RS|ANDNOT number:
+Enter a problem: number AND|OR|XOR|LS|RS|ANDNOT number (or Rw for a w-bit random problem):
 <font color=darkred><b>0x83 OR 0x40 </b></font>
 
 Operator: OR
@@ -321,7 +371,7 @@ C:                          195   0x00000000000000c3  00000000000000000000000000
 <font color=blue>                                                                                                               ^
                                            Now, bit six is set in C                                            |</font>
 
-Enter a problem: number AND|OR|XOR|LS|RS|ANDNOT number:
+Enter a problem: number AND|OR|XOR|LS|RS|ANDNOT number (or Rw for a w-bit random problem):
 <font color=darkred><b>0x64 OR 0x40</b></font>
 
 Operator: OR
@@ -331,7 +381,7 @@ C:                          100   0x0000000000000064  00000000000000000000000000
 <font color=blue>                                                                                                               ^
                                            In this example, bit 6 was already set in A, so C equals A.         |</font>
 
-Enter a problem: number AND|OR|XOR|LS|RS|ANDNOT number:
+Enter a problem: number AND|OR|XOR|LS|RS|ANDNOT number (or Rw for a w-bit random problem):
 <font color=darkred><b>&lt;CNTL-D&gt;</b></font>
 UNIX> <font color=darkred><b></b></font>
 </pre>
@@ -356,7 +406,7 @@ When entering numbers, you can enter:
   A normal decimal number as big as 2^{64}-1.
   A number in hex up to 16 digits, starting with 0x.
   A number in binary up to 64 digits, starting with B.
-Enter a problem: number AND|OR|XOR|LS|RS|ANDNOT number:
+Enter a problem: number AND|OR|XOR|LS|RS|ANDNOT number (or Rw for a w-bit random problem):
 UNIX> <font color=darkred><b>0x64 ANDNOT 0x40</b></font>
 
 Operator: ANDNOT
@@ -365,7 +415,7 @@ B:                           64   0x0000000000000040  00000000000000000000000000
 C:                           36   0x0000000000000024  0000000000000000000000000000000000000000000000000000000000100100
 <font color=blue>                                                                                                               ^
                                            In this example, we clear bit 6:                                    |</font>
-Enter a problem: number AND|OR|XOR|LS|RS|ANDNOT number:
+Enter a problem: number AND|OR|XOR|LS|RS|ANDNOT number (or Rw for a w-bit random problem):
 UNIX> <font color=darkred><b>0x83 ANDNOT 0x40</b></font>
 
 Operator: ANDNOT
@@ -374,7 +424,7 @@ B:                           64   0x0000000000000040  00000000000000000000000000
 C:                          131   0x0000000000000083  0000000000000000000000000000000000000000000000000000000010000011
 <font color=blue>                                                                                                               ^
                                            In this example, bit 6 is already cleared:                          |</font>
-Enter a problem: number AND|OR|XOR|LS|RS|ANDNOT number:
+Enter a problem: number AND|OR|XOR|LS|RS|ANDNOT number (or Rw for a w-bit random problem):
 <font color=darkred><b>&lt;CNTL-D&gt;</b></font>
 UNIX> <font color=darkred><b></b></font>
 </pre>
@@ -388,7 +438,7 @@ When entering numbers, you can enter:
   A normal decimal number as big as 2^{64}-1.
   A number in hex up to 16 digits, starting with 0x.
   A number in binary up to 64 digits, starting with B.
-Enter a problem: number AND|OR|XOR|LS|RS|ANDNOT number:
+Enter a problem: number AND|OR|XOR|LS|RS|ANDNOT number (or Rw for a w-bit random problem):
 <font color=darkred><b>0x64 AND 0xffffffffffffffbf</b></font>
 
 Operator: AND
@@ -397,7 +447,7 @@ B:         18446744073709551551   0xffffffffffffffbf  11111111111111111111111111
 C:                           36   0x0000000000000024  0000000000000000000000000000000000000000000000000000000000100100
 <font color=blue>                                                                                                               ^
                                            In this example, we clear bit 6:                                    |</font>
-Enter a problem: number AND|OR|XOR|LS|RS|ANDNOT number:
+Enter a problem: number AND|OR|XOR|LS|RS|ANDNOT number (or Rw for a w-bit random problem):
 <font color=darkred><b>0x83 AND 0xffffffffffffffbf</b></font>
 
 Operator: AND
@@ -406,7 +456,7 @@ B:         18446744073709551551   0xffffffffffffffbf  11111111111111111111111111
 C:                          131   0x0000000000000083  0000000000000000000000000000000000000000000000000000000010000011
 <font color=blue>                                                                                                               ^
                                            In this example, bit 6 is already cleared:                          |</font>
-Enter a problem: number AND|OR|XOR|LS|RS|ANDNOT number:
+Enter a problem: number AND|OR|XOR|LS|RS|ANDNOT number (or Rw for a w-bit random problem):
 <font color=darkred><b>&lt;CNTL-D&gt;</b></font>
 UNIX> <font color=darkred><b></b></font>
 </pre>
@@ -443,7 +493,7 @@ When entering numbers, you can enter:
   A normal decimal number as big as 2^{64}-1.
   A number in hex up to 16 digits, starting with 0x.
   A number in binary up to 64 digits, starting with B.
-Enter a problem: number AND|OR|XOR|LS|RS|ANDNOT number:
+Enter a problem: number AND|OR|XOR|LS|RS|ANDNOT number (or Rw for a w-bit random problem):
 <font color=darkred><b>0x827364 AND 0x3f  </b></font>
 
 Operator: AND
@@ -452,7 +502,7 @@ B:                           63   0x000000000000003f  00000000000000000000000000
 C:                           36   0x0000000000000024  0000000000000000000000000000000000000000000000000000000000100100
 <font color=blue>                                                                                                                ^^^^^^
                                            Here we are extracting the lowest six bits of 0x827364:              ||||||</font>
-Enter a problem: number AND|OR|XOR|LS|RS|ANDNOT number:
+Enter a problem: number AND|OR|XOR|LS|RS|ANDNOT number (or Rw for a w-bit random problem):
 UNIX> <font color=darkred><b></b></font>
 <font color=darkred><b>&lt;CNTL-D&gt;</b></font>
 UNIX> <font color=darkred><b></b></font>
@@ -481,7 +531,7 @@ A:                      8549220   0x0000000000827364  00000000000000000000000000
 And below, we'll show the two operations:
 
 <pre>
-Enter a problem: number AND|OR|XOR|LS|RS|ANDNOT number:
+Enter a problem: number AND|OR|XOR|LS|RS|ANDNOT number (or Rw for a w-bit random problem):
 <font color=darkred><b>0x827364 AND 0x3f</b></font>
 
 Operator: AND
@@ -489,7 +539,7 @@ A:                      8549220   0x0000000000827364  00000000000000000000000000
 B:                           63   0x000000000000003f  0000000000000000000000000000000000000000000000000000000000111111
 C:                           36   0x0000000000000024  0000000000000000000000000000000000000000000000000000000000100100
 
-Enter a problem: number AND|OR|XOR|LS|RS|ANDNOT number:
+Enter a problem: number AND|OR|XOR|LS|RS|ANDNOT number (or Rw for a w-bit random problem):
 <font color=darkred><b>0x24 RS 2</b></font>
 
 Operator: RS
@@ -685,8 +735,11 @@ despite the fact that it handles input errors pretty cleanly:
 int main()
 {
   Number *A, *B, *C;
-  string sa, sb, sop;
+  string sa, sb, sop, s;
   int error;
+  int w;
+
+  RNG.Seed(time(0));
 
   printf("When entering numbers, you can enter:\n");
   printf("  A normal decimal number as big as 2^{64}-1.\n");
@@ -699,22 +752,42 @@ int main()
 
     <font color=blue>/* Grab A, B and the operator. */</font>
 
-    printf("Enter a problem: number AND|OR|XOR|LS|RS|ANDNOT number:\n");
+    printf("Enter a problem: number AND|OR|XOR|LS|RS|ANDNOT number (or Rw for a w-bit random problem):\n");
     fflush(stdout);
 
-    if (! (cin &gt;&gt; sa &gt;&gt; sop &gt;&gt; sb)) exit(1);
+    if (! (cin &gt;&gt; sa)) return 0;
 
-    <font color=blue>/* Convert A and B to instances of the Number class, and error check. */</font>
+    <font color=blue>/* Generate a random problem . */</font>
 
-    A = number_from_string(sa);
-    B = number_from_string(sb);
-    if (A == NULL) {
-      printf("Bad format for the first number.\n");
-      error = 1;
-    } 
-    if (B == NULL) {
-      printf("Bad format for the second number.\n");
-      error = 1;
+    if (sa[0] == 'R') {
+      w = atoi(sa.c_str()+1);
+      if (w == 0) {
+        error = 1;
+      } else {
+        A = random_number(w);
+        sop = random_op();
+        if (sop == "LS" || sop == "RS") {
+          B = number_from_ull(RNG.Random_Integer()%w);
+        } else {
+          B = random_number(w);
+        }
+      }
+    } else {
+      if (! (cin &gt;&gt; sop &gt;&gt; sb)) return 1;
+
+      <font color=blue>/* Convert A and B to instances of the Number class, and error check. */</font>
+
+      A = number_from_string(sa);
+      B = number_from_string(sb);
+  
+      if (A == NULL) {
+        printf("Bad format for the first number.\n");
+        error = 1;
+      } 
+      if (B == NULL) {
+        printf("Bad format for the second number.\n");
+        error = 1;
+      }
     }
     
     <font color=blue>/* Do the operation if we haven't had an error so far. */</font>
@@ -738,13 +811,18 @@ int main()
       }
     }
     
-    <font color=blue>/* If everything was successful, print the results. */</font>
+    <font color=blue>/* If everything was successful, print the results. Wait for a word if it was Random */</font>
 
     if (error == 0) {
       printf("\n");
       printf("Operator: %s\n", sop.c_str());
       printf("A:        %s\n", A-&gt;To_String().c_str());
       printf("B:        %s\n", B-&gt;To_String().c_str());
+      if (sa[0] == 'R') {
+        printf("Enter any word to continue: ");
+        fflush(stdout);
+        if (!(cin &gt;&gt; s)) return 0;
+      }
       printf("C:        %s\n", C-&gt;To_String().c_str());
       printf("\n");
     }
@@ -761,4 +839,3 @@ int main()
   exit(0);
 }
 </pre></td></table></center><p>
-

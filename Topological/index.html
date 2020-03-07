@@ -10,8 +10,8 @@
 Some additional material:
 <UL>
 <LI> <a href=http://en.wikipedia.org/wiki/Topological_sorting>Wikipedia's page on Topological Sort</a>, which is very nice.
-<LI> Topcoder problem: <a href=http://web.eecs.utk.edu/~plank/topcoder-writeups/2007/IncreasingSubsequences/index.html>IncreasingtSubsequences</a>, which uses topological sorting to count paths.
-<LI> Topcoder problem: <a href=http://web.eecs.utk.edu/~plank/plank/classes/cs302/Notes/DynamicProgramming/ConvertibleStrings.html>ConvertibleStrings</a> - this is presented in the lecture notes
+<LI> Topcoder problem: <a href=http://web.eecs.utk.edu/~jplank/topcoder-writeups/2007/IncreasingSubsequences/index.html>IncreasingtSubsequences</a>, which uses topological sorting to count paths.
+<LI> Topcoder problem: <a href=http://web.eecs.utk.edu/~jplank/plank/classes/cs302/Notes/DynamicProgramming/ConvertibleStrings.html>ConvertibleStrings</a> - this is presented in the lecture notes
 on Dynamic Programming, but you can solve it with Topological sort.
 </UL>
 <hr>
@@ -23,7 +23,7 @@ Since the graph is acyclic, a topological sort is guaranteed to exist, although 
 is not guaranteed to be unique.
 <p>
 For example, consider the following graph (from the Topcoder problem
-<a href=http://web.eecs.utk.edu/~plank/plank/classes/cs302/Notes/DynamicProgramming/ConvertibleStrings.html>ConvertibleStrings</a>, which we use as an example of Dynamic progrmaming).
+<a href=http://web.eecs.utk.edu/~jplank/plank/classes/cs302/Notes/DynamicProgramming/ConvertibleStrings.html>ConvertibleStrings</a>, which we use as an example of Dynamic progrmaming).
 The numbers in green show a valid topological sort of the graph:
 
 <p><center><table border=3><td><a href=CS-Ex2a.jpg><img src=CS-Ex2a.jpg width=500></a></td></table></center><p>
@@ -64,7 +64,7 @@ Is that better than Dijkstra's algorithm?  Yes and no.  See the analysis below.
 There is one path to the source.  Set the number of paths to each other node to zero.  Then
 do a topological sort.  When you remove an edge from <i>a</i> to <i>b</i>, 
 add the number of paths to <i>a</i> to the number of paths to <i>b</i>.  
-This one is in the topcoder problem <a href=http://web.eecs.utk.edu/~plank/plank/classes/cs302/Notes//IncreasingSubsequences/SRM-348-D2-1000.html>IncreasingSubsequences</a>, for which I have
+This one is in the topcoder problem <a href=http://web.eecs.utk.edu/~jplank/plank/classes/cs302/Notes//IncreasingSubsequences/SRM-348-D2-1000.html>IncreasingSubsequences</a>, for which I have
 lecture notes.
 </UL>
 <hr>

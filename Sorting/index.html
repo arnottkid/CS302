@@ -664,7 +664,7 @@ Heap sort, Merge sort and Quicksort are three
 I have two implementations of heap sort:
 <p>
 The first is <b><a href=heap_sort.cpp>heap_sort.cpp</a></b>. This uses the priority queue implementation 
-     from the <a href=http://www.cs.utk.edu/~plank/plank/classes/cs302/Notes/PQ/>priority 
+     from the <a href=http://web.eecs.utk.edu/~jplank/plank/classes/cs302/Notes/PQ/>priority 
      queue lecture notes</a> (although, I modified the print routine so it would match these
      lecture notes).  When you use the "print" option, it prints the vector and
      the priority queue at every step.  In the example below, I color the part of the 
@@ -863,7 +863,7 @@ I've written an awk script in <a href=ms.awk><b>ms.awk</b></a> to produce the co
 that you see above.  Here's another example:
 <p>
 <pre>
-UNIX> <font color=darkred><b>./merge_1_sort 13 1 100 yes yes | awk -f ~plank/cs302/Notes/Sorting/ms.awk > msex.html</b></font>
+UNIX> <font color=darkred><b>./merge_1_sort 13 1 100 yes yes | awk -f ~jplank/cs302/Notes/Sorting/ms.awk > msex.html</b></font>
 </pre>
 <p>
 And here's <a href=msex.html><b>msex.html</b></a>.  It's not a bad idea to look at this, so that
@@ -971,7 +971,7 @@ a "P" line, the pivot will be at the given index, still colored blue, and recurs
 made to the left partition and the right partition.   For example, in line one, the pivot is 5.77.
 The partition moves it to index 6, and then makes recursive calls with start=0,size=6 and start=7,size=5.
 <p>
-You can create your own colored output by piping <b>quick_1_sort</b> to "<b>awk -f ~plank/cs302/Notes/Sorting/qs1.awk</b>" -- the output is HTML that is colored.  Here's a different
+You can create your own colored output by piping <b>quick_1_sort</b> to "<b>awk -f ~jplank/cs302/Notes/Sorting/qs1.awk</b>" -- the output is HTML that is colored.  Here's a different
 example than the one above:
 <pre>
 UNIX> <font color=darkred><b>quick_1_sort 16 1 100 yes yes | awk -f qs1.awk > qs1ex.html</b></font>

@@ -247,7 +247,7 @@ Max flow is 316197 - Paths: 76
 UNIX> <font color=darkred><b></b></font>
 </pre>
 
-As with the greedy DFS, let's think about the tradeoffs of this algorithm  With greedy DFS,
+As with the greedy DFS, let's think about the tradeoffs of this algorithm.  With greedy DFS,
 we made processing the residual more expensive, because you had to insert and delete edges
 from the adjacency multimaps.  Here, processing the residual is back to being cheap, involving
 constant time operations.  The expense is in finding the paths, which is <i>O(|E|log|V|)</i> at
