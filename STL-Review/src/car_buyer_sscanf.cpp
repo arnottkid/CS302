@@ -1,19 +1,17 @@
+#include "car_buyer.hpp"
 #include <string>
 #include <vector>
-#include <cstdio>
-#include <cstdlib>
-#include <iostream>
+#include <sstream>
 using namespace std;
 
-class CarBuyer {
-  public:
-    double lowestCost(vector <string> cars, int fuelPrice, int annualDistance, int years);
-};
+/* This program uses sscanf() instead of the stringstream. */
 
-double CarBuyer::lowestCost(vector <string> cars, int fuelPrice, int annualDistance, int years)
+double CarBuyer::lowestCost(const vector <string> &cars, 
+                            int fuelPrice, 
+                            int annualDistance, 
+                            int years)
 {
-  int i;
-
+  size_t i;
   double fp, ad, y, price, tax, efficiency, cost, min;
  
   fp = fuelPrice;
@@ -24,7 +22,7 @@ double CarBuyer::lowestCost(vector <string> cars, int fuelPrice, int annualDista
   for (i = 0; i < cars.size(); i++) {
     sscanf(cars[i].c_str(), "%lf %lf %lf", &price, &tax, &efficiency);
     cost = price + (y * tax) + (y * ad * fp / efficiency);
-    if (min == -1 || cost < min) min = cost;
+    if (i == 0 || cost < min) min = cost;
   }
   return min;
 }

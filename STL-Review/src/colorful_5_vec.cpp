@@ -1,19 +1,17 @@
+/* The only difference here from colorful_4_vec.cpp is that we resize
+   the vector to have 'Z'+1 elements, and now we can simply use the 
+   character's value as an index to s. */
+
+#include "colorful_bricks.hpp"
 #include <string>
 #include <vector>
 #include <iostream>
-#include <cstdio>
-#include <cstdlib>
-#include <iostream>
 using namespace std;
 
-class ColorfulBricks {
-  public:
-    int countLayouts(string bricks);
-};
-
-int ColorfulBricks::countLayouts(string bricks)
+int ColorfulBricks::countLayouts(const string &bricks)
 {
-  int i, nc;
+  size_t i;
+  int nc;
   vector <int> s;
 
   s.resize('Z'+1, 0);

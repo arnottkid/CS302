@@ -1,0 +1,17 @@
+newgraph xaxis min 0 max 1.5 size 2 label : Running Time (s)
+yaxis min 0.2 max 6.8 hash 1 mhash 0 shash 0 size 1 no_auto_hash_labels
+  hash_label at 6 : Sorting (1)
+  hash_label at 5 : Set (2)
+  hash_label at 4 : Map (3)
+  hash_label at 3 : 26-element vector (4)
+  hash_label at 2 : 100+ element vector (5)
+  hash_label at 1 : Two characters (6)
+
+newcurve marktype ybar marksize 1 1 cfill 1 1 .5 pts 
+0.939 6
+1.444 5
+1.254 4
+0.941 3
+0.932 2
+0.792 1
+
