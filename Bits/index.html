@@ -581,7 +581,7 @@ class Number {
     unsigned long long d;      <font color=blue>/* The number. */</font>
     string hex;                <font color=blue>/* Its representation in hex (16 hex digits with a 0x in front). */</font>
     string binary;             <font color=blue>/* Its representation in binary */</font>
-    string To_String();        <font color=blue>/* This creates a bigger string, which is kind of formatted. */</font>
+    string To_String() const;  <font color=blue>/* This creates a bigger string, which is kind of formatted. */</font>
 };
 </pre></td></table></center><p>
 
@@ -595,7 +595,7 @@ Let's look at <b>To_String()</b>:
 <p><center><table border=3 cellpadding=3><td><pre>
 <font color=blue>/* This returns a "formatted" string for a number. */</font>
 
-string Number::To_String()
+string Number::To_String() const
 {
   char buf[200];
   string s;
