@@ -20,12 +20,12 @@ class Number {
     unsigned long long d;      /* The number. */
     string hex;                /* Its representation in hex (16 hex digits with a 0x in front). */
     string binary;             /* Its representation in binary */
-    string To_String();        /* This creates a bigger string, which is kind of formatted. */
+    string To_String() const;  /* This creates a bigger string, which is kind of formatted. */
 };
 
 /* This returns a "formatted" string for a number. */
 
-string Number::To_String()
+string Number::To_String() const
 {
   char buf[200];
   string s;
