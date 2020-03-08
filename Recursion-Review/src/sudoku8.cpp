@@ -22,7 +22,7 @@ class Sudoku {
     vector <int> Empty_Cells;
   public:
     Sudoku();
-    int Solve(int index);
+    int Solve(size_t index);
     void Print();
 };
 
@@ -39,7 +39,7 @@ void usage(string s)
   exit(1);
 }
 
-int Sudoku::Solve(int index)
+int Sudoku::Solve(size_t index)
 {
   int i, j, k, r, c, pi;
 

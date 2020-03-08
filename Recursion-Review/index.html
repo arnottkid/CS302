@@ -15,12 +15,12 @@ For primary lecture notes on recursion, please see my
 Lecture notes on recursion</a>.
 
 <hr>
-<h3>#1: Topcoder SRM 355, D2, 550-point problem</h3>
+<h3>#1: Topcoder SRM 355, D2, 550-point problem: NoEights</h3>
 
 As always, I don't re-post their problems.  If their server is down, read the 
 problem description from <a href=http://community.topcoder.com/stat?c=problem_statement&pm=7759&rd=10712>http://community.topcoder.com/stat?c=problem_statement&pm=7759&rd=10712</a>.
 The gist is, given two numbers, <b>l</b>
-and <b>h</b>, determine the minimum number of digits that equal eight for all numbers
+and <b>h</b>, determine the minimum number of digits that equal eight for <i>all</i> numbers
 between <b>l</b> and <b>h</b> (inclusive).  
 <p>
 Examples: 
@@ -31,6 +31,44 @@ Examples:
 <LI> <b>l</b>=83848, <b>h</b>=84888: The answer is one -- every number has to start with 8, but
 there are numbers, like 84000, that have only one 8.
 </UL>
+
+<h3>Header and Main</h3>
+
+The class definition is in 
+<b><a href=include/no_eights.hpp>include/no_eights.hpp</a></b>:
+
+<p><center><table border=3 cellpadding=3><td><pre>
+<font color=blue>/* Definition of the NoEights class from Topcoder SRM 355, D2, 550 pointer. */</font>
+
+class NoEights {
+  public:
+    int smallestAmount(int low, int high);
+};
+</pre></td></table></center><p>
+
+I have a driver program in 
+<b><a href=src/no_eights_main.cpp>src/no_eights_main.cpp</a></b>.  If you give it 0, 1, 2
+or 3 on the command line, it will do that Topcoder example.  If you give it "-", then it 
+will read <b>l</b> and <b>h</b> from standard input.
+
+<p>
+The makefile compiles <b>src/no_eights_main.cpp</b> with <b>src/no_eights.cpp</b> to 
+make 
+<b>bin/no_eights</b>:
+
+<pre>
+UNIX> <font color=darkred><b>make clean</b></font>
+rm -f a.out obj/* bin/*
+UNIX> <font color=darkred><b>make bin/no_eights</b></font>
+g++ -std=c++98 -O3 -Wall -Wextra -Iinclude -c -o obj/no_eights_main.o src/no_eights_main.cpp
+g++ -std=c++98 -O3 -Wall -Wextra -Iinclude -c -o obj/no_eights.o src/no_eights.cpp
+g++ -std=c++98 -O3 -Wall -Wextra -Iinclude -o bin/no_eights obj/no_eights_main.o obj/no_eights.o
+UNIX> <font color=darkred><b></b></font>
+</pre>
+
+<hr>
+<h3>Solving this with recursion</h3>
+
 The brain dead way to do this is to iterate from <b>l</b> to <b>h</b>, counting eights.  
 Unfortunately, the  constraints on the problem say that <b>l</b> and <b>h</b> can be up
 to 2,000,000,000, so that's too slow.
@@ -61,14 +99,11 @@ Suppose they do not equal each other, and <b>h[0]</b> equals '8'.  Then,
 you know the number beginning with <b>l[0]</b> and having nines in every other digit is 
 between <b>l</b> and <b>h</b>, and it has zero 8's.  You can return zero again. 
 <p>
-This maps itself to a straightforward solution.  
-It is in 
-<a href=SRM-355-D2-550.cpp>SRM-355-D2-550.cpp</a>, and a <b>main</b> for compiling it is
-in <a href=SRM-355-D2-550-Main.cpp>SRM-355-D2-550-Main.cpp</a>
-Here's the core of <a href=SRM-355-D2-550.cpp>SRM-355-D2-550.cpp</a>
+This maps itself to a straightforward solution, in
+<b><a href=src/no_eights.cpp>src/no_eights.cpp</a></b>:
 
 <p><center><table border=3 cellpadding=3><td><pre>
-int NE(string &l, string &h, int index)
+int NE(const string &l, const string &h, size_t index)
 {
   if (index == l.size()) return 0;     <font color=blue>// Base case when we have no digits left.</font>
   if (l[index] != h[index]) return 0;
@@ -79,7 +114,6 @@ int NE(string &l, string &h, int index)
 
 int NoEights::smallestAmount(int low, int high)
 {
-  int i;
   char b[20];
   string l, h;
 
@@ -94,8 +128,24 @@ int NoEights::smallestAmount(int low, int high)
 Now, you could have solved that with a <b>for</b> loop, but sometimes it's easier to think
 recursively.  What's the running time?  It's <i>O(n)</i>, where <i>n</i> is the length of
 the string. 
+
+<pre>
+UNIX> <font color=darkred><b>bin/no_eights 0</b></font>
+0
+UNIX> <font color=darkred><b>bin/no_eights 1</b></font>
+2
+UNIX> <font color=darkred><b>bin/no_eights 2</b></font>
+1
+UNIX> <font color=darkred><b>bin/no_eights 3</b></font>
+2
+UNIX> <font color=darkred><b>echo 80888 80899 | bin/no_eights -</b></font>
+2
+UNIX> <font color=darkred><b></b></font>
+</pre>
+
+
 <hr>
-<h3>#2: Topcoder SRM 351, D1, 250-point problem</h3>
+<h3>#2: Topcoder SRM 351, D1, 250-point problem: CoinsExchange</h3>
 
 The problem description is available at <a href=http://community.topcoder.com/stat?c=problem_statement&pm=7773&rd=10675>http://community.topcoder.com/stat?c=problem_statement&pm=7773&rd=10675</a>.
 <p>
@@ -110,8 +160,46 @@ of gold, silver and bronze coins that we want to have.  We have exchange rates:
 <LI> If you give the bank one silver, you get 9 bronze
 <LI> If you give the bank 11 bronze, you get one silver
 </UL>
+
 We are to return the minimum number of exchanges that we need to perform to get
-at least <b>G2/S2/B2</b> from <b>G1/S1/B1</b>.  
+at least <b>G2/S2/B2</b> from <b>G1/S1/B1</b>.    Here are the examples:
+
+<hr>
+<pre>
+Example   G1  S1  B1    G2  S2  B2   Answer
+  0        1   0   0     0   0  81     10: One gold to 9 silver.  9 silver to 81 bronze.
+  1        1 100  12     5  53  33      7: 44 silver to 4 gold.  3 silver to 27 gold.
+  2        1 100  12     5  63  33     -1: Impossible.
+  3        5  10  12     3   7   9      0: Got already.
+</pre>
+<hr>
+<h3>Header and Driver</h3>
+
+As with the other topcoder problems in these lectures, I have a header
+and driver.  THe header is in 
+<b><a href=include/coins_exchange.hpp>include/coins_exchange.hpp</a></b>:
+
+<p><center><table border=3 cellpadding=3><td><pre>
+<font color=blue>/* Header file for Topcoder SRM 351, D1, 250-Pointer: CoinsExchange */</font>
+
+#include &lt;string&gt;
+
+class CoinsExchange {
+  public:
+    int countExchanges(int G1, int S1, int B1, int G2, int S2, int B2);
+
+  protected:               <font color=blue>/* I've added this variable to help print out the state. */</font>
+    std::string nest;
+};
+</pre></td></table></center><p>
+
+And the driver is
+<b><a href=src/coins_exchange_main.cpp>src/coins_exchange_main.cpp</a></b>.  You can give
+it the coins on standard input if you give it a dash on the command line.  Otherwise, you 
+can give it example numbers on the command line.
+
+<h3>Solution</h3>
+
 <p>
 This is a problem where you break it into sub-problems and solve them recursively.
 That's a lot easier than trying to think things like: "If <b>G2</b> is greater than <b>G1</b> 
@@ -139,14 +227,18 @@ If not, convert as much gold as you can and do the rest from bronze.  If that's 
 return -1.  
 <p>
 That solves all cases.  For the code, see 
-<a href=SRM-351-D1-250.cpp>SRM-351-D1-250.cpp</a> and 
-in <a href=SRM-351-D1-250-Main.cpp>SRM-351-D1-250-Main.cpp</a>
+<b><a href=src/coins_exchange.cpp>src/coins_exchange.cpp</a></b>.
 I have annotated the code to print out what it's doing, in case you find this
 a little confusing.  It is worth the effort to trace through the recursion:
 
 <pre>
-UNIX> <font color=darkred><b>g++ SRM-351-D1-250-Main.cpp</b></font>
-UNIX> <font color=darkred><b>./a.out 0</b></font>
+UNIX> <font color=darkred><b>make clean</b></font>
+rm -f a.out obj/* bin/*
+UNIX> <font color=darkred><b>make bin/coins_exchange</b></font>
+g++ -std=c++98 -O3 -Wall -Wextra -Iinclude -c -o obj/coins_exchange_main.o src/coins_exchange_main.cpp
+g++ -std=c++98 -O3 -Wall -Wextra -Iinclude -c -o obj/coins_exchange.o src/coins_exchange.cpp
+g++ -std=c++98 -O3 -Wall -Wextra -Iinclude -o bin/coins_exchange obj/coins_exchange_main.o obj/coins_exchange.o
+UNIX> <font color=darkred><b>bin/coins_exchange 0</b></font>
  We have:  G1:   1   S1:   0   B1:   0
  We want:  G2:   0   S2:   0   B2:  81
  Recursively trying to get 81 bronze from 9 silver
@@ -158,7 +250,7 @@ UNIX> <font color=darkred><b>./a.out 0</b></font>
  After recursively trying to get bronze, returning 10
 
 10
-UNIX> <font color=darkred><b>./a.out 1</b></font>
+UNIX> <font color=darkred><b>bin/coins_exchange 1</b></font>
  We have:  G1:   1   S1: 100   B1:  12
  We want:  G2:   5   S2:  53   B2:  33
  Recursively trying to get 4 gold from 44 silver
@@ -176,7 +268,7 @@ UNIX> <font color=darkred><b>./a.out 1</b></font>
  After recursively trying to get gold, returning 7
 
 7
-UNIX> <font color=darkred><b>./a.out 2</b></font>
+UNIX> <font color=darkred><b>bin/coins_exchange 2</b></font>
  We have:  G1:   1   S1: 100   B1:  12
  We want:  G2:   5   S2:  63   B2:  33
  Recursively trying to get 4 gold from 44 silver
@@ -197,7 +289,6 @@ UNIX> <font color=darkred><b>./a.out 2</b></font>
 UNIX> <font color=darkred><b></b></font>
 </pre>
 
-
 <hr>
 <h3>#3: Solving Sudoku Puzzles</h3>
 
@@ -212,17 +303,17 @@ standard input -- numbers are '1' through '9', empty cells are '-' and everythin
 ignored.  I store a puzzle in a vector of nine strings, each with nine characters.
 I do this in a <b>Read()</b> method of a class called <b>Sudoku</b>, and I also 
 implement a <b>Print()</b> method in 
-<b><a href=sudoku1.cpp>sudoku1.cpp</a></b>:
+<b><a href=src/sudoku1.cpp>src/sudoku1.cpp</a></b>:
 
 <p><center><table border=3 cellpadding=3><td valign=top><pre>
 class Sudoku {
   public:
-    vector &lt;string&gt; puzzle;
-    void Read();
-    void Print();
+    vector &lt;string&gt; puzzle; <font color=blue>// Hold the puzzle in a vector of 9 strings</font>
+    void Read();            <font color=blue>// Read from standard input</font>
+    void Print() const;     <font color=blue>// Print to standard outputj</font>
 };
 
-void Sudoku::Read() 
+void Sudoku::Read()        
 {
   int i, j;
   char c;
@@ -230,7 +321,7 @@ void Sudoku::Read()
   puzzle.clear();
   puzzle.resize(9);
 
-  for (i = 0; i &lt; 9; i++) {
+  for (i = 0; i &lt; 9; i++) {  <font color=blue>// Read the puzzle, error checking.</font>
     for (j = 0; j &lt; 9; j++) {
       do {
         if (!(cin &gt;&gt; c)) { 
@@ -247,7 +338,7 @@ void Sudoku::Read()
   }
 }
 </pre></td><td valign=top><pre>
-void Sudoku::Print() 
+void Sudoku::Print() const
 {
   int i, j;
 
@@ -261,7 +352,7 @@ void Sudoku::Print()
   }
 }
   
-main()
+int main()
 {
   Sudoku S;
 
@@ -271,14 +362,14 @@ main()
 </pre></td></table></center><p>
 
 I have the example from the Wikipedia page in two files:
-<b><a href=sudex1.txt>sudex1.txt</a></b> and
-<b><a href=sudex2.txt>sudex2.txt</a></b>.  They differ in the amount of whitespace.
+<b><a href=txt/sudex1.txt>txt/sudex1.txt</a></b> and
+<b><a href=txt/sudex2.txt>txt/sudex2.txt</a></b>.  They differ in the amount of whitespace.
 However, when the program reads them in, the produce the same output:
 
 <p><center><table border=3><td valign=top><pre>
-UNIX> <font color=darkred><b>make sudoku1</b></font>
-g++ -std=c++98 -O3 -o sudoku1 sudoku1.cpp 
-UNIX> <font color=darkred><b>cat sudex1.txt</b></font>
+UNIX> <font color=darkred><b>make bin/sudoku1</b></font>
+g++ -std=c++98 -O3 -o bin/sudoku1 src/sudoku1.cpp 
+UNIX> <font color=darkred><b>cat txt/sudex1.txt</b></font>
 53--7----
 6--195---
 -98----6-
@@ -288,7 +379,7 @@ UNIX> <font color=darkred><b>cat sudex1.txt</b></font>
 -6----28-
 ---419--5
 ----8--79
-UNIX> <font color=darkred><b>./sudoku1 < sudex1.txt</b></font>
+UNIX> <font color=darkred><b>bin/sudoku1 < txt/sudex1.txt</b></font>
 53- -7- ---
 6-- 195 ---
 -98 --- -6-
@@ -304,7 +395,7 @@ UNIX>
 </pre>
 </td><td valign=top>
 <pre>
-UNIX> <font color=darkred><b>cat sudex2.txt</b></font>
+UNIX> <font color=darkred><b>cat txt/sudex2.txt</b></font>
 5 3 -   - 7 -   - - - 
 6 - -   1 9 5   - - - 
 - 9 8   - - -   - 6 - 
@@ -316,7 +407,7 @@ UNIX> <font color=darkred><b>cat sudex2.txt</b></font>
 - 6 -   - - -   2 8 - 
 - - -   4 1 9   - - 5 
 - - -   - 8 -   - 7 9 
-UNIX> <font color=darkred><b>./sudoku1 < sudex2.txt</b></font>
+UNIX> <font color=darkred><b>bin/sudoku1 < txt/sudex2.txt</b></font>
 53- -7- ---
 6-- 195 ---
 -98 --- -6-
@@ -334,23 +425,23 @@ UNIX> <font color=darkred><b></b></font>
 
 As a next step, we implement methods to check whether rows, columns or 
 panels are valid.   They are straightforward.  In 
-<b><a href=sudoku2.cpp>sudoku2.cpp</a></b>, we check to see whether the 
+<b><a href=src/sudoku2.cpp>src/sudoku2.cpp</a></b>, we check to see whether the 
 input matrix is indeed valid.
 
 <p><center><table border=3 cellpadding=3><td valign=top><pre>
 class Sudoku {
   public:
-    vector &lt;string&gt; puzzle;
-    void Read();
-    void Print();
-    int row_ok(int r);
-    int column_ok(int c);
-    int panel_ok(int pr, int pc);
+    vector &lt;string&gt; puzzle;             <font color=blue>// Hold the puzzle in a vector of 9 strings</font>
+    void Read();                        <font color=blue>// Read from standard input</font>
+    void Print() const;                 <font color=blue>// Print to standard outputj</font>
+    int row_ok(int r) const;            <font color=blue>// Test row r for correctness</font>
+    int column_ok(int c) const;         <font color=blue>// Test cols r for correctness</font>
+    int panel_ok(int pr, int pc) const; <font color=blue>// Test panel pr/pc (both 0,1,2) for correctness</font>
 };
 
-int Sudoku::row_ok(int r)
+int Sudoku::row_ok(int r) const
 {
-  vector &lt;int&gt; checker;
+  vector &lt;int&gt; checker;     <font color=blue>/* Use this to make sure no digit is set twice. */</font>
   int c;
 
   checker.clear();
@@ -363,8 +454,8 @@ int Sudoku::row_ok(int r)
   }
   return 1;
 }
-
-int Sudoku::column_ok(int c)
+   
+int Sudoku::column_ok(int c) const
 {
   vector &lt;int&gt; checker;
   int r;
@@ -378,7 +469,8 @@ int Sudoku::column_ok(int c)
   }
   return 1;
 }
-</pre></td><td valign=top><pre>int Sudoku::panel_ok(int pr, int pc)
+
+int Sudoku::panel_ok(int pr, int pc) const
 {
   vector &lt;int&gt; checker;
   int r, c;
@@ -398,7 +490,7 @@ int Sudoku::column_ok(int c)
   return 1;
 }
 
-main()
+int main()
 {
   int r, c;
   Sudoku S;
@@ -414,20 +506,20 @@ main()
 </pre></td></table></center><p>
 
 I have some example puzzles 
-(<b><a href=sudex3.txt>sudex3.txt</a></b>,
-<b><a href=sudex4.txt>sudex4.txt</a></b> &amp;
-<b><a href=sudex5.txt>sudex5.txt</a></b>)
+(<b><a href=txt/sudex3.txt>txt/sudex3.txt</a></b>,
+<b><a href=txt/sudex4.txt>txt/sudex4.txt</a></b> &amp;
+<b><a href=txt/sudex5.txt>txt/sudex5.txt</a></b>)
 with errors: the program 
 correctly identifies them:
 
 <pre>
-UNIX> <font color=darkred><b>make sudoku2</b></font>
-g++ -std=c++98 -O3 -o sudoku2 sudoku2.cpp 
-UNIX> <font color=darkred><b>./sudoku2 < sudex3.txt</b></font>
+UNIX> <font color=darkred><b>make bin/sudoku2</b></font>
+g++ -std=c++98 -O3 -o bin/sudoku2 src/sudoku2.cpp 
+UNIX> <font color=darkred><b>bin/sudoku2 < txt/sudex3.txt</b></font>
 Bad row 3
-UNIX> <font color=darkred><b>./sudoku2 < sudex4.txt</b></font>
+UNIX> <font color=darkred><b>bin/sudoku2 < txt/sudex4.txt</b></font>
 Bad col 7
-UNIX> <font color=darkred><b>./sudoku2 < sudex5.txt</b></font>
+UNIX> <font color=darkred><b>bin/sudoku2 < txt/sudex5.txt</b></font>
 Bad panel 1 2
 UNIX> <font color=darkred><b></b></font>
 </pre>
@@ -444,18 +536,18 @@ recursively.
 
 If it is called on a filled puzzle, we're done -- we print it and exit.
 The code is in 
-<b><a href=sudoku3.cpp>sudoku3.cpp</a></b>:
+<b><a href=src/sudoku3.cpp>src/sudoku3.cpp</a></b>
 
 <p><center><table border=3 cellpadding=3><td><pre>
 class Sudoku {
   public:
-    vector &lt;string&gt; puzzle;
-    void Read();
-    void Print();
-    void Solve();
-    int row_ok(int r);
-    int column_ok(int c);
-    int panel_ok(int pr, int pc);
+    vector &lt;string&gt; puzzle;             <font color=blue>// Hold the puzzle in a vector of 9 strings</font>
+    void Read();                        <font color=blue>// Read from standard input</font>
+    void Print() const;                 <font color=blue>// Print to standard output</font>
+    void Solve();                       <font color=blue>// Solve the problem</font>
+    int row_ok(int r) const;            <font color=blue>// Test row r for correctness</font>
+    int column_ok(int c) const;         <font color=blue>// Test cols r for correctness</font>
+    int panel_ok(int pr, int pc) const; <font color=blue>// Test panel pr/pc (both 0,1,2) for correctness</font>
 };
 
 void Sudoku::Solve()
@@ -464,9 +556,9 @@ void Sudoku::Solve()
 
   for (r = 0; r &lt; 9; r++) {
     for (c = 0; c &lt; 9; c++) {
-      if (puzzle[r][c] == '-') {
-        for (i = '1'; i &lt;= '9'; i++) {
-          puzzle[r][c] = i;
+      if (puzzle[r][c] == '-') {         <font color=blue>/* Find the first empty cell. */</font>
+        for (i = '1'; i &lt;= '9'; i++) {   <font color=blue>/* Try every digit. */</font>
+          puzzle[r][c] = i;              <font color=blue>/* If the digit is legal, call Solve() recursively */</font>
           if (row_ok(r) && column_ok(c) && panel_ok(r/3, c/3)) Solve();
         }
         puzzle[r][c] = '-';
@@ -474,16 +566,16 @@ void Sudoku::Solve()
       }
     }
   }
-  Print();
+  Print();             <font color=blue>/* If we get here, the puzzle has been solved. */</font>
   exit(0);
 }
 </pre></td></table></center><p>
 
 It works on our example, pretty quickly (at this point, I'm assuming that you have
-made all of the executables.
+made all of the executables).
 
 <pre>
-UNIX> <font color=darkred><b>time ./sudoku3 < sudex1.txt</b></font>
+UNIX> <font color=darkred><b>time bin/sudoku3 < txt/sudex1.txt</b></font>
 534 678 912
 672 195 348
 198 342 567
@@ -509,18 +601,18 @@ However, if you're like me, it seems like we could speed this up.  Let's explore
 
 First, we need a way to test speed.  What I've done is grab six "Evil" puzzles
 from a web site.  They are in
-<b><a href=test_puzzle_1.txt>test_puzzle_1.txt</a></b>,
-<b><a href=test_puzzle_2.txt>test_puzzle_2.txt</a></b>,
-<b><a href=test_puzzle_3.txt>test_puzzle_3.txt</a></b>,
-<b><a href=test_puzzle_4.txt>test_puzzle_4.txt</a></b>,
-<b><a href=test_puzzle_5.txt>test_puzzle_5.txt</a></b> and
-<b><a href=test_puzzle_6.txt>test_puzzle_6.txt</a></b>.
+<b><a href=txt/test_puzzle_1.txt>txt/test_puzzle_1.txt</a></b>,
+<b><a href=txt/test_puzzle_2.txt>txt/test_puzzle_2.txt</a></b>,
+<b><a href=txt/test_puzzle_3.txt>txt/test_puzzle_3.txt</a></b>,
+<b><a href=txt/test_puzzle_4.txt>txt/test_puzzle_4.txt</a></b>,
+<b><a href=txt/test_puzzle_5.txt>txt/test_puzzle_5.txt</a></b> and
+<b><a href=txt/test_puzzle_6.txt>txt/test_puzzle_6.txt</a></b>.
 I first compile the program using optimization, and then I time it on the six programs
 with a fancy shell command:
 
 <pre>
-UNIX> <font color=darkred><b>g++ -O3 -o sudoku3 sudoku3.cpp</b></font>
-UNIX> <font color=darkred><b>time sh -c 'for i in 1 2 3 4 5 6 ; do ./sudoku3 < test_puzzle_$i.txt > /dev/null; done'</b></font>
+UNIX> <font color=darkred><b>g++ -O3 -o bin/sudoku3 src/sudoku3.cpp</b></font>
+UNIX> <font color=darkred><b>time sh -c 'for i in 1 2 3 4 5 6 ; do bin/sudoku3 < txt/test_puzzle_$i.txt > /dev/null; done'</b></font>
 0.430u 0.000s 0:00.42 102.3%  0+0k 0+0io 0pf+0w
 UNIX> <font color=darkred><b></b></font>
 </pre>
@@ -530,7 +622,7 @@ seems a bit inefficient to look for a blank space from the beginning each time w
 call <b>Solve()</b>.  Let's instead parameterize <b>Solve()</b> with the row and column,
 and then when we call it recursively, we give it the next cell.  The updated
 <b>Solve()</b> is in 
-<b><a href=sudoku4.cpp>sudoku4.cpp</a></b>:
+<b><a href=src/sudoku4.cpp>src/sudoku4.cpp</a></b>:
 
 <p><center><table border=3 cellpadding=3><td><pre>
 void Sudoku::Solve(int r, int c)
@@ -559,7 +651,7 @@ void Sudoku::Solve(int r, int c)
 We first call it with <b>Solve(0, 0)</b>.  Does it speed things up?  A little:
 
 <pre>
-UNIX> <font color=darkred><b>time sh -c 'for i in 1 2 3 4 5 6 ; do ./sudoku4 < test_puzzle_$i.txt > /dev/null; done'</b></font>
+UNIX> <font color=darkred><b>time sh -c 'for i in 1 2 3 4 5 6 ; do bin/sudoku4 < txt/test_puzzle_$i.txt > /dev/null; done'</b></font>
 0.420u 0.000s 0:00.40 105.0%  0+0k 0+0io 0pf+0w
 UNIX> <font color=darkred><b></b></font>
 </pre>
@@ -573,7 +665,7 @@ legal for those too.  If so, we can call <b>Solve()</b> recursively.
 That eliminates the calls to <b>row_ok()</b>, <b>column_ok()</b> and <b>panel_ok()</b>.
 <p>
 The code is a bit icky -- it's in 
-<b><a href=sudoku5.cpp>sudoku5.cpp</a></b>.  First, here's the updated 
+<b><a href=src/sudoku5.cpp>src/sudoku5.cpp</a></b>.  First, here's the updated 
 class definition:
 
 
@@ -583,13 +675,13 @@ typedef vector &lt;ISet&gt; VISet;
 
 class Sudoku {
   public:
-    vector &lt;string&gt; puzzle;
-    void Read();
-    void Print();
-    void Solve(int r, int c);
-    int row_ok(int r);
-    int column_ok(int c);
-    int panel_ok(int pr, int pc);
+    vector &lt;string&gt; puzzle;             <font color=blue>// Hold the puzzle in a vector of 9 strings</font>
+    void Read();                        <font color=blue>// Read from standard input</font>
+    void Print() const;                 <font color=blue>// Print to standard output</font>
+    void Solve(int r, int c);           <font color=blue>// Solve starting at the given row/col</font>
+    int row_ok(int r) const;            <font color=blue>// Test row r for correctness</font>
+    int column_ok(int c) const;         <font color=blue>// Test cols r for correctness</font>
+    int panel_ok(int pr, int pc) const; <font color=blue>// Test panel pr/pc (both 0,1,2) for correctness</font>
     vector &lt;ISet&gt; vrows;       <font color=blue>// Sets of legal values for each row.</font>
     vector &lt;ISet&gt; vcols;       <font color=blue>// Sets of legal values for each row.</font>
     vector &lt;VISet&gt; vpanels;    <font color=blue>// Sets of legal values for each panel.</font>
@@ -647,7 +739,7 @@ void Sudoku::Solve(int r, int c)
   while (r &lt; 9) {
     if (puzzle[r][c] == '-') {
       for(rit = vrows[r].begin(); rit != vrows[r].end(); rit++) to_try.push_back(*rit);
-      for (i = 0; i &lt; to_try.size(); i++) {
+      for (i = 0; i &lt; (int) to_try.size(); i++) {
         e = to_try[i];
         cit = vcols[c].find(e);
         if (cit != vcols[c].end()) {
@@ -687,7 +779,7 @@ faster; however, using <b>to_try</b> doesn't seem like a bad alternative.
 Is it faster?  Let's see:
 
 <pre>
-UNIX> <font color=darkred><b>time sh -c 'for i in 1 2 3 4 5 6 ; do ./sudoku5 < test_puzzle_$i.txt > /dev/null; done'</b></font>
+UNIX> <font color=darkred><b>time sh -c 'for i in 1 2 3 4 5 6 ; do bin/sudoku5 < txt/test_puzzle_$i.txt > /dev/null; done'</b></font>
 0.210u 0.010s 0:00.18 122.2%  0+0k 0+0io 0pf+0w
 UNIX> <font color=darkred><b></b></font>
 </pre>
@@ -695,13 +787,13 @@ UNIX> <font color=darkred><b></b></font>
 Well, it runs in 50 percent of the time of <b>sudoku4</b>, so I guess I should
 be happy.  I'm not really, but I'll pretend.  
 There are lots of things to try -- for example, 
-<b><a href=sudoku6.cpp>sudoku6.cpp</a></b>
+<b><a href=src/sudoku6.cpp>src/sudoku6.cpp</a></b>
 creates <b>to_try</b> from the smallest of <b>vrows[r]</b>,
 <b>vcols[c]</b> and
 <b>vpanels[r/3][c/3]</b>:
 
 <pre>
-UNIX> <font color=darkred><b>time sh -c 'for i in 1 2 3 4 5 6 ; do ./sudoku6 < test_puzzle_$i.txt > /dev/null; done'</b></font>
+UNIX> <font color=darkred><b>time sh -c 'for i in 1 2 3 4 5 6 ; do bin/sudoku6 < txt/test_puzzle_$i.txt > /dev/null; done'</b></font>
 0.190u 0.000s 0:00.17 111.7%  0+0k 0+0io 0pf+0w
 UNIX> <font color=darkred><b></b></font>
 </pre>
@@ -718,7 +810,11 @@ notes on bit operations</a> if you need to brush up.
 <p>
 As illustrated in those lectures, you can use integers and bit operations to represent sets.
 This actually simplifies the code above.  In
-<b><a href=sudoku7.cpp>sudoku7.cpp</a></b>, we do this.  
+<b><a href=src/sudoku7.cpp>src/sudoku7.cpp</a></b>, we do this.  
+(BTW, this code and the code in 
+<b><a href=src/sudoku8.cpp>src/sudoku8.cpp</a></b> are of an older style, and a little
+different than the code above -- you shouldn't have a hard time navigating them).
+<p>
 Actually, we do quite a bit more.  First, we use the numbers 1 through 9 in the puzzle rather than
 their characters.  We represent '-' with 0.  
 The sets are now vectors of integers rather than <b>sets</b>.  We also have the panel set be
@@ -797,20 +893,21 @@ int Sudoku::Solve(int r, int c)
 Now we're talking speed improvements!
 
 <pre>
-UNIX> <font color=darkred><b>g++ -O3 -o sudoku7 sudoku7.cpp</b></font>
-UNIX> <font color=darkred><b>time sh -c 'for i in 1 2 3 4 5 6 ; do ./sudoku7 < test_puzzle_$i.txt > /dev/null; done'</b></font>
+UNIX> <font color=darkred><b>g++ -O3 -o bin/sudoku7 src/sudoku7.cpp</b></font>
+UNIX> <font color=darkred><b>time sh -c 'for i in 1 2 3 4 5 6 ; do bin/sudoku7 < txt/test_puzzle_$i.txt > /dev/null; done'</b></font>
 0.070u 0.000s 0:00.02 350.0%  0+0k 0+0io 0pf+0w
 UNIX> <font color=darkred><b></b></font>
 </pre>
 
-The improvement comes because for small sets, bit operations are much faster than using
+The improvement comes from the following reason -- for small sets, 
+bit operations are <i>much</i> faster than using
 balanced binary trees (which is how the STL implements sets).
 
 <hr>
 <h3>My final version (I don't do this in class)</h3>
 
 Try 
-<b><a href=sudoku8.cpp>sudoku8.cpp</a></b>.  I've made the following improvements here:
+<b><a href=src/sudoku8.cpp>src/sudoku8.cpp</a></b>.  I've made the following improvements here:
 
 <UL>
 <LI> I've added an array called <b>vecs</b>, which I index by the intersection of 

@@ -8,17 +8,38 @@ using namespace std;
 
 class Sudoku {
   public:
-    vector <string> puzzle;
-    void Read();
-    void Print();
-    int row_ok(int r);
-    int column_ok(int c);
-    int panel_ok(int pr, int pc);
+    vector <string> puzzle;             // Hold the puzzle in a vector of 9 strings
+    void Read();                        // Read from standard input
+    void Print() const;                 // Print to standard output
+    void Solve();                       // Solve the problem
+    int row_ok(int r) const;            // Test row r for correctness
+    int column_ok(int c) const;         // Test cols r for correctness
+    int panel_ok(int pr, int pc) const; // Test panel pr/pc (both 0,1,2) for correctness
 };
 
-int Sudoku::row_ok(int r)
+void Sudoku::Solve()
 {
-  vector <int> checker;
+  int r, c, i;
+
+  for (r = 0; r < 9; r++) {
+    for (c = 0; c < 9; c++) {
+      if (puzzle[r][c] == '-') {         /* Find the first empty cell */
+        for (i = '1'; i <= '9'; i++) {
+          puzzle[r][c] = i;              /* And if ok, call Solve() recursively */
+          if (row_ok(r) && column_ok(c) && panel_ok(r/3, c/3)) Solve();
+        }
+        puzzle[r][c] = '-';
+        return;
+      }
+    }
+  }
+  Print();             /* If we get here, the puzzle has been solved. */
+  exit(0);
+}
+
+int Sudoku::row_ok(int r) const
+{
+  vector <int> checker;     /* Use this to make sure no digit is set twice. */
   int c;
 
   checker.clear();
@@ -32,7 +53,7 @@ int Sudoku::row_ok(int r)
   return 1;
 }
    
-int Sudoku::column_ok(int c)
+int Sudoku::column_ok(int c) const
 {
   vector <int> checker;
   int r;
@@ -47,7 +68,7 @@ int Sudoku::column_ok(int c)
   return 1;
 }
    
-int Sudoku::panel_ok(int pr, int pc)
+int Sudoku::panel_ok(int pr, int pc) const
 {
   vector <int> checker;
   int r, c;
@@ -92,9 +113,9 @@ void Sudoku::Read()
   }
 }
 
-void Sudoku::Print() 
+void Sudoku::Print() const
 {
-  int i, j;
+  size_t i, j;
 
   for (i = 0; i < puzzle.size(); i++) {
     for (j = 0; j < puzzle[i].size(); j++) {
@@ -112,10 +133,14 @@ int main()
   Sudoku S;
 
   S.Read();
-
+  
   for (r = 0; r < 9; r++) if (!S.row_ok(r)) printf("Bad row %d\n", r);
   for (c = 0; c < 9; c++) if (!S.column_ok(c)) printf("Bad col %d\n", c);
   for (r = 0; r < 3; r++) for (c = 0; c < 3; c++) {
     if (!S.panel_ok(r, c)) printf("Bad panel %d %d\n", r, c);
   }
+
+  S.Solve();
+  printf("No Solution\n");
+  exit(0);
 }

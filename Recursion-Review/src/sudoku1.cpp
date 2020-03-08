@@ -8,9 +8,9 @@ using namespace std;
 
 class Sudoku {
   public:
-    vector <string> puzzle;
-    void Read();
-    void Print();
+    vector <string> puzzle; // Hold the puzzle in a vector of 9 strings
+    void Read();            // Read from standard input
+    void Print() const;     // Print to standard outputj
 };
 
 void Sudoku::Read() 
@@ -21,7 +21,7 @@ void Sudoku::Read()
   puzzle.clear();
   puzzle.resize(9);
 
-  for (i = 0; i < 9; i++) {
+  for (i = 0; i < 9; i++) {      // Read the puzzle, error checking.
     for (j = 0; j < 9; j++) {
       do {
         if (!(cin >> c)) { 
@@ -38,9 +38,9 @@ void Sudoku::Read()
   }
 }
 
-void Sudoku::Print() 
+void Sudoku::Print() const
 {
-  int i, j;
+  size_t i, j;
 
   for (i = 0; i < puzzle.size(); i++) {
     for (j = 0; j < puzzle[i].size(); j++) {

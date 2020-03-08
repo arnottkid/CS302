@@ -4,22 +4,15 @@
    Please see lecture notes in http://web.eecs.utk.edu/~plank/plank/classes/cs302/Notes/Recursion-Review/index.html for explanation.
  */
 
+#include "coins_exchange.hpp"
 #include <string>
-#include <vector>
 #include <cstdio>
 #include <cstdlib>
 #include <iostream>
 using namespace std;
 
-class CoinsExchange {
-  public:
-    int countExchanges(int G1, int S1, int B1, int G2, int S2, int B2);
-    string nest;
-};
-
 int CoinsExchange::countExchanges(int G1, int S1, int B1, int G2, int S2, int B2)
 {
-  int i;
   int s;
   int x;
   int fromgold;

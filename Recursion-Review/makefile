@@ -1,32 +1,63 @@
-ALL = sudoku1 sudoku2 sudoku3 sudoku4 sudoku5 sudoku6 sudoku7 sudoku8
+ALL = bin/no_eights \
+      bin/coins_exchange \
+      bin/sudoku1 \
+      bin/sudoku2 \
+      bin/sudoku3 \
+      bin/sudoku4 \
+      bin/sudoku5 \
+      bin/sudoku6 \
+      bin/sudoku7 \
+      bin/sudoku8 
 
 all: $(ALL)
 
 clean:
-	rm -f a.out *.o $(ALL)
+	rm -f a.out obj/* bin/*
 
+CFLAGS = -std=c++98 -O3 -Wall -Wextra -Iinclude
 
-sudoku1: sudoku1.cpp
-	g++ -std=c++98 -O3 -o sudoku1 sudoku1.cpp 
+# ------ Object files
 
-sudoku2: sudoku2.cpp
-	g++ -std=c++98 -O3 -o sudoku2 sudoku2.cpp 
+obj/no_eights_main.o: src/no_eights_main.cpp include/no_eights.hpp
+	g++ $(CFLAGS) -c -o obj/no_eights_main.o src/no_eights_main.cpp
 
-sudoku3: sudoku3.cpp
-	g++ -std=c++98 -O3 -o sudoku3 sudoku3.cpp 
+obj/no_eights.o: src/no_eights.cpp include/no_eights.hpp
+	g++ $(CFLAGS) -c -o obj/no_eights.o src/no_eights.cpp
 
-sudoku4: sudoku4.cpp
-	g++ -std=c++98 -O3 -o sudoku4 sudoku4.cpp 
+obj/coins_exchange_main.o: src/coins_exchange_main.cpp include/coins_exchange.hpp
+	g++ $(CFLAGS) -c -o obj/coins_exchange_main.o src/coins_exchange_main.cpp
 
-sudoku5: sudoku5.cpp
-	g++ -std=c++98 -O3 -o sudoku5 sudoku5.cpp 
+obj/coins_exchange.o: src/coins_exchange.cpp include/coins_exchange.hpp
+	g++ $(CFLAGS) -c -o obj/coins_exchange.o src/coins_exchange.cpp
 
-sudoku6: sudoku6.cpp
-	g++ -std=c++98 -O3 -o sudoku6 sudoku6.cpp 
+# ------ Executables
 
-sudoku7: sudoku7.cpp
-	g++ -std=c++98 -O3 -o sudoku7 sudoku7.cpp 
+bin/sudoku1: src/sudoku1.cpp
+	g++ $(CFLAGS) -o bin/sudoku1 src/sudoku1.cpp 
 
-sudoku8: sudoku8.cpp
-	g++ -std=c++98 -O3 -o sudoku8 sudoku8.cpp 
+bin/sudoku2: src/sudoku2.cpp
+	g++ $(CFLAGS) -o bin/sudoku2 src/sudoku2.cpp 
 
+bin/sudoku3: src/sudoku3.cpp
+	g++ $(CFLAGS) -o bin/sudoku3 src/sudoku3.cpp 
+
+bin/sudoku4: src/sudoku4.cpp
+	g++ $(CFLAGS) -o bin/sudoku4 src/sudoku4.cpp 
+
+bin/sudoku5: src/sudoku5.cpp
+	g++ $(CFLAGS) -o bin/sudoku5 src/sudoku5.cpp 
+
+bin/sudoku6: src/sudoku6.cpp
+	g++ $(CFLAGS) -o bin/sudoku6 src/sudoku6.cpp 
+
+bin/sudoku7: src/sudoku7.cpp
+	g++ $(CFLAGS) -o bin/sudoku7 src/sudoku7.cpp 
+
+bin/sudoku8: src/sudoku8.cpp
+	g++ $(CFLAGS) -o bin/sudoku8 src/sudoku8.cpp 
+
+bin/no_eights: obj/no_eights_main.o obj/no_eights.o
+	g++ $(CFLAGS) -o bin/no_eights obj/no_eights_main.o obj/no_eights.o
+
+bin/coins_exchange: obj/coins_exchange_main.o obj/coins_exchange.o
+	g++ $(CFLAGS) -o bin/coins_exchange obj/coins_exchange_main.o obj/coins_exchange.o

@@ -1,4 +1,5 @@
-/* Jim Plank
+/* Recursive solution to Topcoder SRM 355, D2, 550-Pointer: No-Eights
+   James S. Plank
    September, 2011
  */
 
@@ -22,19 +23,13 @@
    at least for me, makes the thought process cleaner.
  */
 
+#include "no_eights.hpp"
 #include <string>
-#include <vector>
-#include <iostream>
 #include <cstdio>
 #include <cstdlib>
 using namespace std;
 
-class NoEights {
-  public:
-    int smallestAmount(int low, int high);
-};
-
-int NE(string &l, string &h, int index)
+int NE(const string &l, const string &h, size_t index)
 {
   if (index == l.size()) return 0;
   if (l[index] != h[index]) return 0;
@@ -45,14 +40,17 @@ int NE(string &l, string &h, int index)
 
 int NoEights::smallestAmount(int low, int high)
 {
-  int i;
   char b[20];
   string l, h;
+
+  /* Convert each number to 10-digit strings using sprintf(). */
 
   sprintf(b, "%010d", low);
   l = b;
   sprintf(b, "%010d", high);
   h = b;
+
+  /* Call the recursive procedure NE() on the strings. */
+
   return NE(l, h, 0);
-  
 }
