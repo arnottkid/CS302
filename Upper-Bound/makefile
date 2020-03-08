@@ -1,23 +1,21 @@
-ALL = keno-ll keno-ll2 keno-ll3 keno-ll4 keno-ll5
+ALL = bin/keno-ll bin/keno-ll2 bin/keno-ll3 bin/keno-ll4 bin/keno-ll5
 
 all: $(ALL) 
 
 clean:
 	rm -f a.out $(ALL)
 
+bin/keno-ll: src/keno-ll.cpp
+	g++ -O3 -o bin/keno-ll src/keno-ll.cpp
 
+bin/keno-ll2: src/keno-ll2.cpp
+	g++ -O3 -o bin/keno-ll2 src/keno-ll2.cpp
 
-keno-ll: keno-ll.cpp
-	g++ -O3 -o keno-ll keno-ll.cpp
+bin/keno-ll3: src/keno-ll3.cpp
+	g++ -O3 -o bin/keno-ll3 src/keno-ll3.cpp
 
-keno-ll2: keno-ll2.cpp
-	g++ -O3 -o keno-ll2 keno-ll2.cpp
+bin/keno-ll4: src/keno-ll4.cpp
+	g++ -O3 -o bin/keno-ll4 src/keno-ll4.cpp
 
-keno-ll3: keno-ll3.cpp
-	g++ -O3 -o keno-ll3 keno-ll3.cpp
-
-keno-ll4: keno-ll4.cpp
-	g++ -O3 -o keno-ll4 keno-ll4.cpp
-
-keno-ll5: keno-ll5.cpp
-	g++ -O3 -o keno-ll5 keno-ll5.cpp
+bin/keno-ll5: src/keno-ll5.cpp
+	g++ -O3 -o bin/keno-ll5 src/keno-ll5.cpp

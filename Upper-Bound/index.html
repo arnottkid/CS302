@@ -1,7 +1,7 @@
 <title>CS302 Lecture Notes</title>
 <h2>CS302 Lecture Notes - Using upper_bound and lower_bound with a set or map</h2>
 <UL>
-<LI> Original notes: August, 2011.  Latest modification: August, 2013
+<LI> Original notes: August, 2011.  Latest modification: March, 2018
 <LI> James S. Plank
 <LI> Directory: <b>/home/plank/cs302/Notes/Upper_Bound</b>
 </UL>
@@ -54,10 +54,10 @@ pick 20 of them randomly.  They have a catchy little flier about all the
 Keno bets you can make:
 <p>
 <table border=3>
-<td valign=top> <IMG src=K1.jpg width=350></td>
-<td valign=top> <IMG src=K2.jpg width=200><br>
-                <IMG src=K3.jpg width=200></td>
-<td valign=top> <IMG src=K4.jpg width=200></td>
+<td valign=top> <IMG src=img/K1.jpg width=350></td>
+<td valign=top> <IMG src=img/K2.jpg width=200><br>
+                <IMG src=img/K3.jpg width=200></td>
+<td valign=top> <IMG src=img/K4.jpg width=200></td>
 </table>
 <p>
 Now, we're talking entertainment!  You know there's no way that these
@@ -107,26 +107,26 @@ We'll go through a sequence of programs that illustrate a number of points.
 <h3>Program #1 - using upper_bound</h3>
 
 I'm not going through all of this program.  The basic version is in 
-<b><a href=keno-ll.cpp>keno-ll.cpp</a></b>.  Let's first look at 
+<b><a href=src/keno-ll.cpp>src/keno-ll.cpp</a></b>.  Let's first look at 
 our class definition for a <b>Keno_LL</b>:
 
 <p><center><table border=3 cellpadding=3><td><pre>
 class Keno_LL {
   public:
-    int NB;                       // Initial parameter: Number of balls in play (80 in our example)
-    int NP;                       // Initial parameter: Number of balls picked each time (20 in our example)
-    double Payout;                // This is how much you win in the Lucky Loser bet (1.25 in our example)
-    int Iterations;               // Number of iterations for the simulation. 0 if interactive
-    int Verbose;                  // Output on each iteration, or just at the end?
+    int NB;                       <font color=blue>// Initial parameter: Number of balls in play (80 in our example)</font>
+    int NP;                       <font color=blue>// Initial parameter: Number of balls picked each time (20 in our example)</font>
+    double Payout;                <font color=blue>// This is how much you win in the Lucky Loser bet (1.25 in our example)</font>
+    int Iterations;               <font color=blue>// Number of iterations for the simulation. 0 if interactive</font>
+    int Verbose;                  <font color=blue>// Output on each iteration, or just at the end?</font>
 
-    set &lt;int&gt; Picked;             // This is used for the balls picked at each iteration
+    set &lt;int&gt; Picked;             <font color=blue>// This is used for the balls picked at each iteration</font>
 
-    int Wins, Losses, Ties;       // Stats - total wins, losses and ties
-    double Winnings;              // Total winnings (yes, we could calculate from above)
-    double N;                     // Iteration so far
+    int Wins, Losses, Ties;       <font color=blue>// Stats - total wins, losses and ties</font>
+    double Winnings;              <font color=blue>// Total winnings (yes, we could calculate from above)</font>
+    double N;                     <font color=blue>// Iteration so far</font>
 
-    void Pick_Balls();            // Creates Picked randomly
-    void Calculate_Payout(int b); // Given a ball b, and set Picked, calculates the payout and updates the stats.
+    void Pick_Balls();            <font color=blue>// Creates Picked randomly</font>
+    void Calculate_Payout(int b); <font color=blue>// Given a ball b, and set Picked, calculates the payout and updates the stats.</font>
 };
 </pre></td></table></center><p>
 
@@ -290,10 +290,10 @@ Let's run it.  The parameters of the program are <b>NB</b>, <b>NP</b>,
 <b>Payout</b>, <b>Iterations</b> and <b>Verbose</b>:
 
 <pre>
-UNIX> <font color=darkred><b>g++ -o keno-ll keno-ll.cpp</b></font>
-UNIX> <font color=darkred><b>./keno-ll</b></font>
+UNIX> <font color=darkred><b>g++ -o bin/keno-ll src/keno-ll.cpp</b></font>
+UNIX> <font color=darkred><b>bin/keno-ll</b></font>
 usage: keno-ll #balls #picked payout iterations-(zero-to-play) verbose(y|n)
-UNIX> <font color=darkred><b>./keno-ll 80 20 1.25 0 y</b></font>
+UNIX> <font color=darkred><b>bin/keno-ll 80 20 1.25 0 y</b></font>
 Pick your ball: <font color=darkred><b>8</b></font>
 Balls Picked: 2 3 5 12 13 26 31 35 36 38 44 45 51 54 60 65 67 68 70 76.
   D to higher: 4.  D to lower: 3.  -1.00: Total = -1.00.  Avg = -1.000000
@@ -309,14 +309,14 @@ Balls Picked: 1 7 8 12 16 22 28 30 35 41 45 46 51 52 62 64 69 71 73 75.
 Pick your ball: <font color=darkred><b>8</b></font>
 Balls Picked: 5 11 15 17 20 21 22 27 29 32 35 43 47 50 56 57 61 66 67 68.
   D to higher: 3.  D to lower: 3.  -1.00: Total = -0.75.  Avg = -0.150000
-UNIX> ./keno-ll 80 20 1.25 0 n
+UNIX> <font color=darkred><b>bin/keno-ll 80 20 1.25 0 n</b></font>
 <font color=darkred><b>8</b></font>
 <font color=darkred><b>8</b></font>
 <font color=darkred><b>8</b></font>
 <font color=darkred><b>8</b></font>
 <font color=darkred><b>8</b></font>
 Total = 4.00.  Avg = 0.800000.  W/L/T: 4 1 0
-UNIX> <font color=darkred><b>./keno-ll 80 20 1.25 5 y</b></font>
+UNIX> <font color=darkred><b>bin/keno-ll 80 20 1.25 5 y</b></font>
 Picked 59
 Balls Picked: 5 8 9 14 15 19 23 24 33 45 54 61 66 69 70 71 75 78 79 80.
   D to higher: 2.  D to lower: 5.  +1.25: Total = 1.25.  Avg = 1.250000
@@ -332,7 +332,7 @@ Balls Picked: 1 7 11 13 24 26 29 33 34 37 46 50 52 54 58 64 66 67 75 79.
 Picked 68
 Balls Picked: 4 6 8 10 12 20 23 26 28 31 33 38 43 49 58 67 71 74 76 77.
   D to higher: 3.  D to lower: 1.  -1.00: Total = 0.50.  Avg = 0.100000
-UNIX> <font color=darkred><b>./keno-ll 80 20 1.25 5 n</b></font>
+UNIX> <font color=darkred><b>binkeno-ll 80 20 1.25 5 n</b></font>
 Total = -2.00.  Avg = -0.400000.  W/L/T: 0 2 3
 UNIX> <font color=darkred><b></b></font>
 </pre>
@@ -342,22 +342,22 @@ is a good or bad bet over the long run.  I use <b>time</b> to show how long
 each run takes (on my Macintosh):
 
 <pre>
-UNIX> <font color=darkred><b>time ./keno-ll 80 20 1.25 10  n</b></font>
+UNIX> <font color=darkred><b>time bin/keno-ll 80 20 1.25 10  n</b></font>
 Total = 3.00.  Avg = 0.300000.  W/L/T: 4 2 4
 0.000u 0.000s 0:00.00 0.0%	0+0k 0+1io 0pf+0w
-UNIX> <font color=darkred><b>time ./keno-ll 80 20 1.25 100 n</b></font>
+UNIX> <font color=darkred><b>time bin/keno-ll 80 20 1.25 100 n</b></font>
 Total = -21.00.  Avg = -0.210000.  W/L/T: 24 51 25
 0.003u 0.001s 0:00.00 0.0%	0+0k 0+0io 0pf+0w
-UNIX> <font color=darkred><b>time ./keno-ll 80 20 1.25 1000 n</b></font>
+UNIX> <font color=darkred><b>time bin/keno-ll 80 20 1.25 1000 n</b></font>
 Total = -31.25.  Avg = -0.031250.  W/L/T: 315 425 260
 0.022u 0.001s 0:00.02 100.0%	0+0k 0+0io 0pf+0w
-UNIX> <font color=darkred><b>time ./keno-ll 80 20 1.25 10000 n</b></font>
+UNIX> <font color=darkred><b>time bin/keno-ll 80 20 1.25 10000 n</b></font>
 Total = -566.75.  Avg = -0.056675.  W/L/T: 3069 4403 2528
 0.170u 0.001s 0:00.17 100.0%	0+0k 0+0io 0pf+0w
-UNIX> <font color=darkred><b>time ./keno-ll 80 20 1.25 100000 n</b></font>
+UNIX> <font color=darkred><b>time bin/keno-ll 80 20 1.25 100000 n</b></font>
 Total = -3068.00.  Avg = -0.030680.  W/L/T: 32096 43188 24716
 1.637u 0.001s 0:01.63 100.0%	0+0k 0+0io 0pf+0w
-UNIX> <font color=darkred><b>time ./keno-ll 80 20 1.25 1000000 n</b></font>
+UNIX> <font color=darkred><b>time bin/keno-ll 80 20 1.25 1000000 n</b></font>
 Total = -26723.75.  Avg = -0.026724.  W/L/T: 321273 428315 250412
 16.364u 0.009s 0:16.37 99.9%	0+0k 0+0io 0pf+0w
 UNIX> <font color=darkred><b></b></font>
@@ -369,20 +369,20 @@ optimization, and usually the <b>-O3</b> flag gives you the best bang for the
 buck.  
 
 <pre>
-UNIX> <font color=darkred><b>g++ -o keno-ll -O keno-ll.cpp</b></font>
-UNIX> <font color=darkred><b>time ./keno-ll 80 20 1.25 1000000 n</b></font>
+UNIX> <font color=darkred><b>g++ -o bin/keno-ll -O src/keno-ll.cpp</b></font>
+UNIX> <font color=darkred><b>time bin/keno-ll 80 20 1.25 1000000 n</b></font>
 Total = -28030.00.  Avg = -0.028030.  W/L/T: 321128 429440 249432
 6.415u 0.001s 0:06.41 100.0%	0+0k 0+0io 0pf+0w
-UNIX> <font color=darkred><b>g++ -o keno-ll -O2 keno-ll.cpp</b></font>
-UNIX> <font color=darkred><b>time ./keno-ll 80 20 1.25 1000000 n</b></font>
+UNIX> <font color=darkred><b>g++ -o bin/keno-ll -O2 src/keno-ll.cpp</b></font>
+UNIX> <font color=darkred><b>time bin/keno-ll 80 20 1.25 1000000 n</b></font>
 Total = -27554.00.  Avg = -0.027554.  W/L/T: 321096 428924 249980
 6.185u 0.003s 0:06.18 100.0%	0+0k 0+0io 0pf+0w
-UNIX> <font color=darkred><b>g++ -o keno-ll -O3 keno-ll.cpp</b></font>
-UNIX> <font color=darkred><b>time ./keno-ll 80 20 1.25 1000000 n</b></font>
+UNIX> <font color=darkred><b>g++ -o bin/keno-ll -O3 src/keno-ll.cpp</b></font>
+UNIX> <font color=darkred><b>time bin/keno-ll 80 20 1.25 1000000 n</b></font>
 Total = -27053.75.  Avg = -0.027054.  W/L/T: 321521 428955 249524
 6.150u 0.003s 0:06.15 100.0%	0+0k 0+0io 0pf+0w
-UNIX> <font color=darkred><b>g++ -o keno-ll -O4 keno-ll.cpp</b></font>
-UNIX> <font color=darkred><b>time ./keno-ll 80 20 1.25 1000000 n</b></font>
+UNIX> <font color=darkred><b>g++ -o bin/keno-ll -O4 src/keno-ll.cpp</b></font>
+UNIX> <font color=darkred><b>time bin/keno-ll 80 20 1.25 1000000 n</b></font>
 Total = -27600.75.  Avg = -0.027601.  W/L/T: 320969 428812 250219
 6.150u 0.002s 0:06.15 100.0%	0+0k 0+0io 0pf+0w
 UNIX> <font color=darkred><b></b></font>
@@ -401,7 +401,7 @@ pull them out.  Each time you "pull a number out", you move it to the end of the
 and then don't consider it for the next pick.  
 <p>
 The new code is in 
-<b><a href=keno-ll2.cpp>keno-ll2.cpp</a></b>.  I've added a vector <b>Balls</b>
+<b><a href=src/keno-ll2.cpp>src/keno-ll2.cpp</a></b>.  I've added a vector <b>Balls</b>
 to the <b>Keno_LL</b> class, and I have initialized it to hold the numbers 1 thorugh <b>NB</b>.
 Then, <b>Pick_Balls()</b> works as follows:
 
@@ -427,9 +427,9 @@ void Keno_LL::Pick_Balls()
 It runs faster, but not by a huge amount (9 percent):
 
 <pre>
-UNIX> <font color=darkred><b>make keno-ll2</b></font>
-g++ -O3 -o keno-ll2 keno-ll2.cpp
-UNIX> <font color=darkred><b>time ./keno-ll2 80 20 1.25 1000000 n</b></font>
+UNIX> <font color=darkred><b>make bin/keno-ll2</b></font>
+g++ -O3 -o bin/keno-ll2 src/keno-ll2.cpp
+UNIX> <font color=darkred><b>time bin/keno-ll2 80 20 1.25 1000000 n</b></font>
 Total = -27893.75.  Avg = -0.027894.  W/L/T: 321237 429440 249323
 5.652u 0.005s 0:05.65 100.0%	0+0k 0+0io 0pf+0w
 UNIX> <font color=darkred><b></b></font>
@@ -440,7 +440,7 @@ iteration, let's just look at all of them.  We'll do this in a method called
 <b>Calculate_All()</b>, which we only call when we're doing multiple iterations.
 Here is a very simple implementation, which simply calls <b>Calculate_Pick()</b>
 for all balls 
-(in <b><a href=keno-ll3.cpp>keno-ll3.cpp</a></b>):
+(in <b><a href=src/keno-ll3.cpp>src/keno-ll3.cpp</a></b>):
 
 <p><center><table border=3 cellpadding=3><td><pre>
 void Keno_LL::Calculate_All()
@@ -454,9 +454,9 @@ void Keno_LL::Calculate_All()
 We'll compile with optimization and run it:
 
 <pre>
-UNIX> <font color=darkred><b>make keno-ll3</b></font>
-g++ -O3 -o keno-ll3 keno-ll3.cpp
-UNIX> <font color=darkred><b>time ./keno-ll3 80 20 1.25 1000000 n</b></font>
+UNIX> <font color=darkred><b>make bin/keno-ll3</b></font>
+g++ -O3 -o bin/keno-ll3 src/keno-ll3.cpp
+UNIX> <font color=darkred><b>time bin/keno-ll3 80 20 1.25 1000000 n</b></font>
 Total = -27149.25.  Avg = -0.027149.  W/L/T: 321267 428733 250000
 0.108u 0.001s 0:00.10 100.0%	0+0k 0+0io 0pf+0w
 UNIX> <font color=darkred><b></b></font>
@@ -472,7 +472,7 @@ check each interval.  If the interval size is <i>x</i>, then there will
 be <i>x/2</i> winners (integer division) and <i>x - x/2</i> losers.
 <p>
 The code is in 
-<b><a href=keno-ll4.cpp>keno-ll4.cpp</a></b>:
+<b><a href=src/keno-ll4.cpp>src/keno-ll4.cpp</a></b>:
 
 <p><center><table border=3 cellpadding=3><td><pre>
 void Keno_LL::Calculate_All()
@@ -508,9 +508,9 @@ Note once again how the sentinels help us keep our code clean.
 It speeds matters up even further:
 
 <pre>
-UNIX> <font color=darkred><b>make keno-ll4</b></font>
-g++ -O3 -o keno-ll4 keno-ll4.cpp
-UNIX> <font color=darkred><b>time ./keno-ll4 80 20 1.25 1000000 n</b></font>
+UNIX> <font color=darkred><b>make bin/keno-ll4</b></font>
+g++ -O3 -o bin/keno-ll4 src/keno-ll4.cpp
+UNIX> <font color=darkred><b>time bin/keno-ll4 80 20 1.25 1000000 n</b></font>
 Total = -27682.50.  Avg = -0.027682.  W/L/T: 321030 428970 250000
 0.076u 0.000s 0:00.07 100.0%	0+0k 0+0io 0pf+0w
 UNIX> 
@@ -524,7 +524,7 @@ sort the array with the STL procedure <b>sort()</b>.  Then you traverse the
 array in <b>Calculate_All()</b> instead of the map.  
 <p>
 The code is in 
-<b><a href=keno-ll5.cpp>keno-ll5.cpp</a></b>, where we write a separate
+<b><a href=src/keno-ll5.cpp>src/keno-ll5.cpp</a></b>, where we write a separate
 <b>Pick_Balls_Array()</b> which puts the balls into an array <b>PBalls</b>:
 
 <p><center><table border=3 cellpadding=3><td><pre>
@@ -582,18 +582,18 @@ the minimum element is in <b>PBalls[0]</b>, so we can put <b>PBalls[0]+NB</b> in
 <p>
 When we run it, it's much, much faster -- this is the best code for the problem:
 <pre>
-UNIX> <font color=darkred><b>make keno-ll5</b></font>
-g++ -O3 -o keno-ll5 keno-ll5.cpp
-UNIX> <font color=darkred><b>time ./keno-ll5 80 20 1.25 1000000 n</b></font>
+UNIX> <font color=darkred><b>make bin/keno-ll5</b></font>
+g++ -O3 -o bin/keno-ll5 src/keno-ll5.cpp
+UNIX> <font color=darkred><b>time bin/keno-ll5 80 20 1.25 1000000 n</b></font>
 Total = -28366.50.  Avg = -0.028366.  W/L/T: 320726 429274 250000
 0.015u 0.001s 0:00.01 100.0%	0+0k 0+0io 0pf+0w
-UNIX> <font color=darkred><b>time ./keno-ll5 80 20 1.25 10000000 n</b></font>
+UNIX> <font color=darkred><b>time bin/keno-ll5 80 20 1.25 10000000 n</b></font>
 Total = -278195.25.  Avg = -0.027820.  W/L/T: 3209691 4290309 2500000
 0.114u 0.001s 0:00.11 100.0%	0+0k 0+0io 0pf+0w
-UNIX> <font color=darkred><b>time ./keno-ll5 80 20 1.25 100000000 n</b></font>
+UNIX> <font color=darkred><b>time bin/keno-ll5 80 20 1.25 100000000 n</b></font>
 Total = -2778566.25.  Avg = -0.027786.  W/L/T: 32098415 42901585 25000000
 1.103u 0.001s 0:01.10 100.0%	0+0k 0+0io 0pf+0w
-UNIX> <font color=darkred><b>time ./keno-ll5 80 20 1.25 1000000000 n</b></font>
+UNIX> <font color=darkred><b>time bin/keno-ll5 80 20 1.25 1000000000 n</b></font>
 Total = -27759207.00.  Avg = -0.027759.  W/L/T: 320995908 429004092 250000000
 10.999u 0.004s 0:11.00 99.9%	0+0k 0+0io 0pf+0w
 UNIX> <font color=darkred><b></b></font>
@@ -611,7 +611,7 @@ depending on the odds.  I'd say you've invented a pretty good game!
 
 Well, my goals here were twofold.  First, I wanted to teach you <b>upper_bound</b>
 and <b>lower_bound</b>.  Second, I wanted to show you how the choice of algorithm
-and data structure impacts performance.  While the code in <b>keno-ll.cpp</b> was
+and data structure impacts performance.  While the code in <b>src/keno-ll.cpp</b> was
 reasonable to solve the problem, it had three performance deficiencies:
 <p>
 <OL>
