@@ -1,7 +1,7 @@
 <title>CS302 Lecture Notes</title>
 <h2>CS302 Lecture Notes - Enumeration</h2>
 <UL>
-<LI> September, 2011.  Latest revision: September, 2018.
+<LI> September, 2011.  Latest revision: March, 2020.
 <LI> James S. Plank
 <LI> Directory: <b>/home/plank/cs302/Notes/Enumeration</b>
 </UL>
@@ -59,7 +59,7 @@ There are times in your CS careers where you will be called upon to perform
 an enumeration, and if you're not ready for it, it may be a bit confusing.
 There are a few primary types of enumeration, which are the focus of this set of
 lecture notes.  As always, I focus on how you can implement these yourself,
-even though there is linguistic support for some of them (e.g. Permutations).
+even though there is linguistic support for some of them (e.g. Permutations in C++).
 <hr>
 <h3>Numbers / Strings: Div and Mod</h3>
 
@@ -70,7 +70,7 @@ of <i>n</i> values (repetitions are fine).  Here are three examples:
 <UL>
 <LI> Enumerate all 5-character strings containing the letters 'a', 'b' and 'c'.  Here,
      <i>n</i> is three and <i>l</i> is five.
-<LI> Enumerate all 4-digit numbers in base 6.  Here, <i>n</i> is six and <i>l</i> is 4.
+<LI> Enumerate all 4-digit numbers in base 6.  Here, <i>n</i> is six and <i>l</i> is four.
 <LI> Suppose you have an infinite number of balls, which can have five colors.  If two
      balls have the same color, they are indistinguishable.  And suppose you have 7 
      numbered boxes.  Enumerate the distinguishable ways that you put balls into the boxes.
@@ -104,7 +104,7 @@ div and mod.  Here's a table:
   8      2      2         2         22
 </pre>
 
-The program <b><a href=divmod.cpp>divmod.cpp</a></b>
+The program <b><a href=src/divmod.cpp>src/divmod.cpp</a></b>
 takes two command line arguments <i>l</i> and <i>n</i>, and enumerates all strings
 of length <i>l</i> that are composed of the first <i>n</i> letters of the alphabet.
 Here, I show the relevant code.  All variables are <b>ints</b>.
@@ -136,9 +136,9 @@ Here, I show the relevant code.  All variables are <b>ints</b>.
 Let's do the example above:
 
 <pre>
-UNIX> <font color=darkred><b>./divmod </b></font>
+UNIX> <font color=darkred><b>bin/divmod </b></font>
 usage: divmod l n
-UNIX> <font color=darkred><b>./divmod 2 3</b></font>
+UNIX> <font color=darkred><b>bin/divmod 2 3</b></font>
 aa
 ba
 ca
@@ -155,7 +155,7 @@ In class, I did an example where <i>n</i> equals 5 and <i>l</i> equals four, and
 I used Unix tools to prove that the answer had to be correct:
 
 <pre>
-UNIX> <font color=darkred><b>./divmod 4 5 | head </b></font>                            <font color=blue>// We're just taking a look here.</font>
+UNIX> <font color=darkred><b>bin/divmod 4 5 | head </b></font>                            <font color=blue>// We're just taking a look here.</font>
 aaaa
 baaa
 caaa
@@ -166,7 +166,7 @@ bbaa
 cbaa
 dbaa
 ebaa
-UNIX> <font color=darkred><b>./divmod 4 5 | tail</b></font>                            <font color=blue>// And here.</font>
+UNIX> <font color=darkred><b>bin/divmod 4 5 | tail</b></font>                            <font color=blue>// And here.</font>
 adee
 bdee
 cdee
@@ -177,13 +177,13 @@ beee
 ceee
 deee
 eeee
-UNIX> <font color=darkred><b>./divmod 4 5 | wc</b></font>                            <font color=blue>// n^l is 625, so this prints the right number of lines.</font>
+UNIX> <font color=darkred><b>bin/divmod 4 5 | wc</b></font>                            <font color=blue>// n^l is 625, so this prints the right number of lines.</font>
      625     625    3125
-UNIX> <font color=darkred><b>./divmod 4 5 | sort -u | wc</b></font>                  <font color=blue>// This ensures that there are no duplicate lines.</font>
+UNIX> <font color=darkred><b>bin/divmod 4 5 | sort -u | wc</b></font>                  <font color=blue>// This ensures that there are no duplicate lines.</font>
      625     625    3125
-UNIX> <font color=darkred><b>./divmod 4 5 | sed 's/[a-e]/x/g' | sort -u </b></font>  <font color=blue>// This ensures that the only characters printed are a-e and x.</font>
+UNIX> <font color=darkred><b>bin/divmod 4 5 | sed 's/[a-e]/x/g' | sort -u </b></font>  <font color=blue>// This ensures that the only characters printed are a-e and x.</font>
 xxxx
-UNIX> <font color=darkred><b>./divmod 4 5 | sed 's/[a-e]/y/g' | sort -u</b></font>   <font color=blue>// This ensures that there were in fact no x's.</font>
+UNIX> <font color=darkred><b>bin/divmod 4 5 | sed 's/[a-e]/y/g' | sort -u</b></font>   <font color=blue>// This ensures that there were in fact no x's.</font>
 yyyy
 UNIX> <font color=darkred><b></b></font>
 </pre>
@@ -248,7 +248,7 @@ whether (<i>s</i> &amp; (1 &lt;&lt; <i>j</i>)) is non-zero.
 This gives us all we need to know to enumerate sets.  
 <p>
 For example, the program 
-<b><a href=gen-teams.cpp>gen-teams.cpp</a></b> reads in names from 
+<b><a href=src/gen-teams.cpp>src/gen-teams.cpp</a></b> reads in names from 
 standard input, and then generates all possible teams from those names.
 It is what I used to generate the teams above.
 
@@ -311,7 +311,7 @@ least I don't see an easy way to do it.
 <p>
 Instead, you can often write a recursive function to help you enumerate.
 An example is in 
-<b><a href=gen-3-teams.cpp>gen-3-teams.cpp</a></b>.
+<b><a href=src/gen-3-teams.cpp>src/gen-3-teams.cpp</a></b>.
 This program generates all three-person teams from a collection of people
 entered on standard input.  The program maintains two variables: <b>people</b>,
 which is the vector of people, and <b>team</b>, which is a team that gets incrementally
@@ -395,12 +395,12 @@ the code if you find this confusing -- copy the code and put in some
 extra print statements.
 
 <pre>
-UNIX> <font color=darkred><b>echo Larry Curly Moe Shemp | gen-3-teams</b></font>
+UNIX> <font color=darkred><b>echo Larry Curly Moe Shemp | bin/gen-3-teams</b></font>
 Larry Curly Moe
 Larry Curly Shemp
 Larry Moe Shemp
 Curly Moe Shemp
-UNIX> <font color=darkred><b>echo Larry Curly Moe Shemp Baby-Daisy | gen-3-teams</b></font>
+UNIX> <font color=darkred><b>echo Larry Curly Moe Shemp Baby-Daisy | bin/gen-3-teams</b></font>
 Larry Curly Moe
 Larry Curly Shemp
 Larry Curly Baby-Daisy
@@ -428,7 +428,7 @@ A very similar recursion may be used to generate all permutations
 of a collection of elements.  In the example, I again read in names, and
 this time print out all permutations.  The structure of the enumeration is
 again a recursion, which works as follows
-(in <b><a href=gen-permutations.cpp>gen-permutations.cpp</a></b>):
+(in <b><a href=src/gen-permutations.cpp>src/gen-permutations.cpp</a></b>):
 
 <p><center><table border=3 cellpadding=3><td><pre>
 class People {
@@ -472,14 +472,14 @@ void People::GenPermutations(int index)
 
 How many lines are there if you are permuting <i>n</i> items?  Well, there are <i>n</i> ways to choose the first item, then <i>n-1</i> to choose the second, etc.  So, there are <i>(n!)</i> ways to permute <i>n</i> items, which will lead to <i>n!</i> lines of output:
 <pre>
-UNIX> <font color=darkred><b>echo Larry Curly Moe | gen-permutations</b></font>
+UNIX> <font color=darkred><b>echo Larry Curly Moe | bin/gen-permutations</b></font>
 Larry Curly Moe
 Larry Moe Curly
 Curly Larry Moe
 Curly Moe Larry
 Moe Curly Larry
 Moe Larry Curly
-UNIX> <font color=darkred><b>echo 1 2 3 4 | gen-permutations</b></font>
+UNIX> <font color=darkred><b>echo 1 2 3 4 | bin/gen-permutations</b></font>
 1 2 3 4
 1 2 4 3
 1 3 2 4
@@ -504,15 +504,15 @@ UNIX> <font color=darkred><b>echo 1 2 3 4 | gen-permutations</b></font>
 4 3 1 2
 4 1 3 2
 4 1 2 3
-UNIX> <font color=darkred><b>echo 1 2 3 | gen-permutations | wc</b></font>
+UNIX> <font color=darkred><b>echo 1 2 3 | bin/gen-permutations | wc</b></font>
        6      18      36
-UNIX> <font color=darkred><b>echo 1 2 3 4 | gen-permutations | wc</b></font>
+UNIX> <font color=darkred><b>echo 1 2 3 4 | bin/gen-permutations | wc</b></font>
       24      96     192
-UNIX> <font color=darkred><b>echo 1 2 3 4 5 | gen-permutations | wc</b></font>
+UNIX> <font color=darkred><b>echo 1 2 3 4 5 | bin/gen-permutations | wc</b></font>
      120     600    1200
-UNIX> <font color=darkred><b>echo 1 2 3 4 5 6 | gen-permutations | wc</b></font>
+UNIX> <font color=darkred><b>echo 1 2 3 4 5 6 | bin/gen-permutations | wc</b></font>
      720    4320    8640
-UNIX> <font color=darkred><b>echo 1 2 3 4 5 6 7 | gen-permutations | wc</b></font>
+UNIX> <font color=darkred><b>echo 1 2 3 4 5 6 7 | bin/gen-permutations | wc</b></font>
     5040   35280   70560
 UNIX> <font color=darkred><b></b></font>
 </pre>
@@ -549,7 +549,7 @@ the vector, remove the ball from the map, and call the procedure recursively.  A
 the recursive call, we replace the ball in the map.
 <p>
 Here it is, in 
-<b><a href=balls-in-boxes-1.cpp>balls-in-boxes-1.cpp</a></b>:
+<b><a href=src/balls-in-boxes-1.cpp>src/balls-in-boxes-1.cpp</a></b>:
 
 <p><center><table border=3 cellpadding=3><td><pre>
 class BallsInBoxes {
@@ -609,30 +609,30 @@ int main()
 Verify to yourself that it is giving you correct output in all of the examples below:
 
 <pre>
-UNIX> <font color=darkred><b>echo a a b b | balls-in-boxes-1</b></font>
+UNIX> <font color=darkred><b>echo a a b b | bin/balls-in-boxes-1</b></font>
 a a b b
 a b a b
 a b b a
 b a a b
 b a b a
 b b a a
-UNIX> <font color=darkred><b>echo a a a a | balls-in-boxes-1</b></font>
+UNIX> <font color=darkred><b>echo a a a a | bin/balls-in-boxes-1</b></font>
 a a a a
-UNIX> <font color=darkred><b>echo a b c | balls-in-boxes-1</b></font>
+UNIX> <font color=darkred><b>echo a b c | bin/balls-in-boxes-1</b></font>
 a b c
 a c b
 b a c
 b c a
 c a b
 c b a
-UNIX> <font color=darkred><b>echo larry moe curly | balls-in-boxes-1</b></font>
+UNIX> <font color=darkred><b>echo larry moe curly | bin/balls-in-boxes-1</b></font>
 curly larry moe
 curly moe larry
 larry curly moe
 larry moe curly
 moe curly larry
 moe larry curly
-UNIX> <font color=darkred><b>echo B B B W | balls-in-boxes-1</b></font>
+UNIX> <font color=darkred><b>echo B B B W | bin/balls-in-boxes-1</b></font>
 B B B W
 B B W B
 B W B B
@@ -648,7 +648,7 @@ a ball in the <b>balls</b> map once its number of balls reaches zero.
 When that happens, I decide to remove it from the map, so that I'm not later
 traversing a map whose elements I skip.  I may very well write code
 as in 
-<b><a href=balls-in-boxes-2.cpp>balls-in-boxes-2.cpp</a></b>:
+<b><a href=src/balls-in-boxes-2.cpp>src/balls-in-boxes-2.cpp</a></b>:
 
 <p><center><table border=3 cellpadding=3><td><pre>
 void BallsInBoxes::GenInstances(int index)
@@ -689,7 +689,7 @@ Try this with six balls -- three colors, where <i>b<sub>i</sub></i> equals 2 for
 three balls:
 
 <pre>
-UNIX> <font color=darkred><b>echo a a b b c c | balls-in-boxes-2 </b></font>
+UNIX> <font color=darkred><b>echo a a b b c c | bin/balls-in-boxes-2 </b></font>
 a a b b c c
 a a b c b c
 a a b c c b
@@ -730,7 +730,7 @@ to a valid iterator, which may no longer be for "a".
 This is a brutal bug, but one that can happen when you store iterators that may become
 deleted.  It is similar to storing a pointer which is subsequently <b>free()'d</b> or <b>deleted</b>.
 I've fixed this in 
-<b><a href=balls-in-boxes-3.cpp>balls-in-boxes-3.cpp</a></b>, although I'm not proud
+<b><a href=src/balls-in-boxes-3.cpp>src/balls-in-boxes-3.cpp</a></b>, although I'm not proud
 of it.  Here's the relevant code snippet.  After the recursive call, I make sure that
 <b>bit</b> points to the proper iterator:
 
@@ -752,7 +752,7 @@ of it.  Here's the relevant code snippet.  After the recursive call, I make sure
 </pre></td></table></center><p>
 
 I think the code for 
-<b><a href=balls-in-boxes-1.cpp>balls-in-boxes-1.cpp</a></b>
+<b><a href=src/balls-in-boxes-1.cpp>src/balls-in-boxes-1.cpp</a></b>
 is far superior to the others.  On the flip side, I don't think it's the best
 way to solve this.  We should use a vector instead of a map; however, I don't
 think that it's worth the class or study time to go through that level of detail.
@@ -763,7 +763,7 @@ think that it's worth the class or study time to go through that level of detail
 I had mentioned in class that you can always remove recursion and model it with
 a stack.  While the ensuing program may now not be recursive, it's usually a lot
 more convoluted.  I'll give an example with
-<b><a href=balls-in-boxes-4.cpp>balls-in-boxes-4.cpp</a></b>:
+<b><a href=src/balls-in-boxes-4.cpp>src/balls-in-boxes-4.cpp</a></b>:
 
 <p><center><table border=3 cellpadding=3><td><pre>
 class BallsInBoxes {
@@ -843,7 +843,7 @@ To make life easier, I've created the vectors <b>colors</b> and <b>nballs</b>. I
 this way, we can manage a stack of indices into the <b>colors</b> vector, which
 is less confusing than maintaining a stack of iterators of <b>balls</b> (I have
 that code in 
-<b><a href=balls-in-boxes-5.cpp>balls-in-boxes-5.cpp</a></b>).
+<b><a href=src/balls-in-boxes-5.cpp>src/balls-in-boxes-5.cpp</a></b>).
 <p>
 Concentrate on <b>GenInstances()</b>.  It maintains a stack of indices of <b>colors</b>.
 Instead of making recursive calls, you push -1 on the stack.  That's what we do
@@ -881,10 +881,10 @@ replace recursion.
 
 <p>
 A final piece of code is in 
-<b><a href=balls-in-boxes-5.cpp>balls-in-boxes-5.cpp</a></b>.  This code also
+<b><a href=src/balls-in-boxes-5.cpp>src/balls-in-boxes-5.cpp</a></b>.  This code also
 manages a stack, but instead of managing integers, it manages iterator to <b>balls</b>.
 Where -1 was in the code previously, we use <b>balls.end()</b>.  Try to trace through
 it -- it is very similar to 
-<b><a href=balls-in-boxes-4.cpp>balls-in-boxes-4.cpp</a></b>, except you need
+<b><a href=src/balls-in-boxes-4.cpp>src/balls-in-boxes-4.cpp</a></b>, except you need
 to be unafraid of iterators!
 

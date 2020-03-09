@@ -22,7 +22,8 @@ class BallsInBoxes {
 void BallsInBoxes::GenInstances()
 {
   stack <int> Stack;
-  int index, color, i;
+  int color;
+  size_t i, index;
 
   Stack.push(-1);
 
@@ -46,12 +47,12 @@ void BallsInBoxes::GenInstances()
       // Find the next color to enumerate.  
       // Note how this works when color started at -1.
 
-      for (color++; color < nballs.size() && nballs[color] == 0; color++) ;
+      for (color++; color < (int) nballs.size() && nballs[color] == 0; color++) ;
     
       // If we still have a color to enumerate, put it into boxes, push
       // the color onto the stack, and push -1 on the stack to enumerate the next index.
 
-      if (color < nballs.size()) {
+      if (color < (int) nballs.size()) {
         boxes[index] = colors[color];
         nballs[color]--;
         Stack.push(color);

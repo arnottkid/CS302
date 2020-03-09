@@ -21,7 +21,7 @@ typedef map <string, int>::iterator SIMit;
 
 void BallsInBoxes::GenInstances()
 {
-  int index, i;
+  size_t index, i;
   SIMit bit, nextbit;
   stack <SIMit> st;
 

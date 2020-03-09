@@ -13,12 +13,12 @@ class BallsInBoxes {
   public:
     map <string,int> balls;
     vector <string> boxes;
-    void GenInstances(int index);
+    void GenInstances(size_t index);
 };
 
-void BallsInBoxes::GenInstances(int index)
+void BallsInBoxes::GenInstances(size_t index)
 {
-  int i;
+  size_t i;
   map <string, int>::iterator bit;
 
   /* Base case -- if you have placed all of the balls in boxes,

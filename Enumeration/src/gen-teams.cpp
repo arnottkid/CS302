@@ -13,7 +13,7 @@ int main()
 {
   vector <string> people;
   string s;
-  int i, j;
+  size_t i, j;
 
   while (cin >> s) people.push_back(s);
   if (people.size() > 30) {

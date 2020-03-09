@@ -13,12 +13,12 @@ class People {
   public:
     int print;
     vector <string> people;
-    void GenPermutations(int index);
+    void GenPermutations(size_t index);
 };
 
-void People::GenPermutations(int index)
+void People::GenPermutations(size_t index)
 {
-  int i;
+  size_t i;
   string tmp;
 
   if (index == people.size()) {
@@ -48,7 +48,6 @@ int main(int argc, char **argv)
 {
   People P;
   string s;
-  int i, j;
 
   P.print = 1;
   if (argc == 2) {

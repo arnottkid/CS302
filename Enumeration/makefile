@@ -1,42 +1,43 @@
-All = balls-in-boxes-1 \
-      balls-in-boxes-2 \
-      balls-in-boxes-3 \
-      balls-in-boxes-4 \
-      balls-in-boxes-5 \
-      gen-3-teams \
-      divmod \
-      gen-permutations \
-      gen-teams \
+All = bin/balls-in-boxes-1 \
+      bin/balls-in-boxes-2 \
+      bin/balls-in-boxes-3 \
+      bin/balls-in-boxes-4 \
+      bin/balls-in-boxes-5 \
+      bin/gen-3-teams \
+      bin/divmod \
+      bin/gen-permutations \
+      bin/gen-teams \
 
 all: $(All)
 
+CFLAGS = -Wall -Wextra
 clean:
 	rm -f $(All)
 
-balls-in-boxes-1: balls-in-boxes-1.cpp
-	g++ -o balls-in-boxes-1 balls-in-boxes-1.cpp
+bin/balls-in-boxes-1: src/balls-in-boxes-1.cpp
+	g++ $(CFLAGS) -o bin/balls-in-boxes-1 src/balls-in-boxes-1.cpp
 
-balls-in-boxes-2: balls-in-boxes-2.cpp
-	g++ -o balls-in-boxes-2 balls-in-boxes-2.cpp
+bin/balls-in-boxes-2: src/balls-in-boxes-2.cpp
+	g++ $(CFLAGS) -o bin/balls-in-boxes-2 src/balls-in-boxes-2.cpp
 
-balls-in-boxes-3: balls-in-boxes-3.cpp
-	g++ -o balls-in-boxes-3 balls-in-boxes-3.cpp
+bin/balls-in-boxes-3: src/balls-in-boxes-3.cpp
+	g++ $(CFLAGS) -o bin/balls-in-boxes-3 src/balls-in-boxes-3.cpp
 
-balls-in-boxes-4: balls-in-boxes-4.cpp
-	g++ -o balls-in-boxes-4 balls-in-boxes-4.cpp
+bin/balls-in-boxes-4: src/balls-in-boxes-4.cpp
+	g++ $(CFLAGS) -o bin/balls-in-boxes-4 src/balls-in-boxes-4.cpp
 
-balls-in-boxes-5: balls-in-boxes-5.cpp
-	g++ -o balls-in-boxes-5 balls-in-boxes-5.cpp
+bin/balls-in-boxes-5: src/balls-in-boxes-5.cpp
+	g++ $(CFLAGS) -o bin/balls-in-boxes-5 src/balls-in-boxes-5.cpp
 
-gen-3-teams: gen-3-teams.cpp
-	g++ -o gen-3-teams gen-3-teams.cpp
+bin/gen-3-teams: src/gen-3-teams.cpp
+	g++ $(CFLAGS) -o bin/gen-3-teams src/gen-3-teams.cpp
 
-divmod: divmod.cpp
-	g++ -o divmod divmod.cpp
+bin/divmod: src/divmod.cpp
+	g++ $(CFLAGS) -o bin/divmod src/divmod.cpp
 
-gen-permutations: gen-permutations.cpp
-	g++ -o gen-permutations gen-permutations.cpp
+bin/gen-permutations: src/gen-permutations.cpp
+	g++ $(CFLAGS) -o bin/gen-permutations src/gen-permutations.cpp
 
-gen-teams: gen-teams.cpp
-	g++ -o gen-teams gen-teams.cpp
+bin/gen-teams: src/gen-teams.cpp
+	g++ $(CFLAGS) -o bin/gen-teams src/gen-teams.cpp
 

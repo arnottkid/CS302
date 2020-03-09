@@ -13,12 +13,12 @@ class People {
   public:
     vector <string> people;
     vector <string> team;
-    void GenTeams(int index, int npeople);
+    void GenTeams(size_t index, size_t npeople);
 };
 
-void People::GenTeams(int index, int npeople)
+void People::GenTeams(size_t index, size_t npeople)
 {
-  int i;
+  size_t i;
 
   /* Base case -- if there are no more people to add, 
      print out the team and return */
@@ -54,7 +54,6 @@ int main()
 {
   People P;
   string s;
-  int i, j;
 
   while (cin >> s) P.people.push_back(s);
   
