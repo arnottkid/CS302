@@ -4,6 +4,7 @@
 #include <iostream>
 #include <cstdio>
 #include <cstdlib>
+#include <string.h>
 using namespace std;
 
 int main(int argc, char **argv)

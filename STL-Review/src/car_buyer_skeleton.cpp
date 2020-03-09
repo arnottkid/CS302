@@ -1,4 +1,6 @@
 #include "car_buyer.hpp"
+#include <cstdio>
+#include <cstdlib>
 using namespace std;
 
 /* This is a skeleton implementation of the topcoder method.

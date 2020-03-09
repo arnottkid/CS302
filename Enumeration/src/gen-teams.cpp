@@ -13,7 +13,8 @@ int main()
 {
   vector <string> people;
   string s;
-  size_t i, j;
+  size_t j;
+  int k;
 
   while (cin >> s) people.push_back(s);
   if (people.size() > 30) {
@@ -21,12 +22,12 @@ int main()
     exit(1);
   }
 
-  for (i = 1; i < (1 << people.size()); i++) {
+  for (k = 1; k < (1 << people.size()); k++) {
     for (j = 0; j < people.size(); j++) {
-      printf("%c", (i & (1 << j)) ? '1' : '0');
+      printf("%c", (k & (1 << j)) ? '1' : '0');
     }
     for (j = 0; j < people.size(); j++) {
-      if (i & (1 << j)) printf(" %s", people[j].c_str());
+      if (k & (1 << j)) printf(" %s", people[j].c_str());
     }
     printf("\n");
   }

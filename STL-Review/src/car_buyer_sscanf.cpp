@@ -1,5 +1,6 @@
 #include "car_buyer.hpp"
 #include <string>
+#include <cstdio>
 #include <vector>
 #include <sstream>
 using namespace std;
