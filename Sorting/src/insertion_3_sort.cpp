@@ -1,11 +1,11 @@
 #include <iostream>
 #include <vector>
-#include "sorting.h"
+#include "sorting.hpp"
 using namespace std;
 
-void sort_doubles(vector <double> &v, int print)
+void sort_doubles(vector <double> &v, bool print)
 {
-  int i, j, k, minindex;
+  size_t i, j, minindex;
   double tmp;
 
   if (print) {

@@ -1,10 +1,9 @@
 #include <iostream>
 #include <vector>
 #include <cstdlib>
-#include <stdio.h>
+#include <cstdio>
+#include "sorting.hpp"
 using namespace std;
-
-#include "sorting.h"
 
 void usage(const char *s)
 {
@@ -15,16 +14,9 @@ void usage(const char *s)
 
 main(int argc, const char **argv)
 {
-  int size;
-  int iterations, it;
-  int seed;
-  int dc;
-  int i;
-  int j;
-  int print;
   vector <double> v;
   double d;
 
   while (cin >> d) v.push_back(d);
-  sort_doubles(v, 1);
+  sort_doubles(v, true);
 }

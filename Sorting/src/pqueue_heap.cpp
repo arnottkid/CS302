@@ -1,16 +1,17 @@
 #include <cstdio>
 #include <iostream>
 #include <cstdlib>
-#include "pqueue.h"
+#include "pqueue.hpp"
+using namespace std;
 
 /* With the binary heap implementation, the
    underlying data structure is a vector, which
    we organize as a heap.  As such, these three
    methods are one-liners. */
 
-     PQueueHeap::PQueueHeap() { }
-int  PQueueHeap::Size()       { return h.size(); }
-bool PQueueHeap::Empty()      { return h.empty(); }
+       PQueueHeap::PQueueHeap()  { }
+size_t PQueueHeap::Size() const  { return h.size(); }
+bool   PQueueHeap::Empty() const { return h.empty(); }
 
 /* With Push(), we append the new element to the
    end of the vector, and then percolate up. */
@@ -46,9 +47,9 @@ void PQueueHeap::Push(double d)
    protected method, because it is used in two
    places: Pop() and the vector constructor. */
 
-void PQueueHeap::Percolate_Down(int index)
+void PQueueHeap::Percolate_Down(size_t index)
 {
-  int lc, rc;
+  size_t lc, rc;
   double tmp;
 
   /* lc is the left child, and
@@ -100,12 +101,10 @@ void PQueueHeap::Percolate_Down(int index)
 
 double PQueueHeap::Pop() 
 {
-  double retval, tmp;
-  int index, lc, rc;
+  double retval;
   
   if (h.empty()) {
-    cerr << "Error: Called Pop on an empty PQueueHeap\n";
-    exit(1);
+    throw (string) "Called Pop() on an empty PQueue";
   }
   retval = h[0];
   h[0] = h[h.size()-1];
@@ -119,23 +118,24 @@ double PQueueHeap::Pop()
    on all non-leaf elements, going from the bottom 
    of the heap to the top. */
 
-PQueueHeap::PQueueHeap(vector <double> &v) 
+PQueueHeap::PQueueHeap(const vector <double> &v) 
 { 
   int i;
 
   h = v;
 
-  for (i = h.size()/2-1; i >= 0; i--) Percolate_Down(i);
+  for (i = (int) h.size()/2-1; i >= 0; i--) Percolate_Down(i);
 }
 
 /* Print is straightforward. */
 
-void PQueueHeap::Print() 
+void PQueueHeap::Print() const
 {
-  int i;
+  size_t i;
 
   for (i = 0; i < h.size(); i++) {
     if (i != 0) cout << " ";
-    printf("%5.2lf", h[i]);
+    cout << h[i];
   }
+  cout << endl;
 }

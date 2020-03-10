@@ -2,18 +2,19 @@
    James S. Plank
    CS302
    September, 2009
+   Revised 2020
  */
 
 #include <iostream>
 #include <vector>
-#include "sorting.h"
+#include "sorting.hpp"
 using namespace std;
 
 /* I'm only commenting the differences between this and insertion_1_sort.cpp. */
 
-void sort_doubles(vector <double> &v, int print)
+void sort_doubles(vector <double> &v, bool print)
 {
-  int i, j, k;
+  size_t i, j;
   double tmp;
 
   if (print) {

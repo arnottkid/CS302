@@ -3,15 +3,16 @@
    James S. Plank
    CS302 Sorting Lecture
    September, 2009
+   Revised 2020
  */
 
 #include <iostream>
 #include <vector>
 #include <cstdlib>
 #include <stdio.h>
+#include "sorting.hpp"
 using namespace std;
 
-#include "sorting.h"
 
 void usage(const char *s)
 {
@@ -25,9 +26,9 @@ main(int argc, const char **argv)
   int size;
   int iterations, it;
   int seed;
-  int dc;
   int i, j, k;
-  int print;
+  bool print;
+  bool dc;
   vector <double> v;
 
   if (argc != 6) usage(NULL);
@@ -36,16 +37,16 @@ main(int argc, const char **argv)
   if (sscanf(argv[2], "%d", &iterations) != 1 || iterations < 0) usage("Bad iterations\n");
   if (sscanf(argv[3], "%d", &seed) != 1) usage("Bad seed\n");
   if (strcmp(argv[4], "yes") == 0) {
-    dc = 1;
+    dc = true;
   } else if (strcmp(argv[4], "no") == 0) {
-    dc = 0;
+    dc = false;
   } else { 
     usage("Bad double-check\n");
   }
   if (strcmp(argv[5], "yes") == 0) {
-    print = 1;
+    print = true;
   } else if (strcmp(argv[5], "no") == 0) {
-    print = 0;
+    print = false;
   } else { 
     usage("Bad print\n");
   }
@@ -74,5 +75,5 @@ main(int argc, const char **argv)
       }
     }
   }
-  exit(0);
+  return 0;
 }

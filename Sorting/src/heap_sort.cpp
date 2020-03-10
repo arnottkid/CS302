@@ -7,14 +7,13 @@
 
 #include <iostream>
 #include <vector>
-#include "sorting.h"
-#include "pqueue.h"
+#include "sorting.hpp"
+#include "pqueue.hpp"
 using namespace std;
 
-void sort_doubles(vector <double> &v, int print)
+void sort_doubles(vector <double> &v, bool print)
 {
-  int i, j, k;
-  double tmp;
+  size_t i, j;
   PQueue *heap;
 
   heap = new PQueueHeap(v);
@@ -35,5 +34,6 @@ void sort_doubles(vector <double> &v, int print)
       cout << endl;
     }
   }
+  delete heap;
 }
 

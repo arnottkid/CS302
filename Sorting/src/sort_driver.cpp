@@ -7,10 +7,10 @@
 #include <iostream>
 #include <vector>
 #include <cstdlib>
-#include <stdio.h>
+#include <cstdio>
+#include "sorting.hpp"
 using namespace std;
 
-#include "sorting.h"
 
 /* Print the usage string if there is a problem. */
 
@@ -26,10 +26,9 @@ int main(int argc, const char **argv)
   int size;
   int iterations, it;
   int seed;
-  int dc;
+  bool dc, print;
   int i;
   int j;
-  int print;
   vector <double> v;
 
   /* Error check and read the command line arguments. */
@@ -40,16 +39,16 @@ int main(int argc, const char **argv)
   if (sscanf(argv[2], "%d", &iterations) != 1 || iterations < 0) usage("Bad iterations\n");
   if (sscanf(argv[3], "%d", &seed) != 1) usage("Bad seed\n");
   if (strcmp(argv[4], "yes") == 0) {
-    dc = 1;
+    dc = true;
   } else if (strcmp(argv[4], "no") == 0) {
-    dc = 0;
+    dc = false;
   } else { 
     usage("Bad double-check\n");
   }
   if (strcmp(argv[5], "yes") == 0) {
-    print = 1;
+    print = true;
   } else if (strcmp(argv[5], "no") == 0) {
-    print = 0;
+    print = false;
   } else { 
     usage("Bad print\n");
   }

@@ -6,13 +6,13 @@
 
 #include <iostream>
 #include <vector>
+#include "sorting.hpp"
 using namespace std;
 
-#include "sorting.h"
 
-void sort_doubles(vector <double> &v, int print)
+void sort_doubles(vector <double> &v, bool print)
 {
-  int j;
+  size_t j;
 
   if (print) {
     for (j = 0; j < v.size(); j++) printf("%4.2lf ", v[j]);

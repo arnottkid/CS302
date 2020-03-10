@@ -1,8 +1,8 @@
 #include <iostream>
 #include <set>
+#include "sorting.hpp"
 using namespace std;
 
-#include "sorting.h"
 
 int dcomp(const void *v1, const void *v2)
 {
@@ -16,7 +16,7 @@ int dcomp(const void *v1, const void *v2)
   return 0;
 }
 
-void sort_doubles(vector <double> &v, int print)
+void sort_doubles(vector <double> &v, bool print)
 {
   int i, sz;
   double *v2;
@@ -30,4 +30,9 @@ void sort_doubles(vector <double> &v, int print)
 
   for (i = 0; i < sz; i++) v[i] = v2[i];
   free(v2);
+  if (print) {
+    for (i = 0; i < sz; i++) printf("%4.2lf ", v[i]);
+    cout << endl;
+  }
 }
+

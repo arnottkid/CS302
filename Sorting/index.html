@@ -5,7 +5,7 @@
 <LI> James S. Plank
 <LI> Directory: <b>/home/plank/cs302/Notes/Sorting</b>
 <LI> Last modification:<i>
-Mon Oct  8 13:53:34 EDT 2018
+Tue Mar 10 14:57:32 EDT 2020
 </i>
 </UL>
 <hr>
@@ -54,26 +54,24 @@ different ways, which will result in two more sorting executables.
 <h2>Implementation and performance testing</h2>
 
 In 
-<b><a href=sorting.h>sorting.h</a></b> we define a procedure <b>sort_doubles</b>, which takes 
+<b><a href=src/sorting.hpp>src/sorting.hpp</a></b> we define a procedure <b>sort_doubles</b>, which takes 
 a vector of doubles (reference parameter) and a boolean parameter called <b>print</b>.  When it returns,
 the elements of the vector should be sorted.  If <b>print</b> is one, intermediate sorting states
 should be printed.  Otherwise, nothing should be printed.
 
 <p><center><table border=3 cellpadding=3><td><pre>
-#include &lt;iostream&gt;
 #include &lt;vector&gt;
-using namespace std;
 
-void sort_doubles(vector &lt;double&gt; &amp;v, int print);
+void sort_doubles(std::vector &lt;double&gt; &v, bool print);
 </pre></td></table></center><p>
 
-The file <b><a href=sort_driver.cpp>sort_driver.cpp</a></b>
+The file <b><a href=src/sort_driver.cpp>src/sort_driver.cpp</a></b>
 contains a <b>main()</b> routine that lets you perform a variety of sorting examples.
 It is called with five command line arguments:
-<p>
-<pre>
-UNIX> <font color=darkred><b>sort_driver</b></font> size iterations seed double-check(yes|no) print(yes|no)
-</pre>
+<p><center><table border=3 cellpadding=3><td><pre>
+size iterations seed double-check(yes|no) print(yes|no)
+</pre></td></table></center><p>
+
 This will run <i>iterations</i> tests where it sorts a randomly created vector of size <i>size</i>
 by calling <b>sort_doubles()</b>.  It will use the given <i>seed</i> as a seed for <b>srand48()</b>.
 The elements of the vector will be numbers between 0 and 10 (i.e. we multiply <b>drand48()</b> by 10).
@@ -82,24 +80,22 @@ make sure that it sorted correctly.  The last command line argument specifies
 whether to set the <b>print</b> parameter to <b>true</b> or <b>false</b>.
 <p>
 In this lecture (and your next lab), we will implement a large host of sorting algorithms and 
-link them in with <b>sort_driver.o</b> so that we can test their correctness and speed.
+link them in with <b>obj/sort_driver.o</b> so that we can test their correctness and speed.
 <p>
 The first such implementation is 
-<b><a href=null_sort.cpp>null_sort.cpp</a></b>, which does nothing except print out the 
-vector if <b>print</b> is equal to one:
-
-<b><a href=null_sort.cpp>null_sort.cpp</a></b>
+<b><a href=src/null_sort.cpp>src/null_sort.cpp</a></b>, which does nothing except print out the 
+vector if <b>print</b> is true:
 
 <p><center><table border=3 cellpadding=3><td><pre>
 #include &lt;iostream&gt;
 #include &lt;vector&gt;
+#include "sorting.hpp"
 using namespace std;
 
-#include "sorting.h"
 
-void sort_doubles(vector &lt;double&gt; &v, int print)
+void sort_doubles(vector &lt;double&gt; &v, bool print)
 {
-  int j;
+  size_t j;
 
   if (print) {
     for (j = 0; j &lt; v.size(); j++) printf("%4.2lf ", v[j]);
@@ -114,7 +110,7 @@ As such, it does not run correctly.  For example, if we double-check it on a thr
 vector, it will fail:
 
 <pre>
-UNIX> <font color=darkred><b>./null_sort 3 1 0 yes no</b></font>
+UNIX> <font color=darkred><b>bin/null_sort 3 1 0 yes no</b></font>
 V is unsorted at element 1
 
 0 1.70828036
@@ -123,7 +119,7 @@ V is unsorted at element 1
 UNIX> <font color=darkred><b></b></font>
 </pre>
 
-Although it doesn't sort properly, <b>null_sort.cpp</b> is useful because we can use it as
+Although it doesn't sort properly, <b>src/null_sort.cpp</b> is useful because we can use it as
 a base case for timing other sorting algorithms.  
 <p>
 <hr>
@@ -161,11 +157,11 @@ you'll have do do <i>n-1</i>
 iterations to get it to the beginning.  Such is bubble sort.  You iterate <i>n-1</i> times, and
 at each iteration, you perform the "inner loop" above.  Each time you perform it, you can skip 
 an additional element at the end of the vector, because the previous iteration has already placed
-that element where it belongs.  Here's <b><a href=bubble_sort.cpp>bubble_sort.cpp</a></b>, without
+that element where it belongs.  Here's <b><a href=src/bubble_sort.cpp>src/bubble_sort.cpp</a></b>, without
 the code to print the vector, and without the headers:
 
 <p><center><table border=3 cellpadding=3><td><pre>
-void sort_doubles(vector &lt;double&gt; &v, int print)
+void sort_doubles(vector &lt;double&gt; &v, bool print)
 {
   int i, j, n;
   double tmp;
@@ -197,7 +193,7 @@ coloring this one so that you see the elements that are inspected in each loop.
 
 <p><center><table border=3 cellpadding=3><td>
 <pre>
-                 | UNIX> <font color=darkred><b>./bubble_sort 8 1 14 yes yes</b></font>
+                 | UNIX> <font color=darkred><b>bin/bubble_sort 8 1 14 yes yes</b></font>
 Before the loop: | 3.62 6.14 4.35 3.88 4.12 8.09 6.28 0.72
 i = 0            | <font  style="background-color: #ffff80">3.62 4.35 3.88 4.12 6.14 6.28 0.72 8.09</font> 
 i = 1            | <font  style="background-color: #ffff80">3.62 3.88 4.12 4.35 6.14 0.72 6.28</font> 8.09 
@@ -251,7 +247,7 @@ Before looking at any code, let's look at the output to make sure we know what's
 
 <p><center><table border=3 cellpadding=3><td>
 <pre>
-                 | UNIX> <font color=darkred><b>./selection_sort 8 1 13 yes yes</b></font>
+                 | UNIX> <font color=darkred><b>bin/selection_sort 8 1 13 yes yes</b></font>
 Before the loop: | 4.91 9.10 6.96 9.22 4.24 5.93 1.32 4.50
 i = 0            | <font style="background-color: #ffff80"><font style="background-color: #d0d0ff">1.32 </font>9.10 6.96 9.22 4.24 5.93 <font style="background-color: #d0d0ff">4.91 </font>4.50 </font>
 i = 1            | 1.32 <font style="background-color: #ffff80"><font style="background-color: #d0d0ff">4.24 </font>6.96 9.22 <font style="background-color: #d0d0ff">9.10 </font>5.93 4.91 4.50 </font>
@@ -272,13 +268,7 @@ because it involves fewer swaps.  And it is better for sorting cards in bridge..
 Here's the code (in <b><a href=selection_sort.cpp>selection_sort.cpp</a></b>):
 
 <p><center><table border=3 cellpadding=3><td valign=top><pre>
-#include &lt;iostream&gt;
-#include &lt;vector&gt;
-using namespace std;
-
-#include "sorting.h"
-
-void sort_doubles(vector &lt;double&gt; &v, int print)
+void sort_doubles(vector &lt;double&gt; &v, bool print)
 {
   int i, j, k, n;
   double tmp;
@@ -339,7 +329,7 @@ Before we implement it, let's take a look at its output on seed 4:
 
 <p><center><table border=3 cellpadding=3><td>
 <pre>
-                                                | UNIX> <font color=darkred><b>./insertion_1_sort 8 1 4 yes yes</b></font>
+                                                | UNIX> <font color=darkred><b>bin/insertion_1_sort 8 1 4 yes yes</b></font>
 Before the loop. The first element is sorted.   | <font style="background-color: #d0FFd0">6.54</font> 5.68 0.50 7.33 5.30 6.50 6.74 8.55 
 Iteration 0: The first 2 elements are sorted.   | <font style="background-color: #d0FFd0">5.68 6.54</font> 0.50 7.33 5.30 6.50 6.74 8.55 
 Iteration 1: The first 3 elements are sorted.   | <font style="background-color: #d0FFd0">0.50 5.68 6.54</font> 7.33 5.30 6.50 6.74 8.55 
@@ -363,7 +353,7 @@ in blue, and the elements that have to be "moved over" in yellow:
 
 <p><center><table border=3 cellpadding=3><td>
 <pre>
-                                                | UNIX> <font color=darkred><b>./insertion_1_sort 8 1 4 yes yes</b></font>
+                                                | UNIX> <font color=darkred><b>bin/insertion_1_sort 8 1 4 yes yes</b></font>
 Before the loop. The first element is sorted.   | 6.54 5.68 0.50 7.33 5.30 6.50 6.74 8.55 
 Iteration 0: The first 2 elements are sorted.   | <font style="background-color: #d0d0FF">5.68 </font><font style="background-color: #FFFFaa">6.54</font> 0.50 7.33 5.30 6.50 6.74 8.55 
 Iteration 1: The first 3 elements are sorted.   | <font style="background-color: #d0d0FF">0.50 </font><font style="background-color: #FFFFaa">5.68 6.54</font> 7.33 5.30 6.50 6.74 8.55 
@@ -386,22 +376,22 @@ In the "average" case, the element will have to go into the middle of the elemen
 <p>
 Before we think about that any more, let's look at implementations.  
 I have three implementations that vary in their details.  The first is 
-<b><a href=insertion_1_sort.cpp>insertion_1_sort.cpp</a></b>, which I'll include in its
+<b><a href=src/insertion_1_sort.cpp>src/insertion_1_sort.cpp</a></b>, which I'll include in its
 entirety.  Note, it works pretty much straight from the definition of insertion sort -- assume you 
 have a sorted list of size <i>i-1</i> and look at the <i>i<sup>th</sup></i> element.  Start at the
 right-hand side of the sorted list, and as long as the <i>i<sup>th</sup></i> element is less than 
 that element, swap the two.  When you're done, the element will be in its proper place,
 and you have a sorted list of size <i>i</i>.
 
-<p><center><table border=3 cellpadding=3><td valign=top> <pre>
+<p><center><table border=3 cellpadding=3><td valign=top><pre>
 #include &lt;iostream&gt;
 #include &lt;vector&gt;
-#include "sorting.h"
+#include "sorting.hpp"
 using namespace std;
 
-void sort_doubles(vector &lt;double&gt; &v, int print)
+void sort_doubles(vector &lt;double&gt; &v, bool print)
 {
-  int i, j, k;
+  size_t i, j;
   double tmp;
 
   <font color=blue>/* Optionally print the vector */</font>
@@ -431,20 +421,19 @@ void sort_doubles(vector &lt;double&gt; &v, int print)
   }
 }
 </pre></td></table></center><p>
-
 Let's reconsider what makes insertion sort an interesting algorithm:
 When the input is already sorted, or "nearly" sorted, then 
 <i>it sorts in 
 linear time rather than quadratic.</i>  That's because at each iteration, the element to be inserted
 is "close" to where it belongs.  To see this, I've implemented a second driver program called
-<b><a href=sort_sorted.cpp>sort_sorted.cpp</a></b> which generates "nearly" sorted input and
+<b><a href=src/sort_sorted.cpp>src/sort_sorted.cpp</a></b> which generates "nearly" sorted input and
 sorts it.  Instead of simply inserting random numbers between 0 and 10, this program 
 inserts <i>i*0.1+drand48()</i> into index <i>i</i>.  This means that the vector contains
 the numbers from 0 to roughly <b>v.size()/10.0</b>, where each number is within 10 vector
 slots of its final sorted position.  Let's look at an example with 20 elements:
 
 <pre>
-UNIX> <font color=darkred><b>insertion_1_sorted 20 1 0 no yes | head -n 1</b></font>
+UNIX> <font color=darkred><b>bin/insertion_1_sorted 20 1 0 no yes | head -n 1</b></font>
 0.17 0.85 0.30 1.17 0.98 1.29 1.29 1.07 1.67 1.65 1.45 1.45 1.93 1.56 1.79 2.28 2.45 2.28 2.52 1.98 
 UNIX> <font color=darkred><b></b></font>
 </pre>
@@ -456,7 +445,7 @@ its final resting place.   Now, let's take a look at insertion sort sorting this
 vector:
 
 <p><center><table border=3 cellpadding=3><td valign=top> <pre>
-UNIX> <font color=darkred><b>./insertion_1_sorted 20 1 0 no yes </b></font>
+UNIX> <font color=darkred><b>bin/insertion_1_sorted 20 1 0 no yes </b></font>
 0.17 0.85 0.30 1.17 0.98 1.29 1.29 1.07 1.67 1.65 1.45 1.45 1.93 1.56 1.79 2.28 2.45 2.28 2.52 1.98 
 0.17 <font style="background-color: #d0d0FF">0.85</font> 0.30 1.17 0.98 1.29 1.29 1.07 1.67 1.65 1.45 1.45 1.93 1.56 1.79 2.28 2.45 2.28 2.52 1.98 
 0.17 <font style="background-color: #d0d0FF">0.30</font><font style="background-color: #FFFFaa"> 0.85</font> 1.17 0.98 1.29 1.29 1.07 1.67 1.65 1.45 1.45 1.93 1.56 1.79 2.28 2.45 2.28 2.52 1.98 
@@ -487,9 +476,9 @@ with insertion sort
 (all timings in this writeup are done on a Dell Linux workstation in 2009):
 
 <pre>
-UNIX> <font color=darkred><b>time ./insertion_1_sort 50000 1 0 no no</b></font>
+UNIX> <font color=darkred><b>time bin/insertion_1_sort 50000 1 0 no no</b></font>
 3.768u 0.000s 0:03.76 100.0%    0+0k 0+0io 0pf+0w
-UNIX> <font color=darkred><b>time ./insertion_1_sorted 50000 1 0 no no</b></font>
+UNIX> <font color=darkred><b>time bin/insertion_1_sorted 50000 1 0 no no</b></font>
 0.004u 0.008s 0:00.00 0.0%      0+0k 32+0io 0pf+0w
 UNIX> <font color=darkred><b></b></font>
 </pre>
@@ -504,7 +493,7 @@ data movement.  Think about the following output:
 
 
 <p><center><table border=3 cellpadding=3><td><pre>
-UNIX> <font color=darkred><b>./insertion_1_sort 6 1 1 no yes</b></font>
+UNIX> <font color=darkred><b>bin/insertion_1_sort 6 1 1 no yes</b></font>
 0.42 4.54 8.35 3.36 5.65 0.02 
 0.42 4.54 8.35 3.36 5.65 0.02 
 0.42 4.54 8.35 3.36 5.65 0.02 
@@ -529,7 +518,7 @@ Specifically, look at the two highlighted lines.  When we perform the insertion 
 Those are a lot of swap operations, when in reality, all we wanted to do was
 move all those numbers over one, and "insert" 0.02 into position.
 This change has been made in 
-<b><a href=insertion_2_sort.cpp>insertion_2_sort.cpp</a></b> -- I only put the main loop here
+<b><a href=src/insertion_2_sort.cpp>src/insertion_2_sort.cpp</a></b> -- I only put the main loop here
 without the <b>print</b> statements.
 
 <p><center><table border=3 cellpadding=3><td><pre>
@@ -549,24 +538,24 @@ without the <b>print</b> statements.
 Note how it is faster than <b>insertion_1_sort:</b>
 
 <pre>
-UNIX> <font color=darkred><b>time ./insertion_1_sort 50000 1 0 no no</b></font>
+UNIX> <font color=darkred><b>time bin/insertion_1_sort 50000 1 0 no no</b></font>
 3.792u 0.000s 0:03.80 99.7%     0+0k 0+0io 0pf+0w
-UNIX> <font color=darkred><b>time ./insertion_2_sort 50000 1 0 no no</b></font>
+UNIX> <font color=darkred><b>time bin/insertion_2_sort 50000 1 0 no no</b></font>
 2.584u 0.012s 0:02.59 100.0%    0+0k 32+0io 0pf+0w
 UNIX> <font color=darkred><b></b></font>
 </pre>
 
 Let's compare sorting algorithms graphically.  To do so, I've written a 
 shell script called 
-<b><a href=do_timing.sh>do_timing.sh</a></b>
+<b><a href=scripts/do_timing.sh>scripts/do_timing.sh</a></b>
 that varies the number of elements and times the given sorting program as it
 runs ten iterations.  It uses the wall-clock time of the program (again on 
 my Linux box in 2009).  I have results of timing all the programs in this lecture 
 in the file
-<b><a href=all_timings.txt>all_timings.txt</a></b>.  Below, we graph the 
+<b><a href=txt/all_timings.txt>txt/all_timings.txt</a></b>.  Below, we graph the 
 algorithms that we have seen so far:
 
-<p><center><table border=3 cellpadding=3><td><img src=Pictures/quad1.png width=450></td></table></center><p>
+<p><center><table border=3 cellpadding=3><td><img src=img/quad1.png width=450></td></table></center><p>
 
 <p>
 So, insertion sort is the fastest (interestingly, this can vary from machine to machine.  On
@@ -577,7 +566,7 @@ it is always checking to make sure that <i>j &gt;= 1</i>.  We can fix this by se
 we traverse
 the vector before sorting and swap the minimum element in index 0.  This is done
 in 
-<b><a href=insertion_3_sort.cpp>insertion_3_sort.cpp</a></b> -- here's the relevant part:
+<b><a href=src/insertion_3_sort.cpp>src/insertion_3_sort.cpp</a></b> -- here's the relevant part:
 
 <p><center><table border=3 cellpadding=3><td><pre>
   <font color=blue>/* Swap the minimum element into element 0 */</font>
@@ -598,27 +587,31 @@ in
 </pre></td></table></center><p>
 This improves matters, but not to a great degree (again, this varies from
 machine to machine).
-<p><center><table border=3 cellpadding=3><td><img src=Pictures/quad2.png width=450></td></table></center><p>
+<p><center><table border=3 cellpadding=3><td><img src=img/quad2.png width=450></td></table></center><p>
 
 <hr>
 <h3>Using STL's multisets</h3>
 
 Were I to point a gun to your head and tell you to sort a vector of doubles without
 using the STL's <b>sort()</b> procedures, you would probably
-use a multiset, as in <b><a href=set_sort.cpp>set_sort.cpp</a></b>
+use a multiset, as in <b><a href=src/set_sort.cpp>src/set_sort.cpp</a></b>:
 
 <p><center><table border=3 cellpadding=3><td><pre>
-void sort_doubles(vector &lt;double&gt; &v, int print)
+void sort_doubles(vector &lt;double&gt; &v, bool print)
 {
   multiset &lt;double&gt; s;
+  size_t i;
   multiset &lt;double&gt;::iterator sit;
-  int i;
 
   for (i = 0; i &lt; v.size(); i++) s.insert(v[i]);
   i = 0;
   for (sit = s.begin(); sit != s.end(); sit++) {
     v[i] = *sit;
     i++;
+  }
+  if (print) {
+    for (i = 0; i &lt; v.size(); i++) printf("%4.2lf ", v[i]);
+    cout &lt;&lt; endl;
   }
 }
 </pre></td></table></center><p>
@@ -628,26 +621,32 @@ This is because the others
 are <i>O(n<sup>2</sup>)</i> algorithms, and STL's sets are implemented with a balanced binary 
 tree structure (e.g. AVL or Red-Black trees), which results in <i>O(n log(n))</i> sorting:
 
-<p><center><table border=3 cellpadding=3><td><img src=Pictures/set.png width=450></td></table></center><p>
+<p><center><table border=3 cellpadding=3><td><img src=img/set.png width=450></td></table></center><p>
 
 Using multisets, however, is overkill, since they contain a lot of structure
 (internal nodes, pointers, etc), which takes time and memory to keep updated after
 every <b>insert()</b> call.  There are algorithms that sort in 
 <i>O(n log(n))</i> time without the extra overhead.  One of these is used in the <b>sort</b> routine
 implemented with STL algorithms.  We include that in 
-<b><a href=stl_sort.cpp>stl_sort.cpp</a></b>
+<b><a href=src/stl_sort.cpp>src/stl_sort.cpp</a></b>
 
 <p><center><table border=3 cellpadding=3><td><pre>
-void sort_doubles(vector &lt;double&gt; &v, int print)
+void sort_doubles(vector &lt;double&gt; &v, bool print)
 {
+  size_t j;
+
   sort(v.begin(), v.end());
+  if (print) {
+    for (j = 0; j &lt; v.size(); j++) printf("%4.2lf ", v[j]);
+    cout &lt;&lt; endl;
+  }
 }
 </pre></td></table></center><p>
 
 The graph below shows how it destroys the others (note the X-axis has been greatly
 expanded to sort up to one million elements).  
 
-<p><center><table border=3 cellpadding=3><td><img src=Pictures/stl.png width=450></td></table></center><p>
+<p><center><table border=3 cellpadding=3><td><img src=img/stl.png width=450></td></table></center><p>
 The reason is that the STL's <b>sort()</b> routine is a very carefully tuned 
 <i>O(n log(n))</i> algorithm (I'd guess quicksort).  We'll explore these algorithms below.
 
@@ -663,7 +662,7 @@ Heap sort, Merge sort and Quicksort are three
 
 I have two implementations of heap sort:
 <p>
-The first is <b><a href=heap_sort.cpp>heap_sort.cpp</a></b>. This uses the priority queue implementation 
+The first is <b><a href=src/heap_sort.cpp>src/heap_sort.cpp</a></b>. This uses the priority queue implementation 
      from the <a href=http://web.eecs.utk.edu/~jplank/plank/classes/cs302/Notes/PQ/>priority 
      queue lecture notes</a> (although, I modified the print routine so it would match these
      lecture notes).  When you use the "print" option, it prints the vector and
@@ -673,20 +672,20 @@ The first is <b><a href=heap_sort.cpp>heap_sort.cpp</a></b>. This uses the prior
      vector in light red.
 
 <p><center><table border=3 cellpadding=3><td><pre>
-       | UNIX> <font color=darkred><b>./heap_sort 8 1 0 no yes</b></font>                                                            |
-vector | 1.71 7.50 0.96 8.70 5.77 7.86 6.92 3.69    <font  style="background-color: #ffffaa">0.96</font>  3.69  1.71  7.50  5.77  7.86  6.92  8.70 | heap
-       | <font  style="background-color: #ffaaaa">0.96</font> 7.50 0.96 8.70 5.77 7.86 6.92 3.69    <font  style="background-color: #ffffaa">1.71</font>  3.69  6.92  7.50  5.77  7.86  8.70       |
-       | <font  style="background-color: #ffaaaa">0.96 1.71</font> 0.96 8.70 5.77 7.86 6.92 3.69    <font  style="background-color: #ffffaa">3.69</font>  5.77  6.92  7.50  8.70  7.86             |
-       | <font  style="background-color: #ffaaaa">0.96 1.71 3.69</font> 8.70 5.77 7.86 6.92 3.69    <font  style="background-color: #ffffaa">5.77</font>  7.50  6.92  7.86  8.70                   |
-       | <font  style="background-color: #ffaaaa">0.96 1.71 3.69 5.77</font> 5.77 7.86 6.92 3.69    <font  style="background-color: #ffffaa">6.92</font>  7.50  8.70  7.86                         |
-       | <font  style="background-color: #ffaaaa">0.96 1.71 3.69 5.77 6.92</font> 7.86 6.92 3.69    <font  style="background-color: #ffffaa">7.50</font>  7.86  8.70                               |
-       | <font  style="background-color: #ffaaaa">0.96 1.71 3.69 5.77 6.92 7.50</font> 6.92 3.69    <font  style="background-color: #ffffaa">7.86</font>  8.70                                     |
-       | <font  style="background-color: #ffaaaa">0.96 1.71 3.69 5.77 6.92 7.50 7.86</font> 3.69    <font  style="background-color: #ffffaa">8.70</font>                                           |
-       | <font  style="background-color: #ffaaaa">0.96 1.71 3.69 5.77 6.92 7.50 7.86 8.70</font>                                                   | 
-       | UNIX> <font color=darkred><b></b></font>                                                                                    |
+       | UNIX> <font color=darkred><b>bin/heap_sort 8 1 0 no yes</b></font>                                                            |
+vector | 1.71 7.50 0.96 8.70 5.77 7.86 6.92 3.69    <font  style="background-color: #ffffaa">0.96</font>  3.69  1.71  7.50  5.77  7.86  6.92  8.70   | heap
+       | <font  style="background-color: #ffaaaa">0.96</font> 7.50 0.96 8.70 5.77 7.86 6.92 3.69    <font  style="background-color: #ffffaa">1.71</font>  3.69  6.92  7.50  5.77  7.86  8.70         |
+       | <font  style="background-color: #ffaaaa">0.96 1.71</font> 0.96 8.70 5.77 7.86 6.92 3.69    <font  style="background-color: #ffffaa">3.69</font>  5.77  6.92  7.50  8.70  7.86               |
+       | <font  style="background-color: #ffaaaa">0.96 1.71 3.69</font> 8.70 5.77 7.86 6.92 3.69    <font  style="background-color: #ffffaa">5.77</font>  7.50  6.92  7.86  8.70                     |
+       | <font  style="background-color: #ffaaaa">0.96 1.71 3.69 5.77</font> 5.77 7.86 6.92 3.69    <font  style="background-color: #ffffaa">6.92</font>  7.50  8.70  7.86                           |
+       | <font  style="background-color: #ffaaaa">0.96 1.71 3.69 5.77 6.92</font> 7.86 6.92 3.69    <font  style="background-color: #ffffaa">7.50</font>  7.86  8.70                                 |
+       | <font  style="background-color: #ffaaaa">0.96 1.71 3.69 5.77 6.92 7.50</font> 6.92 3.69    <font  style="background-color: #ffffaa">7.86</font>  8.70                                       |
+       | <font  style="background-color: #ffaaaa">0.96 1.71 3.69 5.77 6.92 7.50 7.86</font> 3.69    <font  style="background-color: #ffffaa">8.70</font>                                             |
+       | <font  style="background-color: #ffaaaa">0.96 1.71 3.69 5.77 6.92 7.50 7.86 8.70</font>                                                     |
+       | UNIX> <font color=darkred><b></b></font>                                                                                      |
 </pre></td></table></center><p>
 
-The second is <b><a href=heap_fast_sort.cpp>heap_fast_sort.cpp</a></b>. One inefficiency with using
+The second is <b><a href=src/heap_fast_sort.cpp>src/heap_fast_sort.cpp</a></b>. One inefficiency with using
      the priority queue data structure is that you make a copy of the vector.  This program
      rips the functionality out of the priority queue program and puts it directly into the
      sorting procedure.  That way, it doesn't require a second vector.  
@@ -702,7 +701,7 @@ The second is <b><a href=heap_fast_sort.cpp>heap_fast_sort.cpp</a></b>. One inef
 
 
 <p><center><table border=3 cellpadding=3><td><pre>
-                |  UNIX> <font color=darkred><b>./heap_fast_sort 8 1 0 no yes</b></font>      | 
+                |  UNIX> <font color=darkred><b>bin/heap_fast_sort 8 1 0 no yes</b></font>    | 
   heap, but     |  <font  style="background-color: #ffffaa">8.70 7.50 7.86 3.69 5.77 0.96 6.92 1.71</font>  | the vector is filled
   storing max   |  <font  style="background-color: #ffffaa">7.86 7.50 6.92 3.69 5.77 0.96 1.71</font><font  style="background-color: #ffaaaa"> 8.70</font>  | in from right to left
   values rather |  <font  style="background-color: #ffffaa">7.50 5.77 6.92 3.69 1.71 0.96</font><font  style="background-color: #ffaaaa"> 7.86 8.70</font>  | with the maximum element
@@ -718,7 +717,7 @@ The second is <b><a href=heap_fast_sort.cpp>heap_fast_sort.cpp</a></b>. One inef
 In terms of timing, this is faster than using multisets, and you can see that the "fast"
 version is faster, although just a little:
 
-<p><center><table border=3 cellpadding=3><td><img src=Pictures/heap.png width=550></td></table></center><p>
+<p><center><table border=3 cellpadding=3><td><img src=img/heap.png width=550></td></table></center><p>
 
 <hr>
 <h2> Merge Sort</h2>
@@ -821,7 +820,7 @@ right when <b>recursive_sort()</b> is about to return ("E"):
 
 <p><center><table border=3 cellpadding=3><td>
 <pre>
-UNIX> <font color=darkred><b>./merge_1_sort 16 1 1 yes yes</b></font>
+UNIX> <font color=darkred><b>bin/merge_1_sort 16 1 1 yes yes</b></font>
 B:     0    16      <font  style="background-color: #ffaaaa">  0.42</font><font  style="background-color: #ffaaaa">  4.54</font><font  style="background-color: #ffaaaa">  8.35</font><font  style="background-color: #ffaaaa">  3.36</font><font  style="background-color: #ffaaaa">  5.65</font><font  style="background-color: #ffaaaa">  0.02</font><font  style="background-color: #ffaaaa">  1.88</font><font  style="background-color: #ffaaaa">  9.90</font><font  style="background-color: #ffaaaa">  7.50</font><font  style="background-color: #ffaaaa">  3.66</font><font  style="background-color: #ffaaaa">  3.51</font><font  style="background-color: #ffaaaa">  5.73</font><font  style="background-color: #ffaaaa">  1.33</font><font  style="background-color: #ffaaaa">  0.64</font><font  style="background-color: #ffaaaa">  9.51</font><font  style="background-color: #ffaaaa">  1.54</font>
 B:     0     8      <font  style="background-color: #ffaaaa">  0.42</font><font  style="background-color: #ffaaaa">  4.54</font><font  style="background-color: #ffaaaa">  8.35</font><font  style="background-color: #ffaaaa">  3.36</font><font  style="background-color: #ffaaaa">  5.65</font><font  style="background-color: #ffaaaa">  0.02</font><font  style="background-color: #ffaaaa">  1.88</font><font  style="background-color: #ffaaaa">  9.90</font>  7.50  3.66  3.51  5.73  1.33  0.64  9.51  1.54
 B:     0     4      <font  style="background-color: #ffaaaa">  0.42</font><font  style="background-color: #ffaaaa">  4.54</font><font  style="background-color: #ffaaaa">  8.35</font><font  style="background-color: #ffaaaa">  3.36</font>  5.65  0.02  1.88  9.90  7.50  3.66  3.51  5.73  1.33  0.64  9.51  1.54
@@ -863,7 +862,7 @@ I've written an awk script in <a href=ms.awk><b>ms.awk</b></a> to produce the co
 that you see above.  Here's another example:
 <p>
 <pre>
-UNIX> <font color=darkred><b>./merge_1_sort 13 1 100 yes yes | awk -f ~jplank/cs302/Notes/Sorting/ms.awk > msex.html</b></font>
+UNIX> <font color=darkred><b>bin/merge_1_sort 13 1 100 yes yes | awk -f ~jplank/cs302/Notes/Sorting/ms.awk > msex.html</b></font>
 </pre>
 <p>
 And here's <a href=msex.html><b>msex.html</b></a>.  It's not a bad idea to look at this, so that
@@ -899,7 +898,7 @@ that for small arrays, insertion sort is faster than merge sort, since it doesn'
 calls.  Thus, <b>merge_2_sort</b> should be faster than <b>merge_1_sort</b>.  (I determined
 the value of 115 experimentally).  Here is merge sort in relation to the other algorithms:
 
-<p><center><table border=3 cellpadding=3><td><img src=Pictures/merge.png width=550></td></table></center><p>
+<p><center><table border=3 cellpadding=3><td><img src=img/merge.png width=550></td></table></center><p>
 
 <hr>
 <h3> Quicksort </h3>
@@ -941,7 +940,7 @@ Let's look at some example output:
 <p>
 
 <p><center><table border=3 cellpadding=3><td><pre>
-UNIX> <font color=darkred><b>./quick_1_sort 12 1 82 no yes </b></font>
+UNIX> <font color=darkred><b>bin/quick_1_sort 12 1 82 no yes </b></font>
 S:     0    12       <font color=blue> 5.77</font> <font color=red> 5.26</font> <font color=red> 6.49</font> <font color=red> 0.43</font> <font color=red> 6.09</font> <font color=red> 4.95</font> <font color=red> 3.15</font> <font color=red> 3.46</font> <font color=red> 7.55</font> <font color=red> 6.82</font> <font color=red> 6.69</font> <font color=red> 3.62</font>
 P:     0    12     6 <font color=red> 3.15</font> <font color=red> 5.26</font> <font color=red> 3.62</font> <font color=red> 0.43</font> <font color=red> 3.46</font> <font color=red> 4.95</font> <font color=blue> 5.77</font> <font color=red> 6.09</font> <font color=red> 7.55</font> <font color=red> 6.82</font> <font color=red> 6.69</font> <font color=red> 6.49</font>
 S:     0     6       <font color=blue> 3.15</font> <font color=red> 5.26</font> <font color=red> 3.62</font> <font color=red> 0.43</font> <font color=red> 3.46</font> <font color=red> 4.95</font>  5.77  6.09  7.55  6.82  6.69  6.49
@@ -1097,7 +1096,7 @@ works when there are a lot of duplicate entries:
 
 
 <p><center><table border=3 cellpadding=3><td><pre>
-UNIX> <font color=darkred><b>./quick_1_lab_sort 12 1 6000 yes yes</b></font>
+UNIX> <font color=darkred><b>bin/quick_1_lab_sort 12 1 6000 yes yes</b></font>
 S:     0    12       <font color=blue> 9.85</font> <font color=red> 2.93</font> <font color=red> 7.70</font> <font color=red> 9.85</font> <font color=red> 7.70</font> <font color=red> 9.85</font> <font color=red> 7.70</font> <font color=red> 2.93</font> <font color=red> 9.85</font> <font color=red> 2.93</font> <font color=red> 2.93</font> <font color=red> 9.85</font>
 P:     0    12     8 <font color=red> 2.93</font> <font color=red> 2.93</font> <font color=red> 7.70</font> <font color=red> 9.85</font> <font color=red> 7.70</font> <font color=red> 2.93</font> <font color=red> 7.70</font> <font color=red> 2.93</font> <font color=blue> 9.85</font> <font color=red> 9.85</font> <font color=red> 9.85</font> <font color=red> 9.85</font>
 S:     0     8       <font color=blue> 2.93</font> <font color=red> 2.93</font> <font color=red> 7.70</font> <font color=red> 9.85</font> <font color=red> 7.70</font> <font color=red> 2.93</font> <font color=red> 7.70</font> <font color=red> 2.93</font>  9.85  9.85  9.85  9.85
@@ -1200,7 +1199,7 @@ There are times when, after incrementing and decrementing,  you will have <b>L</
 case, and perform the appropriate action.  You can see an example of this with the following call:
 
 <pre>
-UNIX> <font color=darkred><b>./quick_1_lab_sort 8 1 12000 yes yes</b></font>
+UNIX> <font color=darkred><b>bin/quick_1_lab_sort 8 1 12000 yes yes</b></font>
 </pre>
 
 In the first partitioning, you will end up with <b>L</b> = <b>R</b>.
@@ -1221,7 +1220,7 @@ performing the partition.  The output prints a line with a label of "M" after
 the pivot has been found and swapped to <b>v[start]</b>:
 Here's an example:
 
-<p><center><table border=3 cellpadding=3><td><img src=Pictures/Quick-Example-2.png height=180></td></table></center><p>
+<p><center><table border=3 cellpadding=3><td><img src=img/Quick-Example-2.png height=180></td></table></center><p>
 
 The circles show the three elements considered for the pivot -- the one with the median value is always chosen.
 (The indices are calculated as <b>start</b>, (<b>start+size-1</b>) and <b>(start+size/2</b>).
@@ -1233,16 +1232,16 @@ minor difference in sorting random lists, but a <i>huge</i> difference in sortin
 presorted lists:
 
 <pre>
-UNIX> <font color=darkred><b>time ./quick_1_sorted 100000 1 0 no no</b></font>
+UNIX> <font color=darkred><b>time bin/quick_1_sorted 100000 1 0 no no</b></font>
 5.173u 0.012s 0:05.21 99.4%     0+0k 0+0io 0pf+0w
-UNIX> <font color=darkred><b>time ./quick_2_sorted 100000 1 0 no no</b></font>
+UNIX> <font color=darkred><b>time bin/quick_2_sorted 100000 1 0 no no</b></font>
 0.006u 0.003s 0:00.01 0.0%      0+0k 0+0io 0pf+0w
 UNIX> <font color=darkred><b></b></font>
 </pre>
 
 Quicksort #3 sorts lists of size 46 and smaller with insertion sort.  That improves
 the performance a little: 
-<p><center><table border=3 cellpadding=3><td><img src=Pictures/quick.png width=550></td></table></center><p>
+<p><center><table border=3 cellpadding=3><td><img src=img/quick.png width=550></td></table></center><p>
 <p>
 
 If you'd like more help, Katie Schuman (CS302 TA from 2010 to 2014) 
@@ -1258,11 +1257,11 @@ is uniform between 0 and ten, we know that the value 4.53 is going to be pretty 
 when the vector is sorted.
 <p>
 A first pass of using this information is in 
-<b><a href=bucket_1_sort.cpp>bucket_1_sort.cpp</a></b>
+<b><a href=src/bucket_1_sort.cpp>src/bucket_1_sort.cpp</a></b>
 
 <p><center><table border=3 cellpadding=3><td valign=top><pre>
 <font color=blue>/* Headers and insertion sort omitted. */</font>
-void sort_doubles(vector &lt;double&gt; &v, int print)
+void sort_doubles(vector &lt;double&gt; &v, bool print)
 {
   int sz;
   int index, j;
@@ -1319,7 +1318,7 @@ void sort_doubles(vector &lt;double&gt; &v, int print)
 
   if (print) {
     cout &lt;&lt; "Before Insertion Sort\n";
-    for (j = 0; j &lt; v.size(); j++) printf("%.2lf ", v[j]);
+    for (j = 0; j &lt; sz; j++) printf("%.2lf ", v[j]);
     cout &lt;&lt; endl;
   }
 
@@ -1327,7 +1326,7 @@ void sort_doubles(vector &lt;double&gt; &v, int print)
 
   if (print) {
     cout &lt;&lt; "After Insertion Sort\n";
-    for (j = 0; j &lt; v.size(); j++) printf("%.2lf ", v[j]);
+    for (j = 0; j &lt; sz; j++) printf("%.2lf ", v[j]);
     cout &lt;&lt; endl;
   }
 }
@@ -1343,12 +1342,12 @@ should sort it very quickly.
 As it turns out, this process is quite slow, and the reason is that as <b>v2</b> fills 
 up, it takes longer to find empty slots and they are quite far from where they should be.
 We fix this in 
-<b><a href=bucket_2_sort.cpp>bucket_2_sort.cpp</a></b>
+<b><a href=src/bucket_2_sort.cpp>src/bucket_2_sort.cpp</a></b>
 where we double the size of <b>v2</b> so that there are more empty cells and a much smaller
 chance of having to move to adjacent cells.  As you can see, the results are great -- 
 even better than the Standard Template Library!
 
-<p><center><table border=3 cellpadding=3><td><img src=Pictures/bucket.png width=550></td></table></center><p>
+<p><center><table border=3 cellpadding=3><td><img src=img/bucket.png width=550></td></table></center><p>
 
 As I said in class, if you can characterize the probability distribution, 
 you can use its CDF 

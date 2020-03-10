@@ -2,16 +2,17 @@
    James S. Plank
    CS302
    September, 2009
+   Revised, 2020
  */
 
-#include "sorting.h"
+#include "sorting.hpp"
 #include <iostream>
 #include <vector>
 using namespace std;
 
-void sort_doubles(vector <double> &v, int print)
+void sort_doubles(vector <double> &v, bool print)
 {
-  int i, j, n;
+  size_t i, j, n;
   double tmp;
 
   /* Optionally print out the vector at the beginning. */
