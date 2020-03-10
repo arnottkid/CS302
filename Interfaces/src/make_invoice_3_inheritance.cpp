@@ -14,7 +14,7 @@ using namespace std;
 class Item {
   public:
     virtual ~Item() {};
-    virtual string Description() = 0;
+    virtual string Description() const = 0;
 
     // We have moved these variables and members into the class.
 
@@ -22,28 +22,30 @@ class Item {
     double yards;
     double price;
 
-    double Price();
-    double Expenses();
+    double Price() const;
+    double Expenses() const;
 };
 
 /* And we implement them here. */
 
-double Item::Price() { return price; }
-double Item::Expenses() { return yards * 2.25; }
+double Item::Price() const { return price; }
+double Item::Expenses() const { return yards * 2.25; }
 
 /* Our Dog class now only has the items that are specific to it. */
 
 class Dog : public Item {
   public:
     Dog(istringstream &ss);
-    string Description();
+    string Description() const;
   protected:
     string size;
 };
 
 Dog::Dog(istringstream &ss)
 {
-  ss >> size >> color;
+  if (!(ss >> size >> color)) {
+    throw runtime_error("Bad stringstream in Dog constructor");
+  }
 
   if (size == "S") {
     yards = 3.0;
@@ -52,12 +54,11 @@ Dog::Dog(istringstream &ss)
     yards = 6.0;
     price = 40.0;
   } else {
-    fprintf(stderr, "Bad dog size: %s\n", size.c_str());
-    exit(1);
+    throw runtime_error("Bad dog size - should be S or L");
   }
 }
 
-string Dog::Description()
+string Dog::Description() const
 {
   string s;
  
@@ -72,7 +73,7 @@ string Dog::Description()
 class Koozie : public Item {
   public:
     Koozie(istringstream &ss);
-    string Description();
+    string Description() const;
   protected:
     string monogram;
 };
@@ -81,10 +82,10 @@ Koozie::Koozie(istringstream &ss)
 {
   yards = 1.5;
   price = 10.0;
-  ss >> color >> monogram; 
+  if (!(ss >> color >> monogram)) throw runtime_error("Bad Koozie");
 };
 
-string Koozie::Description() 
+string Koozie::Description() const
 {
   string s;
   s = color + " Koozie with monogram ";

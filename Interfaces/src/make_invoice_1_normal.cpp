@@ -22,9 +22,9 @@ using namespace std;
 class Dog {
   public:
     Dog(istringstream &ss);
-    string Description();
-    double Price();
-    double Expenses();
+    string Description() const;
+    double Price() const;
+    double Expenses() const;
   protected:
     string color;
     string size;
@@ -34,7 +34,9 @@ class Dog {
 
 Dog::Dog(istringstream &ss)
 {
-  ss >> size >> color;
+  if (!(ss >> size >> color)) {
+    throw runtime_error("Bad stringstream in Dog constructor");
+  }
 
   if (size == "S") {
     yards = 3.0;
@@ -43,12 +45,11 @@ Dog::Dog(istringstream &ss)
     yards = 6.0;
     price = 40.0;
   } else {
-    fprintf(stderr, "Bad dog size: %s\n", size.c_str());
-    exit(1);
+    throw runtime_error("Bad dog size - should be S or L");
   }
 }
 
-string Dog::Description()
+string Dog::Description() const
 {
   string s;
  
@@ -58,12 +59,12 @@ string Dog::Description()
   return s;
 }
 
-double Dog::Price()
+double Dog::Price() const
 {
   return price;
 }
 
-double Dog::Expenses()
+double Dog::Expenses() const
 {
   return yards * 2.25;
 }
@@ -84,15 +85,15 @@ class Koozie {
     Koozie(istringstream &ss) : 
        yards(1.5), 
        price(10.0) 
-       { ss >> color >> monogram; };
-    string Description() {
+       { if (!(ss >> color >> monogram)) throw runtime_error("Bad Koozie"); };
+    string Description() const {
       string s;
       s = color + " Koozie with monogram ";
       s += monogram; 
       return s;
     }
-    double Price() { return price; }
-    double Expenses() { return yards * 2.25; }
+    double Price() const { return price; }
+    double Expenses() const { return yards * 2.25; }
 };
 
 /* The main code is really straightforward: */

@@ -1,19 +1,22 @@
-ALL = make_invoice_1_normal make_invoice_2_interface make_invoice_3_inheritance destruct
+ALL = bin/make_invoice_1_normal \
+      bin/make_invoice_2_interface \
+      bin/make_invoice_3_inheritance \
+      bin/destruct
 
 all: $(ALL)
 
 clean:
-	rm -f $(ALL) a.out
+	rm -f a.out bin/*
 
-make_invoice_1_normal: make_invoice_1_normal.cpp
-	g++ -o make_invoice_1_normal make_invoice_1_normal.cpp 
+bin/make_invoice_1_normal: src/make_invoice_1_normal.cpp
+	g++ -o bin/make_invoice_1_normal src/make_invoice_1_normal.cpp 
 
-make_invoice_2_interface: make_invoice_2_interface.cpp
-	g++ -o make_invoice_2_interface make_invoice_2_interface.cpp 
+bin/make_invoice_2_interface: src/make_invoice_2_interface.cpp
+	g++ -o bin/make_invoice_2_interface src/make_invoice_2_interface.cpp 
 
-make_invoice_3_inheritance: make_invoice_3_inheritance.cpp
-	g++ -o make_invoice_3_inheritance make_invoice_3_inheritance.cpp 
+bin/make_invoice_3_inheritance: src/make_invoice_3_inheritance.cpp
+	g++ -o bin/make_invoice_3_inheritance src/make_invoice_3_inheritance.cpp 
 
-destruct: destruct.cpp
-	g++ -o destruct destruct.cpp 
+bin/destruct: src/destruct.cpp
+	g++ -o bin/destruct src/destruct.cpp 
 

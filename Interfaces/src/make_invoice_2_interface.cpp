@@ -18,9 +18,9 @@ using namespace std;
 class Item {
   public:
     virtual ~Item() {};
-    virtual string Description() = 0;
-    virtual double Price() = 0;
-    virtual double Expenses() = 0;
+    virtual string Description() const = 0;
+    virtual double Price() const = 0;
+    virtual double Expenses() const = 0;
 };
 
 /* Our Dog class is identical to before, except in the first line of its specification,
@@ -29,9 +29,9 @@ class Item {
 class Dog : public Item {
   public:
     Dog(istringstream &ss);
-    string Description();
-    double Price();
-    double Expenses();
+    string Description() const;
+    double Price() const;
+    double Expenses() const;
   protected:
     string color;
     string size;
@@ -41,7 +41,9 @@ class Dog : public Item {
 
 Dog::Dog(istringstream &ss)
 {
-  ss >> size >> color;
+  if (!(ss >> size >> color)) {
+    throw runtime_error("Bad stringstream in Dog constructor");
+  }
 
   if (size == "S") {
     yards = 3.0;
@@ -50,12 +52,11 @@ Dog::Dog(istringstream &ss)
     yards = 6.0;
     price = 40.0;
   } else {
-    fprintf(stderr, "Bad dog size: %s\n", size.c_str());
-    exit(1);
+    throw runtime_error("Bad dog size - should be S or L");
   }
 }
 
-string Dog::Description()
+string Dog::Description() const
 {
   string s;
  
@@ -65,8 +66,8 @@ string Dog::Description()
   return s;
 }
 
-double Dog::Price() { return price; }
-double Dog::Expenses() { return yards * 2.25; }
+double Dog::Price() const { return price; }
+double Dog::Expenses() const { return yards * 2.25; }
 
 /* The Koozie class is also the same except that it too implements the
    Item interface.  I also made it look like the Dog class, because I 
@@ -75,9 +76,9 @@ double Dog::Expenses() { return yards * 2.25; }
 class Koozie : public Item {
   public:
     Koozie(istringstream &ss);
-    string Description();
-    double Price();
-    double Expenses();
+    string Description() const;
+    double Price() const;
+    double Expenses() const;
   protected:
     string color;
     string monogram;
@@ -89,10 +90,10 @@ Koozie::Koozie(istringstream &ss)
 {
   yards = 1.5;
   price = 10.0;
-  ss >> color >> monogram; 
+  if (!(ss >> color >> monogram)) throw runtime_error("Bad Koozie");
 };
 
-string Koozie::Description() 
+string Koozie::Description() const
 {
   string s;
   s = color + " Koozie with monogram ";
@@ -100,8 +101,8 @@ string Koozie::Description()
   return s;
 }
 
-double Koozie::Price() { return price; }
-double Koozie::Expenses() { return yards * 2.25; }
+double Koozie::Price() const { return price; }
+double Koozie::Expenses() const { return yards * 2.25; }
 
 /* The main code is similar, except now you declare an item, and set it
    at run-time to be either a Dog or Koozie.  That removes the code 

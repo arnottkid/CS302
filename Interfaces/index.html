@@ -64,7 +64,7 @@ keep track of in your bookkeeping:
 </center>
 <p>
 
-You are keeping track of your sales in text files, one file for sale.  Your
+You are keeping track of your sales in text files, one file per sale.  Your
 files have the following format:
 <p>
 <UL>
@@ -80,7 +80,7 @@ Here are two example files:
 
 <p><center><table border=3 cellpadding=3>
 <td valign=top>
-<b><a href=f1.txt>f1.txt</a></b>
+<b><a href=txt/f1.txt>txt/f1.txt</a></b>
 <pre>
 Isabelle Human
 Koozie Red IH
@@ -88,7 +88,7 @@ Koozie Blue BH
 Dog S Red
 </pre></td>
 <td valign=top>
-<b><a href=f2.txt>f2.txt</a></b>
+<b><a href=txt/f2.txt>txt/f2.txt</a></b>
 <pre>
 Jonathan Cherubim
 Dog L Orange
@@ -104,7 +104,7 @@ have envisioned:
 
 <hr>
 <pre>
-UNIX> <font color=darkred><b>./make_invoice_1_normal < f1.txt</b></font>
+UNIX> <font color=darkred><b>bin/make_invoice_1_normal < txt/f1.txt</b></font>
 Customer: Isabelle Human
 
 Description                                                   Price  Costs
@@ -116,7 +116,7 @@ Gross:     40.00
 Costs:     13.50
 Fees:       3.20
 Profit:    23.30
-UNIX> <font color=darkred><b>./make_invoice_1_normal < f2.txt</b></font>
+UNIX> <font color=darkred><b>bin/make_invoice_1_normal < txt/f2.txt</b></font>
 Customer: Jonathan Cherubim
 
 Description                                                   Price  Costs
@@ -134,7 +134,7 @@ UNIX> <font color=darkred><b></b></font>
 <hr>
 
 Let's write the program using vanilla C++.  
-It's in <b><a href=make_invoice_1_normal.cpp>make_invoice_1_normal.cpp</a></b>.
+It's in <b><a href=src/make_invoice_1_normal.cpp>src/make_invoice_1_normal.cpp</a></b>.
 We'll have a class for a Dog and a class for
 a Koozie.  Here's the Dog class with standard Dr. Plank-style C++:
 
@@ -142,9 +142,9 @@ a Koozie.  Here's the Dog class with standard Dr. Plank-style C++:
 class Dog {
   public:
     Dog(istringstream &ss);
-    string Description();
-    double Price();
-    double Expenses();
+    string Description() const;
+    double Price() const;
+    double Expenses() const;
   protected:
     string color;
     string size;
@@ -154,7 +154,9 @@ class Dog {
 
 Dog::Dog(istringstream &ss)
 {
-  ss &gt;&gt; size &gt;&gt; color;
+  if (!(ss &gt;&gt; size &gt;&gt; color)) {
+    throw runtime_error("Bad stringstream in Dog constructor");
+  }
 
   if (size == "S") {
     yards = 3.0;
@@ -163,12 +165,11 @@ Dog::Dog(istringstream &ss)
     yards = 6.0;
     price = 40.0;
   } else {
-    fprintf(stderr, "Bad dog size: %s\n", size.c_str());
-    exit(1);
+    throw runtime_error("Bad dog size - should be S or L");
   }
 }
 </pre></td><td valign=top><pre>
-string Dog::Description()
+string Dog::Description() const
 {
   string s;
  
@@ -178,12 +179,12 @@ string Dog::Description()
   return s;
 }
 
-double Dog::Price()
+double Dog::Price() const
 {
   return price;
 }
 
-double Dog::Expenses()
+double Dog::Expenses() const
 {
   return yards * 2.25;
 }
@@ -193,7 +194,7 @@ I've written the definition for the Koozie class in a different style
 -- here we implement the code in the class definition and specify
 default values in the constructor specification.  You may prefer this
 style, and while I acknowledge the simplicity of the specifications
-of <b>Price()</b> and <b>Expenses()</b>, I still don't like it.  I
+of <b>Price()</b> and <b>Expenses()</b>, I still don't like them.  I
 like to have defintions and implementations separated.
 
 <p><center><table border=3 cellpadding=3><td><pre>
@@ -207,15 +208,15 @@ class Koozie {
     Koozie(istringstream &ss) : 
        yards(1.5), 
        price(10.0) 
-       { ss &gt;&gt; color &gt;&gt; monogram; };
-    string Description() {
+       { if (!(ss &gt;&gt; color &gt;&gt; monogram)) throw runtime_error("Bad Koozie"); };
+    string Description() const {
       string s;
       s = color + " Koozie with monogram ";
       s += monogram; 
       return s;
     }
-    double Price() { return price; }
-    double Expenses() { return yards * 2.25; }
+    double Price() const { return price; }
+    double Expenses() const { return yards * 2.25; }
 };
 </pre></td></table></center><p>
 
@@ -301,15 +302,15 @@ Here's a specification of an interface for
 an <b>Item</b>, which contains virtual methods for 
 <b>Description()</b>, <b>Price()</b> and <b>Expenses()</b> (it also has a destructor -- more
 on that later).  The code is in
-<b><a href=make_invoice_2_interface.cpp>make_invoice_2_interface.cpp</a></b>:
+<b><a href=src/make_invoice_2_interface.cpp>src/make_invoice_2_interface.cpp</a></b>:
 
 <p><center><table border=3 cellpadding=3><td><pre>
 class Item {
   public:
     virtual ~Item() {};
-    virtual string Description() = 0;
-    virtual double Price() = 0;
-    virtual double Expenses() = 0;
+    virtual string Description() const = 0;
+    virtual double Price() const = 0;
+    virtual double Expenses() const = 0;
 };
 </pre></td></table></center><p>
 
@@ -322,9 +323,9 @@ required for them to implement the <b>Item</b>.
 class Dog <font color=red>: public Item</font> {
   public:
     Dog(istringstream &ss);
-    string Description();
-    double Price();
-    double Expenses();
+    string Description() const;
+    double Price() const;
+    double Expenses() const;
   protected:
     string color;
     string size;
@@ -335,9 +336,9 @@ class Dog <font color=red>: public Item</font> {
 class Koozie <font color=red>: public Item</font> {
   public:
     Koozie(istringstream &ss);
-    string Description();
-    double Price();
-    double Expenses();
+    string Description() const;
+    double Price() const;
+    double Expenses() const;
   protected:
     string color;
     string monogram;
@@ -388,7 +389,7 @@ use the default destructor for <b>Dog</b> and <b>Koozie</b>, since you have not 
 them.  See the last section of these lecture notes for some explanation on destructors.
 <p>
 I think you can see how this functionality is powerful, and in many cases can clean up your
-code.   When you run it, you'll see that it runs identically to <b>make_invoice_1_normal</b>.
+code.   When you run it, you'll see that it runs identically to <b>bin/make_invoice_1_normal</b>.
 
 
 <hr>
@@ -406,13 +407,13 @@ Wouldn't it be nice if you could remove that duplication?  Enter inheritance.  W
 to do now is move the common elements up into the <b>Item</b>, 
 and we'll remove the <b>virtual</b>
 tag on <b>Price()</b> and <b>Expenses()</b>.  The code is in 
-<b><a href=make_invoice_3_inheritance.cpp>make_invoice_3_inheritance.cpp</a></b>:
+<b><a href=src/make_invoice_3_inheritance.cpp>src/make_invoice_3_inheritance.cpp</a></b>:
 
 <p><center><table border=3 cellpadding=3><td><pre>
 class Item {
   public:
     virtual ~Item() {};
-    virtual string Description() = 0;
+    virtual string Description() const = 0;
 
     <font color=blue>// We have moved these variables and members into the class.</font>
 
@@ -420,14 +421,14 @@ class Item {
     double yards;
     double price;
 
-    double Price();
-    double Expenses();
+    double Price() const;
+    double Expenses() const;
 };
 
 <font color=blue>/* And we implement them here. */</font>
 
-double Item::Price() { return price; }
-double Item::Expenses() { return yards * 2.25; }
+double Item::Price() const { return price; }
+double Item::Expenses() const { return yards * 2.25; }
 </pre></td></table></center><p>
 
 We remove the common variables and member functions from <b>Dog</b> and <b>Koozie</b>.
@@ -439,14 +440,16 @@ Let's take a quick look at the <b>Dog</b> specification and constructor:
 class Dog : public Item {
   public:
     Dog(istringstream &ss);
-    string Description();
+    string Description() const;
   protected:
     string size;
 };
 
 Dog::Dog(istringstream &ss)
 {
-  ss &gt;&gt; size &gt;&gt; color;
+  if (!(ss &gt;&gt; size &gt;&gt; color)) {
+    throw runtime_error("Bad stringstream in Dog constructor");
+  }
 
   if (size == "S") {
     yards = 3.0;
@@ -455,8 +458,7 @@ Dog::Dog(istringstream &ss)
     yards = 6.0;
     price = 40.0;
   } else {
-    fprintf(stderr, "Bad dog size: %s\n", size.c_str());
-    exit(1);
+    throw runtime_error("Bad dog size - should be S or L");
   }
 }
 </pre></td></table></center><p>
@@ -540,9 +542,12 @@ structure was defined at time A, and new objects were added at time B, and the n
 fit the structure.  And it was way too hard to change the structure.  So you get illogical code
 that's hard to read, and oh yeah, you have no idea where the variables are defined.  
 <p>
-For that reason, I don't use inheritance, and I advocate that you don't either.  I know it's
-cool and seductive, but you'll regret it, most likely.  Of course, 
-please make your own decisions in that regard.  I don't allow it in my classes.
+For that reason, I don't use inheritance.  Now, you, gentle reader, are going to be 20+ years
+younger than I am, and given the prevalence of inheritance in both C++ and Python, will not have
+the luxury of ridding your life of it.  So, learn what I've taught you here, and please try to 
+keep a critical eye towards inheritance, and think twice before choosing an inheritance-based
+solution to your problems.  What you gain in "simplicity" and "elegance", you will lose in 
+documentation...
 
 <hr>
 <h3>A little more on destructors</h3>
@@ -556,10 +561,10 @@ If you do write destructors, what happens is as follows: When you delete a point
 call the proper subclass destructor first, and then the superclass destructor next.  (You can 
 extrapolate this down the hierarchy if you are using a hierarchy of inheritance).  The following
 code illustrates.  Simply read the inline comments to see what it does.  It is in
-<b><a href=destruct.cpp>destruct.cpp</a></b>:
+<b><a href=src/destruct.cpp>src/destruct.cpp</a></b>:
 
 <p><center><table border=3 cellpadding=3><td><pre>
-<font color=blue>/* destruct.cpp.
+<font color=blue>/* src/destruct.cpp.
    James S. Plank
    Tue Sep 25 14:47:43 EDT 2018
 
@@ -623,7 +628,7 @@ int main()
 Here is the running code:
 
 <pre>
-UNIX> <font color=darkred><b>destruct </b></font>
+UNIX> <font color=darkred><b>bin/destruct </b></font>
 S1 destructor.
 Superclass destructor.
 S2 destructor.
