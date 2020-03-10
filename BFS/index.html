@@ -4,8 +4,8 @@
 <LI> James S. Plank
 <LI> November 2, 2009.
 Latest Modification:
-Tue Oct 28 09:01:14 EDT 2014
-<LI> Directory: <b>/home/plank/cs302/Notes/BFS</b>
+Tue Mar 10 16:45:01 EDT 2020
+<LI> Directory: <b>/home/jplank/cs302/Notes/BFS</b>
 </UL>
 <hr>
 
@@ -58,7 +58,7 @@ In fact, it will be useful to revisit DFS with this view.  Let's use the followi
 graph as an example:
 
 <p><center><table border=3 cellpadding=3>
-<td valign=top><b><a href=Ex-Graph.txt>Ex-Graph.txt</a></b>
+<td valign=top><b><a href=txt/Ex-Graph.txt>txt/Ex-Graph.txt</a></b>
 <pre>
 NNODES 12
 EDGE 8 10  EDGE 4 11
@@ -70,12 +70,12 @@ EDGE 0 11  EDGE 3 7
 EDGE 3 9   EDGE 8 9
 EDGE 6 8
 </pre></td>
-<td valign=top><IMG src=Ex-Graph.png width=200></td></table></center><p>
+<td valign=top><IMG src=img/Ex-Graph.png width=200></td></table></center><p>
 
 A recursive visiting of all nodes using DFS starting with node zero will 
 look as follows:
 
-<p><center><table border=3 cellpadding=3><td valign=top><IMG src=DFS-Run.png width=400></td></table></center><p>
+<p><center><table border=3 cellpadding=3><td valign=top><IMG src=img/DFS-Run.png width=400></td></table></center><p>
 
 Were we to print out the nodes, they would be printed out in the order in which they are visited:
 <center>
@@ -280,10 +280,10 @@ the starting node.  The BFS algorithm becomes:
 When the algorithm terminates, each node contains its shortest distance to node zero, and the
 path to node zero can be obtained by traversing the backedges.
 <p>
-The PDF file <b><a href=BFS-Run.pdf>BFS-Run.pdf</a></b> contains an example from the graph
+The PDF file <b><a href=pdf/BFS-Run.pdf>pdf/BFS-Run.pdf</a></b> contains an example from the graph
 above.  It shows every step along the way.  The final state is below:
 
-<p><center><table border=3 cellpadding=3><td valign=top><IMG src=BFS-Run.png></td></table></center><p>
+<p><center><table border=3 cellpadding=3><td valign=top><IMG src=img/BFS-Run.png></td></table></center><p>
 
 Once the BFS finishes, we know the shortest distance of every node from node zero, and we can use
 the backedges to find the paths.  For example, the shortest path from node 0 to node 7 is:
@@ -341,14 +341,14 @@ I do advocate that you try removing the node in your lab.  Not only is the code 
 but it forces you to think about data structure design..</font>
 <p>
 As an example, suppose we enrich the graph above with edge weights:
-<p><center><table border=3 cellpadding=3><td valign=top><IMG src=Ex-Graph-W.png width=250></td></table></center><p>
+<p><center><table border=3 cellpadding=3><td valign=top><IMG src=img/Ex-Graph-W.png width=250></td></table></center><p>
 Then 
-the PDF file <b><a href=Dijkstra-Run.pdf>Dijkstra-Run.pdf</a></b> shows how Dijkstra's
+the PDF file <b><a href=pdf/Dijkstra-Run.pdf>pdf/Dijkstra-Run.pdf</a></b> shows how Dijkstra's
 algorithm runs on the graph.  In the PDF file, we are removing nodes when we 
 replace them).  When it finishes, here is the state of the system:
 
 
-<p><center><table border=3 cellpadding=3><td valign=top><IMG src=Dijkstra-Run.png></td></table></center><p>
+<p><center><table border=3 cellpadding=3><td valign=top><IMG src=img/Dijkstra-Run.png></td></table></center><p>
 
 As with the BFS run above, you can use the backedges to find the shortest paths.  For example, 
 the shortest path from node 0 to node 3 has a distance of 20, and contains the edges:
