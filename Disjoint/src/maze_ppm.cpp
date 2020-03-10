@@ -19,14 +19,14 @@ class Maze {
     int c;
     vector <int_vector> cells;
     vector <int> path;
-    void Print_Index(int index);
+    void Print_Index(int index) const;
     void PPM();
     void set_h_wall(int i, int j, int red, int green, int blue, vector <int> *pixmap);
     void set_v_wall(int i, int j, int red, int green, int blue, vector <int> *pixmap);
     void set_cell(int i, int j, int red, int green, int blue, vector <int> *pixmap);
 };
 
-void Maze::Print_Index(int index)
+void Maze::Print_Index(int index) const
 {
       cout << " [" << index/c << "," << index%c << "]";
 }

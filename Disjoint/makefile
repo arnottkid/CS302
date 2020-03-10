@@ -1,32 +1,45 @@
-ALL = example maze-gen maze_ppm example-exam
+ALL = bin/example bin/maze-gen bin/maze_ppm bin/example-exam
 
 all: $(ALL)
 
+CFLAGS = -Iinclude -Wall -Wextra -std=c++98
+
 clean: 
-	rm -f *.o a.out $(ALL)
+	rm -f a.out obj/* bin/*
 
-OBJS = disjoint-height.o disjoint-rank.o disjoint-size.o
+# Object files
 
-example.o: disjoint.h
-maze-gen.o: disjoint.h
-disjoint-height.o: disjoint.h
-disjoint-rank.o: disjoint.h
-disjoint-size.o: disjoint.h
+OBJS = obj/disjoint-height.o obj/disjoint-rank.o obj/disjoint-size.o
 
-.SUFFIXES: .cpp .o 
+obj/disjoint-height.o: src/disjoint-height.cpp include/disjoint.hpp
+	g++ $(CFLAGS) -c -o obj/disjoint-height.o src/disjoint-height.cpp
 
-.cpp.o: 
-	g++ -c -O $*.cpp
+obj/disjoint-rank.o: src/disjoint-rank.cpp include/disjoint.hpp
+	g++ $(CFLAGS) -c -o obj/disjoint-rank.o src/disjoint-rank.cpp
 
-example: example.o $(OBJS)
-	g++ -O -o example example.o $(OBJS)
+obj/disjoint-size.o: src/disjoint-size.cpp include/disjoint.hpp
+	g++ $(CFLAGS) -c -o obj/disjoint-size.o src/disjoint-size.cpp
 
-example-exam: example-exam.o $(OBJS)
-	g++ -O -o example-exam example-exam.o $(OBJS)
+obj/example.o: src/example.cpp include/disjoint.hpp
+	g++ $(CFLAGS) -c -o obj/example.o src/example.cpp
 
-maze-gen: maze-gen.o $(OBJS)
-	g++ -O -o maze-gen maze-gen.o $(OBJS)
+obj/example-exam.o: src/example-exam.cpp include/disjoint.hpp
+	g++ $(CFLAGS) -c -o obj/example-exam.o src/example-exam.cpp
 
-maze_ppm: maze_ppm.cpp 
-	g++ -O -o maze_ppm maze_ppm.cpp
+obj/maze-gen.o: src/maze-gen.cpp include/disjoint.hpp
+	g++ $(CFLAGS) -c -o obj/maze-gen.o src/maze-gen.cpp
+
+# Executables
+
+bin/example: obj/example.o $(OBJS)
+	g++ -O -o bin/example obj/example.o $(OBJS)
+
+bin/example-exam: obj/example-exam.o $(OBJS)
+	g++ -O -o bin/example-exam obj/example-exam.o $(OBJS)
+
+bin/maze-gen: obj/maze-gen.o $(OBJS)
+	g++ -O -o bin/maze-gen obj/maze-gen.o $(OBJS)
+
+bin/maze_ppm: src/maze_ppm.cpp 
+	g++ -O -o bin/maze_ppm src/maze_ppm.cpp
 

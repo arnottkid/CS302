@@ -1,14 +1,13 @@
-#include <vector>
 #include <cstdlib>
 #include <cstdio>
 #include <map>
-#include "disjoint.h"
+#include "disjoint.hpp"
 #include <iostream>
 using namespace std;
 
 int main(int argc, char **argv)
 {
-  int r, c, row, column, c1, c2, ncomp, s1, s2, hov;
+  int r, c, row, column, c1, c2, ncomp, s1, s2;
   DisjointSet *d;
   map <double, int> walls;
   map <double, int>::iterator wit;

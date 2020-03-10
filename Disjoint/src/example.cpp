@@ -1,7 +1,6 @@
-#include <vector>
 #include <cstdlib>
 #include <cstdio>
-#include "disjoint.h"
+#include "disjoint.hpp"
 #include <iostream>
 using namespace std;
 

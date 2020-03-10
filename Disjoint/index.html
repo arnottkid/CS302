@@ -1,9 +1,9 @@
 <title>CS302 Lecture Notes</title>
 <h2>CS302 Lecture Notes - Disjoint Sets</h2>
 <UL>
-<LI> March 27, 2008.  Latest revision: September, 2018.
+<LI> March 27, 2008.  Latest revision: March, 2020.
 <LI> James S. Plank
-<LI> Directory: <b>/home/plank/cs302/Notes/Disjoint</b>
+<LI> Directory: <b>/home/jplank/cs302/Notes/Disjoint</b>
 </UL>
 <hr>
 
@@ -80,7 +80,7 @@ Let's illustrate with a simple example.  We initialize an instance of disjoint s
 10 items.  Each item is a node with a number from 0 to 9.  Each node has a NULL link, which 
 we depict by not drawing any arrows from the node:
 
-<p><center><table border=3><td><img src=P1.jpg></td></table></center><p>
+<p><center><table border=3><td><img src=img/P1.jpg></td></table></center><p>
 
 Again, each node is in its own set, and each node's set id is its number.  Suppose we call
 <i>Union(0, 1)</i>, 
@@ -88,7 +88,7 @@ Again, each node is in its own set, and each node's set id is its number.  Suppo
 <i>Union(4, 5)</i>.  These will each set one of the node's link to the other node.  We'll talk
 about how that gets done later.  However, suppose this is the result:
 
-<p><center><table border=3><td><img src=P2.jpg></td></table></center><p>
+<p><center><table border=3><td><img src=img/P2.jpg></td></table></center><p>
 
 As you can see, node 0's link has been set to 1.  Both of these nodes' set ids are now 1, which 
 means <i>Find(0)</i> equals <i>Find(1)</i> equals one.  Similarly, 
@@ -114,13 +114,13 @@ nodes from the path from i to the root, to the root.
 <p>
 As always, a picture helps.  Suppose this is the state of our disjoint set instance:
 
-<center><table border=3><td><img src=P8.jpg></td></table></center><p>
+<center><table border=3><td><img src=img/P8.jpg></td></table></center><p>
 
 There are two sets, with set id's 5 and 9.  Now, suppose you call <i>Find(0)</i>.  It will 
 return five, but along the way to the root node of its set, it encounters nodes 1 and 3.
 Before returning five, it sets the links to 0, 1 and 3 to five:
 
-<center><table border=3><td><img src=P9.jpg></td></table></center><p>
+<center><table border=3><td><img src=img/P9.jpg></td></table></center><p>
 
 Do you see why this is a good thing?  Previously, when you called <i>Find(0)</i>, you needed to
 travel through nodes 1 and 3 before getting to 5.  If you call <i>Find(0)</i> again, you get to
@@ -173,24 +173,28 @@ in the newly merged set will return this set id.
 </UL>
 
 The API is in 
-<b><a href=disjoint.h>disjoint.h</a></b>:
+<b><a href=include/disjoint.hpp>include/disjoint.hpp</a></b>:
 
-<p><center><table border=3 cellpadding=3><td><pre>
+<p><center><table border=3 cellpadding=3><td valign=top><pre>
+<font color=blue>/* disjoint.hpp
+   Interface and subclass specification for disjoint sets.
+   James S. Plank
+   Tue Sep 25 15:48:18 EDT 2018
+ */</font>
+
 #pragma once
 #include &lt;vector&gt;
-using namespace std;
 
-<font color=blue>/* The Disjoint Set API is defined as a c++
-   interface, because I am implementing it three
-   ways.  Each subclass implementation is in its
-   own cpp file.  */</font>
+<font color=blue>/* The Disjoint Set API is implemented as a c++ interface, 
+   because I am implementing it three ways.  Each subclass
+   implementation is in its own cpp file. */</font>
 
 class DisjointSet {
   public:
     virtual ~DisjointSet() {};
     virtual int Union(int s1, int s2) = 0;
     virtual int Find(int element) = 0;  
-    virtual void Print() = 0;
+    virtual void Print() const = 0;
 };
 
 <font color=blue>/* The first subclass implements Union-by-Size. */</font>
@@ -200,39 +204,40 @@ class DisjointSetBySize : public DisjointSet {
     DisjointSetBySize(int nelements);
     int Union(int s1, int s2);
     int Find(int element); 
-    void Print();
+    void Print() const ;
 
   protected:
-    vector &lt;int&gt; links;
-    vector &lt;int&gt; sizes;
+    std::vector &lt;int&gt; links;
+    std::vector &lt;int&gt; sizes;
 };
-</pre></td><td valign=top><pre><font color=blue>/* The second subclass implements Union-by-Height. */</font>
+</pre></td><td valign=top><pre>
+<font color=blue>/* The second subclass implements Union-by-Height. */</font>
 
 class DisjointSetByHeight : public DisjointSet {
   public:
     DisjointSetByHeight(int nelements);
     int Union(int s1, int s2);
     int Find(int element); 
-    void Print();
+    void Print() const;
 
   protected:
-    vector &lt;int&gt; links;
-    vector &lt;int&gt; heights;
+    std::vector &lt;int&gt; links;
+    std::vector &lt;int&gt; heights;
 };
 
-<font color=blue>/* The third subclass implements Union-by-Rank 
-   with path compression. */</font>
+<font color=blue>/* The third subclass implements 
+  Union-by-Rank with path compression. */</font>
 
 class DisjointSetByRankWPC : public DisjointSet {
   public:
     DisjointSetByRankWPC(int nelements);
     int Union(int s1, int s2);
     int Find(int element); 
-    void Print();
+    void Print() const;
 
   protected:
-    vector &lt;int&gt; links;
-    vector &lt;int&gt; ranks;
+    std::vector &lt;int&gt; links;
+    std::vector &lt;int&gt; ranks;
 };
 </pre></td></table></center><p>
 
@@ -259,9 +264,9 @@ In all cases, if <b>e</b> is not the root of a set,
 Each subclass is implemented in its own source file:
 <p>
 <UL>
-<LI> <b><a href=disjoint-size.cpp>disjoint-size.cpp</a></b> implements union-by-size.
-<LI> <b><a href=disjoint-height.cpp>disjoint-height.cpp</a></b> implements union-by-height.
-<LI> <b><a href=disjoint-rank.cpp>disjoint-rank.cpp</a></b> implements union-by-rank with path compression.
+<LI> <b><a href=src/disjoint-size.cpp>src/disjoint-size.cpp</a></b> implements union-by-size.
+<LI> <b><a href=src/disjoint-height.cpp>src/disjoint-height.cpp</a></b> implements union-by-height.
+<LI> <b><a href=src/disjoint-rank.cpp>src/disjoint-rank.cpp</a></b> implements union-by-rank with path compression.
 </UL>
 I will start with union-by-size, and then show the differences with the others.  The differences
 are <i>very</i> minor.
@@ -314,7 +319,7 @@ int Disjoint::Union(int s1, int s2)
 }
 </pre></td></table></center><p>
 
-I won't show <b>Print()</b>: it simply prints out the vectors.  
+I won't show <b>Print()</b>. It simply prints out the vectors.  
 <p>
 The only difference between union-by-size and union-by-height is that <b>heights</b> keeps track of the 
 number of nodes in the longest path.  After changing all of the "sizes" to "heights", 
@@ -404,7 +409,8 @@ int Disjoint::Find(int e)
 <hr>
 <h3>Example of Use</h3>
 
-The program <b><a href=example.cpp>example.cpp</a></b> shows a simple example of using the
+The program <b><a href=src/example.cpp>src/example.cpp</a></b> 
+shows a simple example of using the
 API.  It does the operations in the example above, which is nice because it illustrates
 the difference between the three algorithms.  First, let's take a look at how it
 uses a command line argument to select which subclass it will use:
@@ -437,7 +443,7 @@ int main(int argc, char **argv)
   }
 </pre></td></table></center><p>
 
-As for the rest, I'm just going to show the Union and Find commands, so that see what
+As for the rest, I'm just going to show the Union and Find commands, so that you can see what
 it's doing without all of the prints:
 
 <p><center><table border=3 cellpadding=3><td><pre>
@@ -477,15 +483,21 @@ The <b><a href=makefile>makefile</a></b> compiles eveything:
 
 <pre>
 UNIX> <font color=darkred><b>make clean</b></font>
-rm -f *.o a.out example
-UNIX> <font color=darkred><b>make example</b></font>
-g++ -c -O example.cpp
-g++ -c -O disjoint-height.cpp
-g++ -c -O disjoint-rank.cpp
-g++ -c -O disjoint-size.cpp
-g++ -O -o example example.o disjoint-height.o disjoint-rank.o disjoint-size.o
-UNIX> 
+rm -f a.out obj/* bin/*
+UNIX> <font color=darkred><b>make</b></font>
+g++ -Iinclude -Wall -Wextra -std=c++98 -c -o obj/example.o src/example.cpp
+g++ -Iinclude -Wall -Wextra -std=c++98 -c -o obj/disjoint-height.o src/disjoint-height.cpp
+g++ -Iinclude -Wall -Wextra -std=c++98 -c -o obj/disjoint-rank.o src/disjoint-rank.cpp
+g++ -Iinclude -Wall -Wextra -std=c++98 -c -o obj/disjoint-size.o src/disjoint-size.cpp
+g++ -O -o bin/example obj/example.o obj/disjoint-height.o obj/disjoint-rank.o obj/disjoint-size.o
+g++ -Iinclude -Wall -Wextra -std=c++98 -c -o obj/maze-gen.o src/maze-gen.cpp
+g++ -O -o bin/maze-gen obj/maze-gen.o obj/disjoint-height.o obj/disjoint-rank.o obj/disjoint-size.o
+g++ -O -o bin/maze_ppm src/maze_ppm.cpp
+g++ -Iinclude -Wall -Wextra -std=c++98 -c -o obj/example-exam.o src/example-exam.cpp
+g++ -O -o bin/example-exam obj/example-exam.o obj/disjoint-height.o obj/disjoint-rank.o obj/disjoint-size.o
+UNIX> <font color=darkred><b></b></font>
 </pre>
+
 
 We first run it with union-by-size.  Let's look at the output incrementally.  When 
 the program starts, it sets up an empty <b>Disjoint</b> with ten elements:
@@ -495,7 +507,7 @@ the program starts, it sets up an empty <b>Disjoint</b> with ten elements:
 <tr>
 <td valign=top>
 <pre>
-UNIX> <font color=darkred><b>./example size</b></font>
+UNIX> <font color=darkred><b>binexample size</b></font>
 Starting State:
 
 Node:    0  1  2  3  4  5  6  7  8  9
@@ -503,7 +515,7 @@ Links:  -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
 Sizes:   1  1  1  1  1  1  1  1  1  1
 </pre>
 </td>
-<td valign=center align=center><IMG src=P1.jpg></td>
+<td valign=center align=center><IMG src=img/P1.jpg></td>
 </tr>
 </table></center><p>
 Next, it performs three union operations: 
@@ -527,7 +539,7 @@ Links:   1 -1  3 -1  5 -1 -1 -1 -1 -1
 Sizes:   1  2  1  2  1  2  1  1  1  1
 </pre>
 </td>
-<td valign=center align=center><IMG src=P2.jpg></td>
+<td valign=center align=center><IMG src=img/P2.jpg></td>
 </tr>
 </table></center><p>
 
@@ -567,7 +579,7 @@ Links:   1  3  3 -1  5 -1  5  5  5 -1
 Sizes:   1  2  1  4  1  5  1  1  1  1
 </pre>
 </td> 
-<td valign=center align=center><IMG src=P3.jpg></td>
+<td valign=center align=center><IMG src=img/P3.jpg></td>
 </tr> 
 </table></center><p>  
 
@@ -603,7 +615,7 @@ Sizes:   1  2  1  4  1  9  1  1  1  1
 UNIX> <font color=darkred><b></b></font>
 </pre>
 </td>
-<td valign=center align=center><IMG src=P4.jpg></td>
+<td valign=center align=center><IMG src=img/P4.jpg></td>
 </tr>
 </table></center><p> 
 
@@ -616,7 +628,7 @@ Now, when we run this on union-by-height, the output is the same until the third
 <tr>
 <td valign=top>
 <pre>
-UNIX> <font color=darkred><b>./example height</b></font>
+UNIX> <font color=darkred><b>bin/example height</b></font>
 Starting State:
 
 Node:    0  1  2  3  4  5  6  7  8  9
@@ -624,7 +636,7 @@ Links:  -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
 Hghts:   1  1  1  1  1  1  1  1  1  1
 </pre>
 </td>
-<td valign=center align=center><IMG src=P1.jpg></td>
+<td valign=center align=center><IMG src=img/P1.jpg></td>
 </tr>
 <tr>
 <td valign=top>
@@ -638,7 +650,7 @@ Links:   1 -1  3 -1  5 -1 -1 -1 -1 -1
 Hghts:   1  2  1  2  1  2  1  1  1  1
 </pre>
 </td>
-<td valign=center align=center><IMG src=P2.jpg></td>
+<td valign=center align=center><IMG src=img/P2.jpg></td>
 </tr>
 <tr>
 <td valign=top>
@@ -657,7 +669,7 @@ Links:   1  3  3 -1  5 -1  5  5  5 -1
 Hghts:   1  2  1  3  1  2  1  1  1  1
 </pre>
 </td> 
-<td valign=center align=center><IMG src=P3H.jpg></td>
+<td valign=center align=center><IMG src=img/P3H.jpg></td>
 </tr> 
 </table></center><p>  
 
@@ -694,7 +706,7 @@ Hghts:   1  2  1  3  1  2  1  1  1  1
 UNIX> 
 </pre>
 </td>
-<td valign=center align=center><IMG src=P4H.jpg></td>
+<td valign=center align=center><IMG src=img/P4H.jpg></td>
 </tr>
 </table></center><p>
 
@@ -707,7 +719,7 @@ We'll start with the last Union, where the state of the data structure is the sa
 <table cellpadding=3 border=3>
 <tr>
 <td valign=top><pre>
-UNIX> <font color=darkred><b>./example rank</b></font>
+UNIX> <font color=darkred><b>bin/example rank</b></font>
 ....
 ....
 Doing d->Union(3, 5).  Resulting set = 3
@@ -717,7 +729,7 @@ Links:   1  3  3 -1  5  3  5  5  5 -1
 Ranks:   1  2  1  3  1  2  1  1  1  1
 </pre>
 </td>
-<td valign=center align=center><IMG src=P4H.jpg></td>
+<td valign=center align=center><IMG src=img/P4H.jpg></td>
 </tr>
 </table></center><p>
 
@@ -738,7 +750,7 @@ Links:   1  3  3 -1  5  3  5  3  5 -1
 Ranks:   1  2  1  3  1  2  1  1  1  1
 </pre>
 </td>
-<td valign=center align=center><IMG src=P5.jpg></td>
+<td valign=center align=center><IMG src=img/P5.jpg></td>
 </tr>
 </table></center><p>
 
@@ -755,7 +767,7 @@ Links:   3  3  3 -1  5  3  5  3  5 -1
 Ranks:   1  2  1  3  1  2  1  1  1  1
 </pre>
 </td>
-<td valign=center align=center><IMG src=P6.jpg></td>
+<td valign=center align=center><IMG src=img/P6.jpg></td>
 </tr>
 </table></center><p>
 
@@ -778,7 +790,7 @@ Links:  3  3  3 -1  3  3  3  3  3 -1
 Ranks:  1  2  1  3  1  2  1  1  1  1
 </pre>
 </td>
-<td valign=center align=center><IMG src=P7.jpg></td>
+<td valign=center align=center><IMG src=img/P7.jpg></td>
 </tr>
 </table></center><p>
 
@@ -797,7 +809,7 @@ viewed as an undirected graph, where each cell in a grid is a node in the graph,
 horizontally or vertically from one cell to the next, there is an edge between the nodes.  If there
 is a wall between two cells, then there is no edge.
 
-<p><center><table border=0><td><IMG src=maze.jpg></table></center><p>
+<p><center><table border=0><td><IMG src=img/maze.jpg></table></center><p>
 
 A good maze is one where the graph is fully connected, so that every cell is reachable from the
 start/end cells, but there are no cycles.  We can generate such a maze using disjoint sets.
@@ -815,7 +827,7 @@ call <b>Union()</b> on the two sets.  Otherwise, we keep the wall.  We keep doin
 we have just one set.
 <p>
 The code is in 
-<b><a href=maze-gen.cpp>maze-gen.cpp</a></b>.  It's a little tricky.  We first generate
+<b><a href=src/maze-gen.cpp>src/maze-gen.cpp</a></b>.  It's a little tricky.  We first generate
 all the walls.  Walls that separate vertically adjacent cells are indexed by the smaller
 cell number.  Walls
 that separate horizontally adjacent cells are indexed by the smaller cell number plus <i>r*c</i>.
@@ -828,7 +840,7 @@ just one component.  Then we print out the walls:
 #include &lt;cstdlib&gt;
 #include &lt;cstdio&gt;
 #include &lt;map&gt;
-#include "disjoint.h"
+#include "disjoint.hpp"
 #include &lt;iostream&gt;
 using namespace std;
 
@@ -923,21 +935,21 @@ generate mazes of all sizes:
 
 <p><center><table border=0><td>
 <pre>
-UNIX> <font color=darkred><b>./maze-gen 50 100 rank | maze_ppm 5 | convert - maze2.jpg</b></font>
+UNIX> <font color=darkred><b>bin/maze-gen 50 100 rank | bin/maze_ppm 5 | convert - img/maze2.jpg</b></font>
 </pre>
-<IMG src=maze2.jpg></table></center><p>
+<IMG src=img/maze2.jpg></table></center><p>
 
 <hr>
 <h3>An example exam question</h3>
 
 Behold the following program (in
-<b><a href=example-exam.cpp>example-exam.cpp</a></b>):
+<b><a href=src/example-exam.cpp>src/example-exam.cpp</a></b>):
 
 <p><center><table border=3 cellpadding=3><td><pre>
 #include &lt;vector&gt;
 #include &lt;cstdlib&gt;
 #include &lt;cstdio&gt;
-#include "disjoint.h"
+#include "disjoint.hpp"
 #include &lt;iostream&gt;
 using namespace std;
 
@@ -972,7 +984,7 @@ int main()
 When I compile this with <b>DJ-rank.cpp</b> and run it, the first lines are:
 
 <pre>
-UNIX> <font color=darkred><b>example-exam</b></font>
+UNIX> <font color=darkred><b>bin/example-exam</b></font>
 
 Elts:   0  1  2  3  4  5  6  7
 Links:  1  3  3  7  5  7  7 -1
@@ -987,12 +999,12 @@ Then give me the output of the last <b>d.Print()</b> call.
 
 You use the <b>links</b> field to draw the data structure:
 
-<p><center><table border=3><td><img src=EE1.jpg></td></table></center><p>
+<p><center><table border=3><td><img src=img/EE1.jpg></td></table></center><p>
 
 When you call <b>d.Find(0)</b>, path compression occurs, which means that
 nodes 0, 1 (and 3) all point to the root (7): 
 
-<p><center><table border=3><td><img src=EE2.jpg></td></table></center><p>
+<p><center><table border=3><td><img src=img/EE2.jpg></td></table></center><p>
 
 Thus, the <b>links</b> fields for 0 and 1 will become 7.  Everything else
 remains the same, because <b>Find()</b> doesn't change the <b>ranks</b>. 

@@ -8,7 +8,7 @@
 #include <cstdlib>
 #include <cstdio>
 #include <iostream>
-#include "disjoint.h"
+#include "disjoint.hpp"
 using namespace std;
 
 DisjointSetByRankWPC::DisjointSetByRankWPC(int nelements)
@@ -67,13 +67,13 @@ int DisjointSetByRankWPC::Find(int e)
   return p;
 }
 
-void DisjointSetByRankWPC::Print()
+void DisjointSetByRankWPC::Print() const
 {
-  int i;
+  size_t i;
 
   printf("\n");
   printf("Node:  ");
-  for (i = 0; i < links.size(); i++) printf("%3d", i);  
+  for (i = 0; i < links.size(); i++) printf("%3lu", i);  
   printf("\n");
 
   printf("Links: ");
