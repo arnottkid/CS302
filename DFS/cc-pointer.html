@@ -19,12 +19,13 @@ vector.
 When I asked in class (this is 2016), whether I should implement the program with
 integers in the adjacency lists, or pointers, the class chose pointers.  Nice. 
 So, I have implemented this version in
-<b><a href=concomp-pointer.cpp>concomp-pointer.cpp</a></b>.  I include the implementation
+<b><a href=src/concomp-pointer.cpp>src/concomp-pointer.cpp</a></b>.  I include the implementation
 below with extensive inline comments to help you.  In some respects, this is a simpler
 implementation, because it doesn't require a <b>Graph</b> class.  This is because the 
 pointers point directly to nodes, and don't require that the nodes be accessible as part
 of the <b>Graph</b> class.
 <p>
+
 <p><center><table border=3 cellpadding=3><td><pre>
 <font color=blue>/* The Node class:  
 
@@ -60,11 +61,11 @@ class Node {
    asterisk is an "s", which means to print out a string (C style).  
    I give it the empty string.  So, if, for example, "indent" is equal to 4, this
    will print out four spaces.
-   */</font>
+*/</font>
 
 void DFS(Node *n, int cn, int indent)
 {
-  int i;
+  size_t i;
 
   printf("%*sDFS(%d,%d)\n", indent, "", n-&gt;id, cn);
   if (n-&gt;component != -1) return;
@@ -81,7 +82,7 @@ int main()
   vector &lt;Node *&gt; Nodes;     <font color=blue>/* These are the nodes.  Note that they are pointers. */</font>
   int nn;
   int f, t;
-  int i, j;
+  size_t i, j;
   string s;
   Node *nf, *nt;
   int cn;
@@ -136,6 +137,7 @@ int main()
   
   return 0;
 }
+
 </pre></td></table></center><p>
 
 This code is also a little different, because it prints out the beginning of

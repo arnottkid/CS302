@@ -1,31 +1,34 @@
-all: gen_graph concomp cycledet0 cycledet1 cycledet2 cycledet3 concomp-pointer
+all: bin/gen_graph \
+     bin/concomp \
+     bin/cycledet0 \
+     bin/cycledet1 \
+     bin/cycledet2 \
+     bin/cycledet3 \
+     bin/concomp-pointer 
+
+CFLAGS = -Wall -Wextra 
 
 clean:
-	rm -f *.o gen_graph concomp cycledet0 cycledet1 cycledet2 cycledet3 concomp-pointer
+	rm -f bin/* a.out
 
-.SUFFIXES: .cpp .o
+bin/gen_graph: src/gen_graph.cpp
+	g++ $(CFLAGS) -o bin/gen_graph src/gen_graph.cpp
 
-.cpp.o: 
-	g++ -c $*.cpp 
+bin/concomp: src/concomp.cpp
+	g++ $(CFLAGS) -o bin/concomp src/concomp.cpp
 
-gen_graph: gen_graph.o
-	g++ -o gen_graph gen_graph.o
+bin/concomp-pointer: src/concomp-pointer.cpp
+	g++ $(CFLAGS) -o bin/concomp-pointer src/concomp-pointer.cpp
 
-concomp: concomp.o
-	g++ -o concomp concomp.o
+bin/cycledet0: src/cycledet0.cpp
+	g++ $(CFLAGS) -o bin/cycledet0 src/cycledet0.cpp
 
-concomp-pointer: concomp-pointer.o
-	g++ -o concomp-pointer concomp-pointer.o
+bin/cycledet1: src/cycledet1.cpp
+	g++ $(CFLAGS) -o bin/cycledet1 src/cycledet1.cpp
 
-cycledet0: cycledet0.o
-	g++ -o cycledet0 cycledet0.o
+bin/cycledet2: src/cycledet2.cpp
+	g++ $(CFLAGS) -o bin/cycledet2 src/cycledet2.cpp
 
-cycledet1: cycledet1.o
-	g++ -o cycledet1 cycledet1.o
-
-cycledet2: cycledet2.o
-	g++ -o cycledet2 cycledet2.o
-
-cycledet3: cycledet3.o
-	g++ -o cycledet3 cycledet3.o
+bin/cycledet3: src/cycledet3.cpp
+	g++ $(CFLAGS) -o bin/cycledet3 src/cycledet3.cpp
 

@@ -1,10 +1,5 @@
 #include <string>
 #include <vector>
-#include <list>
-#include <cmath>
-#include <algorithm>
-#include <map>
-#include <set>
 #include <iostream>
 #include <cstdio>
 #include <cstdlib>
@@ -48,7 +43,7 @@ class Node {
 
 void DFS(Node *n, int cn, int indent)
 {
-  int i;
+  size_t i;
 
   printf("%*sDFS(%d,%d)\n", indent, "", n->id, cn);
   if (n->component != -1) return;
@@ -65,7 +60,7 @@ int main()
   vector <Node *> Nodes;     /* These are the nodes.  Note that they are pointers. */
   int nn;
   int f, t;
-  int i, j;
+  size_t i, j;
   string s;
   Node *nf, *nt;
   int cn;

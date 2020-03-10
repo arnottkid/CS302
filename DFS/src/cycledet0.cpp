@@ -1,42 +1,49 @@
 #include <iostream>
 #include <string>
+#include <set>
 #include <vector>
 #include <stdlib.h>
 using namespace std;
+
+/* The structure of the graph is the same as the 
+   connected component problem. */
 
 class Node {
   public:
     int id;
     vector <int> edges;
-    int component;
+    int visited;
 };
 
 class Graph {
   public:
     vector <Node *> nodes;
-    void Print();
-    void Component_Count(int index, int cn);
+    bool is_cycle(int index);    // Returns whether there is a cycle.
+    void Print() const;
 };
 
-void Graph::Component_Count(int index, int cn)
+bool Graph::is_cycle(int index)
 {
   Node *n;
-  int i;
+  size_t i;
 
   n = nodes[index];
-  if (n->component != -1) return;
-  n->component = cn;
-  for (i = 0; i < n->edges.size(); i++) Component_Count(n->edges[i], cn);
+  if (n->visited) return true;
+  n->visited = 1;
+  for (i = 0; i < n->edges.size(); i++) {
+    if (is_cycle(n->edges[i])) return true;
+  }
+  return false;
 }
 
-void Graph::Print()
+void Graph::Print() const
 {
-  int i, j;
+  size_t i, j;
   Node *n;
 
   for (i = 0; i < nodes.size(); i++) {
     n = nodes[i];
-    cout << "Node " << i << ": " << n->component << ":";
+    cout << "Node " << i << ": " << n->visited << ":";
     for (j = 0; j < n->edges.size(); j++) {
       cout << " " << n->edges[j];
     }
@@ -44,12 +51,11 @@ void Graph::Print()
   }
 }
 
-
-int main(int argc, char **argv)
+int main()
 {
   Graph g;
   string s;
-  int nn, n1, n2, i, c;
+  size_t nn, n1, n2, i;
   Node *n;
 
   cin >> s;
@@ -58,7 +64,7 @@ int main(int argc, char **argv)
 
   for (i = 0; i < nn; i++) {
     n = new Node;
-    n->component = -1;
+    n->visited = 0;
     n->id = i;
     g.nodes.push_back(n);
   }
@@ -72,14 +78,14 @@ int main(int argc, char **argv)
     }
   }
 
-  c = 0;
   for (i = 0; i < g.nodes.size(); i++) {
-    if (g.nodes[i]->component == -1) {
-      c++;
-      g.Component_Count(i, c);
-     }
+    if (!g.nodes[i]->visited) {
+      if (g.is_cycle(i)) {
+        cout << "There is a cycle reachable from node " << i << endl;
+      } else {
+        cout << "No cycle reachable from node " << i << endl;
+      }
+    }
   }
-
-  g.Print();
   return 0;
 }

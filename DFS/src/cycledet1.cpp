@@ -1,3 +1,6 @@
+/* This only differs from cycledet0.cpp by printing at the beginning
+   of each is_cycle() call. */
+
 #include <iostream>
 #include <string>
 #include <set>
@@ -15,27 +18,28 @@ class Node {
 class Graph {
   public:
     vector <Node *> nodes;
-    void Print();
-    int is_cycle(int index);
+    bool is_cycle(int index);
+    void Print() const;
 };
 
-int Graph::is_cycle(int index)
+bool Graph::is_cycle(int index)
 {
   Node *n;
-  int i;
+  size_t i;
 
+  cout << "Called is_cycle(" << index << ")\n";
   n = nodes[index];
-  if (n->visited) return 1;
+  if (n->visited) return true;
   n->visited = 1;
   for (i = 0; i < n->edges.size(); i++) {
-    if (is_cycle(n->edges[i])) return 1;
+    if (is_cycle(n->edges[i])) return true;
   }
-  return 0;
+  return false;
 }
 
-void Graph::Print()
+void Graph::Print() const
 {
-  int i, j;
+  size_t i, j;
   Node *n;
 
   for (i = 0; i < nodes.size(); i++) {
@@ -48,11 +52,11 @@ void Graph::Print()
   }
 }
 
-int main(int argc, char **argv)
+int main()
 {
   Graph g;
   string s;
-  int nn, n1, n2, i;
+  size_t nn, n1, n2, i;
   Node *n;
 
   cin >> s;
