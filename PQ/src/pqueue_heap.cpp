@@ -104,7 +104,7 @@ double PQueueHeap::Pop()
   double retval;
   
   if (h.empty()) {
-    throw runtime_error("Called Pop() on an empty PQueue");
+    throw (string) "Called Pop() on an empty PQueue";
   }
   retval = h[0];
   h[0] = h[h.size()-1];

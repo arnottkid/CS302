@@ -23,7 +23,7 @@ double PQueueSet::Pop()
   double retval;
   
   if (elements.empty()) {
-    throw runtime_error("Called Pop() on an empty PQueue");
+    throw (string) "Called Pop() on an empty PQueue";
   }
   hit = elements.begin();
   retval = *hit;
