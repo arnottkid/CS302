@@ -1,4 +1,6 @@
-#include "pqueue.h"
+/* This program sorts doubles on standard input using a priority queue. */
+
+#include "pqueue.hpp"
 #include <iostream>
 #include <cstdlib>
 #include <cstdio>

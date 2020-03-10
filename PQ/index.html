@@ -16,7 +16,7 @@ Its API supports the following operations:
 </UL>
 <P>
 
-In <b><a href=pqueue.h>pqueue.h</a></b>, I define an interface for a priority
+In <b><a href=include/pqueue.hpp>include/pqueue.hpp</a></b>, I define an interface for a priority
 queue which holds doubles.  Then I define  class definitions for two implementations:
 
 <UL>
@@ -33,33 +33,33 @@ to the interface.
 <p><center><table border=3 cellpadding=3><td valign=top><pre>
 #include &lt;vector&gt;
 #include &lt;set&gt;
-using namespace std;
 
 <font color=blue>/* The Main Priority Queue Interface. */</font>
 
 class PQueue {
   public:
+    virtual ~PQueue() {};
     virtual void    Push(double d) = 0;
     virtual double  Pop()          = 0;
-    virtual int     Size()         = 0;
-    virtual bool    Empty()        = 0;
-    virtual void    Print()        = 0;
+    virtual size_t  Size() const   = 0;
+    virtual bool    Empty() const  = 0;
+    virtual void    Print() const  = 0;
 };
 </pre></td><td valign=top><pre>
-<font color=blue>/* PQueueSet: Implementing the
-   priority queue with a multiset */</font>
+<font color=blue>/* PQueueSet: Implementing the priority 
+   queue with a multiset */</font>
 
 class PQueueSet : public PQueue {
   public:
     void    Push(double d);
     double  Pop();
-    int     Size();
-    bool    Empty();
-    void    Print();
+    size_t  Size() const;
+    bool    Empty() const;
+    void    Print() const;
 
     PQueueSet();
   protected:
-    multiset &lt;double&gt; elements;
+    std::multiset &lt;double&gt; elements;
 };
 </pre></td><td valign=top><pre>
 <font color=blue>/* PQueueHeap: Implementing the priority 
@@ -72,15 +72,15 @@ class PQueueHeap : public PQueue {
   public:
     void    Push(double d);
     double  Pop();
-    int     Size();
-    bool    Empty();
-    void    Print();
+    size_t  Size() const;
+    bool    Empty() const;
+    void    Print() const;
 
     PQueueHeap();
-    PQueueHeap(vector &lt;double&gt; &init);
+    PQueueHeap(const std::vector &lt;double&gt; &init);
   protected:
-    vector &lt;double&gt; h;
-    void Percolate_Down(int index);
+    std::vector &lt;double&gt; h;
+    void Percolate_Down(size_t index);
 };
 </pre></td></table></center><p>
 
@@ -95,28 +95,29 @@ vector of doubles.  We'll discuss that more below.
 
 The easiest way to implement a priority queue is to use a <b>multiset</b>.  This implementation 
 is so simple that most methods take one line of code.  It is in 
-<b><a href=pqueue_set.cpp>pqueue_set.cpp</a></b>:
+<b><a href=src/pqueue_set.cpp>src/pqueue_set.cpp</a></b>:
 
-<p><center><table border=3 cellpadding=3><td><pre>
+<p><center><table border=3 cellpadding=3><td valign=top><pre>
 #include &lt;cstdio&gt;
 #include &lt;iostream&gt;
 #include &lt;cstdlib&gt;
-#include "pqueue.h"
+#include "pqueue.hpp"
+using namespace std;
 
 <font color=blue>/* Using a multiset to implement the priority queue makes 
    most of these methods really simple.  The first four
    here are one-liners: */</font>
 
-     PQueueSet::PQueueSet()    { }
-void PQueueSet::Push(double d) { elements.insert(d); }
-int  PQueueSet::Size()         { return elements.size(); }
-bool PQueueSet::Empty()        { return elements.empty(); }
+        PQueueSet::PQueueSet()    { }
+void    PQueueSet::Push(double d) { elements.insert(d); }
+size_t  PQueueSet::Size() const   { return elements.size(); }
+bool    PQueueSet::Empty() const  { return elements.empty(); }
 
-<font color=blue>/* Print() is straightforward. */</font>
+<font color=blue>/* Print() is straightfoward. */</font>
 
-void PQueueSet::Print() 
+void PQueueSet::Print() const
 {
-  multiset &lt;double&gt;::iterator hit;
+  multiset &lt;double&gt;::const_iterator hit;
 
   for (hit = elements.begin(); hit != elements.end(); hit++) {
     if (hit != elements.begin()) cout &lt;&lt; " ";
@@ -135,8 +136,7 @@ double PQueueSet::Pop()
   double retval;
   
   if (elements.empty()) {
-    cerr &lt;&lt; "Error: Called Pop on an empty PQueue\n";
-    exit(1);
+    throw runtime_error("Called Pop() on an empty PQueue");
   }
   hit = elements.begin();
   retval = *hit;
@@ -148,13 +148,13 @@ double PQueueSet::Pop()
 
 To test, I have written two simple programs that use Priority Queues.  The 
 first is
-<b><a href=add_5.cpp>add_5.cpp</a></b>.  It creates an insteance of the PQueue
+<b><a href=src/add_5.cpp>src/add_5.cpp</a></b>.  It creates an insteance of the PQueue
 and then prompts the user for five numbers.  It pushes them onto the priority
 queue and then prints the queue.  It reads its command line argument to determine
 whether to use the multiset implementation ('s') or the heap implementation ('h').
 
 <p><center><table border=3 cellpadding=3><td><pre>
-#include "pqueue.h"
+#include "pqueue.hpp"
 #include &lt;iostream&gt;
 #include &lt;cstdlib&gt;
 #include &lt;cstdio&gt;
@@ -193,11 +193,11 @@ int main(int argc, char **argv)
 }
 </pre></td></table></center><p>
 
-When we run <b>add_5</b> on the multiset implementation, the numbers are sorted,
+When we run <b>bin/add_5</b> on the multiset implementation, the numbers are sorted,
 because the multiset sorts them:
 
 <pre>
-UNIX> <font color=darkred><b>./add_5 s</b></font>
+UNIX> <font color=darkred><b>bin/add_5 s</b></font>
 Enter five numbers.
 <font color=darkred><b>3 5 2 4 1</b></font>
 1 2 3 4 5
@@ -205,8 +205,8 @@ UNIX> <font color=darkred><b></b></font>
 </pre>
 
 The second program is 
-<b><a href=pq_sort.cpp>pq_sort.cpp</a></b>.  This program reads doubles from
-standard input and sorts them using a priority queue.  Like <b>add_5</b> it uses
+<b><a href=src/pq_sort.cpp>src/pq_sort.cpp</a></b>.  This program reads doubles from
+standard input and sorts them using a priority queue.  Like <b>bin/add_5</b> it uses
 its command line argument to determine which implementation to use:
 
 <UL>
@@ -221,7 +221,7 @@ prints the values in sorted order.  Take a look at the code to error check -- it
 a useful trick when you want to check whether a value belongs to a set of characters:
 
 <p><center><table border=3 cellpadding=3><td><pre>
-#include "pqueue.h"
+#include "pqueue.hpp"
 #include &lt;iostream&gt;
 #include &lt;cstdlib&gt;
 #include &lt;cstdio&gt;
@@ -270,23 +270,23 @@ int main(int argc, char **argv)
 Let's test it on the multiset:
 
 <pre>
-UNIX> <font color=darkred><b>head -n 5 input.txt</b></font>
+UNIX> <font color=darkred><b>head -n 5 txt/input.txt</b></font>
 782.678
 270.576
 447.465
 501.138
 714.567
-UNIX> <font color=darkred><b>head -n 5 input.txt | ./pq_sort s</b></font>
+UNIX> <font color=darkred><b>head -n 5 txt/input.txt | bin/pq_sort s</b></font>
 270.576
 447.465
 501.138
 714.567
 782.678
-UNIX> <font color=darkred><b>wc input.txt</b></font>
-    1000    1000    7885 input.txt
-UNIX> <font color=darkred><b>./pq_sort s < input.txt > output1.txt</b></font>
-UNIX> <font color=darkred><b>sort -n input.txt > output2.txt</b></font>
-UNIX> <font color=darkred><b>diff output1.txt output2.txt</b></font>
+UNIX> <font color=darkred><b>wc txt/input.txt</b></font>
+    1000    1000    7885 txt/input.txt
+UNIX> <font color=darkred><b>bin/pq_sort s < txt/input.txt > txt/output1.txt</b></font>
+UNIX> <font color=darkred><b>sort -n input.txt > txt/output2.txt</b></font>
+UNIX> <font color=darkred><b>diff txt/output1.txt txt/output2.txt</b></font>
 UNIX> <font color=darkred><b></b></font>
 </pre>
 
@@ -303,23 +303,23 @@ Thus, if we know how many elements are in a heap, we know exactly what it looks 
 For example, a heap with 10 elements will look as follows, regardless of the values of
 the elements.
 
-<p><center><table border=3 cellpadding=3><td valign=top><IMG src=Pictures/Heap-10.png></td></table></center><p>
+<p><center><table border=3 cellpadding=3><td valign=top><img src=img/Heap-10.png></td></table></center><p>
 
 The other property of a heap is that the value of each node must be less than or equal to all of
 the values in its subtrees.  That's it.  Below are two examples of heaps:
 
 <p><center><table border=3 cellpadding=3>
-<td valign=top><IMG src=Pictures/Good-Heap-1.png></td>
-<td valign=top><IMG src=Pictures/Good-Heap-2.png></td>
+<td valign=top><img src=img/Good-Heap-1.png></td>
+<td valign=top><img src=img/Good-Heap-2.png></td>
 </table></center><p>
 
 That second one has duplicate values (two sixes), but that's ok.  It still fits the definition of a heap.
 <p>
 Below are three examples of non-heaps:
 <p><center><table border=3 cellpadding=3>
-<td valign=top align=center><IMG src=Pictures/Bad-Heap-1.png><br>The 10 node is not smaller than the values in its subtrees.</td>
-<td valign=top align=center><IMG src=Pictures/Bad-Heap-2.png><br>Not a complete tree.</td>
-<td valign=top align=center><IMG src=Pictures/Bad-Heap-3.png><br>The last row is not filled from left to right.</td>
+<td valign=top align=center><img src=img/Bad-Heap-1.png><br>The 10 node is not smaller than the values in its subtrees.</td>
+<td valign=top align=center><img src=img/Bad-Heap-2.png><br>Not a complete tree.</td>
+<td valign=top align=center><img src=img/Bad-Heap-3.png><br>The last row is not filled from left to right.</td>
 </table></center><p>
 
 When we push a value onto a heap, we know where the new node is going to go.  So we insert the
@@ -330,11 +330,11 @@ quit -- we have a valid heap.  Otherwise, we swap the value with its parent, and
 Below we give an example of inserting the value 2 into a heap:
 
 <p><center><table border=3 cellpadding=3><tr>
-<td valign=top align=center><u>Start</u><p><IMG src=Pictures/Insert-Ex-1.png></td>
-<td valign=top align=center><u>Put 2 into the new node and percolate up.</u><p><IMG src=Pictures/Insert-Ex-2.png></td>
+<td valign=top align=center><u>Start</u><p><img src=img/Insert-Ex-1.png></td>
+<td valign=top align=center><u>Put 2 into the new node and percolate up.</u><p><img src=img/Insert-Ex-2.png></td>
 </tr><tr>
-<td valign=top align=center><u>Continue percolating, since 2 is less than 3.</u><p><IMG src=Pictures/Insert-Ex-3.png></td>
-<td valign=top align=center><u>Now we stop, since 1 is less than 2.</u><p><IMG src=Pictures/Insert-Ex-4.png></td></tr>
+<td valign=top align=center><u>Continue percolating, since 2 is less than 3.</u><p><img src=img/Insert-Ex-3.png></td>
+<td valign=top align=center><u>Now we stop, since 1 is less than 2.</u><p><img src=img/Insert-Ex-4.png></td></tr>
 </table></center><p>
 
 To pop a value off a heap, again, we know the shape of the tree when we're done -- we will lose the rightmost node
@@ -349,10 +349,10 @@ As before, an example helps.  We will call <b>Pop()</b> on the last heap above. 
 and will delete the node holding the 7, so we put the value 7 into the root and start percolating down:
 
 <p><center><table border=3 cellpadding=3><tr>
-<td valign=top align=center><u>Start</u><p><IMG src=Pictures/Pop-Ex-1.png></td>
-<td valign=top align=center><u>Swap 7 and 2</u><p><IMG src=Pictures/Pop-Ex-2.png></td>
+<td valign=top align=center><u>Start</u><p><img src=img/Pop-Ex-1.png></td>
+<td valign=top align=center><u>Swap 7 and 2</u><p><img src=img/Pop-Ex-2.png></td>
 </tr><tr>
-<td valign=top align=center><u>Swap 7 and 3.  We're Done.</u><p><IMG src=Pictures/Pop-Ex-3.png></td>
+<td valign=top align=center><u>Swap 7 and 3.  We're Done.</u><p><img src=img/Pop-Ex-3.png></td>
 <td valign=top align=center></td></tr>
 </table></center><p>
 
@@ -366,8 +366,8 @@ as a vector.  The root is at index 0, the nodes at the next level are at indices
 we show how the final heap above maps to a vector:
 
 <p><center><table border=3 cellpadding=3><tr>
-<td valign=top align=center><IMG src=Pictures/Linearize-1.png></td>
-<td valign=center align=center><IMG src=Pictures/Linearize-2.png></td>
+<td valign=top align=center><img src=img/Linearize-1.png></td>
+<td valign=center align=center><img src=img/Linearize-2.png></td>
 </tr>
 </table></center><p>
 
@@ -390,11 +390,14 @@ implementation.
 <h3>The Heap Implementation</h3>
 
 The heap implementation is in 
-<b><a href=pqueue_heap.cpp>pqueue_heap.cpp</a></b>.  The vector that 
-implemens the heap is named <b>h</b>.  Below, I show <b>Push()</b>,
+<b><a href=src/pqueue_heap.cpp>src/pqueue_heap.cpp</a></b>.  The vector that 
+implements the heap is named <b>h</b>.  Below, I show <b>Push()</b>,
 which appends the element to the vector and then percolates up:
 
 <p><center><table border=3 cellpadding=3><td><pre>
+<font color=blue>/* With Push(), we append the new element to the
+   end of the vector, and then percolate up. */</font>
+
 void PQueueHeap::Push(double d) 
 { 
   int i, parent;
@@ -433,10 +436,14 @@ a few cases, depending on whether there is a right child,
 or whether the right child's value is less than the left
 child's value.
 
-<p><center><table border=3 cellpadding=3><td><pre>
-void PQueueHeap::Percolate_Down(int index)
+<p><center><table border=3 cellpadding=3><td valign=top><pre>
+<font color=blue>/* I have implemented Percolate_Down as a separate
+   protected method, because it is used in two
+   places: Pop() and the vector constructor. */</font>
+
+void PQueueHeap::Percolate_Down(size_t index)
 {
-  int lc, rc;
+  size_t lc, rc;
   double tmp;
 
   <font color=blue>/* lc is the left child, and
@@ -488,12 +495,10 @@ void PQueueHeap::Percolate_Down(int index)
 
 double PQueueHeap::Pop() 
 {
-  double retval, tmp;
-  int index, lc, rc;
+  double retval;
   
   if (h.empty()) {
-    cerr &lt;&lt; "Error: Called Pop on an empty PQueue\n";
-    exit(1);
+    throw runtime_error("Called Pop() on an empty PQueue");
   }
   retval = h[0];
   h[0] = h[h.size()-1];
@@ -503,11 +508,24 @@ double PQueueHeap::Pop()
   return retval;
 }
 
+<font color=blue>/* The vector constructor calls Percolate_Down()
+   on all non-leaf elements, going from the bottom 
+   of the heap to the top. */</font>
+
+PQueueHeap::PQueueHeap(const vector &lt;double&gt; &v) 
+{ 
+  int i;
+
+  h = v;
+
+  for (i = (int) h.size()/2-1; i &gt;= 0; i--) Percolate_Down(i);
+}
+
 <font color=blue>/* Print is straightforward. */</font>
 
-void PQueueHeap::Print() 
+void PQueueHeap::Print() const
 {
-  int i;
+  size_t i;
 
   for (i = 0; i &lt; h.size(); i++) {
     if (i != 0) cout &lt;&lt; " ";
@@ -517,14 +535,14 @@ void PQueueHeap::Print()
 }
 </pre></td></table></center><p>
 
-Let's double-check ourselves with <b>add_5</b>:
+Let's double-check ourselves with <b>bin/add_5</b>:
 
 <pre>
-UNIX> <font color=darkred><b>./add_5 h</b></font>
+UNIX> <font color=darkred><b>bin/add_5 h</b></font>
 Enter five numbers.
 <font color=darkred><b>3 5 2 4 1</b></font>
 1 2 3 5 4
-UNIX> <font color=darkred><b>./add_5 h</b></font>
+UNIX> <font color=darkred><b>bin/add_5 h</b></font>
 Enter five numbers.
 <font color=darkred><b>5 4 3 2 1</b></font>
 1 2 4 5 3
@@ -537,11 +555,11 @@ In the second call, the five add calls each percolate the new value
 to the root of the heap:
 
 <p><center><table border=3 cellpadding=3><tr>
-<td valign=top align=center><IMG src=Pictures/Add-5-1.png></td>
-<td valign=top align=center><IMG src=Pictures/Add-5-2.png></td>
-<td valign=top align=center><IMG src=Pictures/Add-5-3.png></td>
-<td valign=top align=center><IMG src=Pictures/Add-5-4.png></td>
-<td valign=top align=center><IMG src=Pictures/Add-5-5.png></td>
+<td valign=top align=center><img src=img/Add-5-1.png></td>
+<td valign=top align=center><img src=img/Add-5-2.png></td>
+<td valign=top align=center><img src=img/Add-5-3.png></td>
+<td valign=top align=center><img src=img/Add-5-4.png></td>
+<td valign=top align=center><img src=img/Add-5-5.png></td>
 </tr>
 </table></center><p>
 
@@ -549,14 +567,14 @@ To verify that percolating down works, let's compare <b>pq_sort</b> with the
 multiset implementation:
 
 <pre>
-UNIX> <font color=darkred><b>head -n 5 input.txt | ./pq_sort h</b></font>
+UNIX> <font color=darkred><b>head -n 5 txt/input.txt | bin/pq_sort h</b></font>
 270.576
 447.465
 501.138
 714.567
 782.678
-UNIX> <font color=darkred><b>./pq_sort h < input.txt > output3.txt</b></font>
-UNIX> <font color=darkred><b>diff output1.txt output3.txt</b></font>
+UNIX> <font color=darkred><b>bin/pq_sort h < txt/input.txt > txt/output3.txt</b></font>
+UNIX> <font color=darkred><b>diff txt/output1.txt txt/output3.txt</b></font>
 UNIX> <font color=darkred><b></b></font>
 </pre>
 
@@ -603,12 +621,12 @@ get to the root, we have created a valid heap:
 
 <p><center><table border=3 cellpadding=3>
 <tr>
-<td valign=top align=center><IMG src=Pictures/Linear-1.png></td>
-<td valign=center align=center><IMG src=Pictures/Linear-2.png></td>
+<td valign=top align=center><img src=img/Linear-1.png></td>
+<td valign=center align=center><img src=img/Linear-2.png></td>
 </tr>
 <tr>
-<td valign=top align=center><IMG src=Pictures/Linear-3.png></td>
-<td valign=center align=center><IMG src=Pictures/Linear-4.png></td>
+<td valign=top align=center><img src=img/Linear-3.png></td>
+<td valign=center align=center><img src=img/Linear-4.png></td>
 </tr>
 </table></center><p>
 
@@ -626,10 +644,10 @@ Thus, all of them take <i>2n/4</i>.  At the next level, there are <i>n/8</i> nod
 pattern? 
 <p>
 The creation of the heap can be converted into a summation:
-<p><center><table border=0 cellpadding=3><td valign=top><IMG src=Pictures/Eq1.png></td></table></center><p>
+<p><center><table border=0 cellpadding=3><td valign=top><img src=img/Eq1.png></td></table></center><p>
 To figure out what that second summation is, let's first write a quick C++ program to calculate its
 value for the first 15 values of <i>n</i>.  The code is below 
-(<b><a href=formula.cpp>formula.cpp</a></b>), and to the right, we show its output:
+(<b><a href=src/formula.cpp>src/formula.cpp</a></b>), and to the right, we show its output:
 
 <p><center><table border=3 cellpadding=3><td valign=top><pre>
 #include &lt;iostream&gt;
@@ -651,7 +669,7 @@ main()
   }
 }
 </pre></td><td valign=top width=200><pre>
-UNIX> <font color=darkred><b>formula</b></font>
+UNIX> <font color=darkred><b>bin/formula</b></font>
 0.5
 1
 1.375
@@ -672,10 +690,10 @@ UNIX> <font color=darkred><b></b></font>
 
 Looks like it converges to 2.  Let's analyze it mathematically.  Consider the following sum:
 
-<p><center><table border=0 cellpadding=3><td valign=top><IMG src=Pictures/Eq2.png></td></table></center><p>
+<p><center><table border=0 cellpadding=3><td valign=top><img src=img/Eq2.png></td></table></center><p>
 
 Now, let's consider the equation <i>G - G/2</i>:
-<p><center><table border=0 cellpadding=3><td valign=top><IMG src=Pictures/Eq3.png></td></table></center><p>
+<p><center><table border=0 cellpadding=3><td valign=top><img src=img/Eq3.png></td></table></center><p>
 
 From high school math, we know that this last summation equals one, so <i>G - G/2 = 1</i>, which 
 means that <i>G = 2</i>.
@@ -685,20 +703,16 @@ means that <i>G = 2</i>.
 The upshot is that creating a heap from a vector is less than or equal to <i>Gn</i>, which means that
 it is <i>O(n)</i> instead of <i>O(n(log(n)))</i>.  Is that significant?  
 Let's test it -- here's the vector constructor in
-<b><a href=pqueue_heap.cpp>pqueue_heap.cpp</a></b>:
+<b><a href=src/pqueue_heap.cpp>src/pqueue_heap.cpp</a></b>:
 
 <p><center><table border=3 cellpadding=3><td><pre>
-<font color=blue>/* The vector constructor calls Percolate_Down()
-   on all non-leaf elements, going from the bottom 
-   of the heap to the top. */</font>
-
-PQueueHeap::PQueueHeap(vector &lt;double&gt; &v) 
+PQueueHeap::PQueueHeap(const vector &lt;double&gt; &v) 
 { 
   int i;
 
   h = v;
 
-  for (i = h.size()/2-1; i &gt;= 0; i--) Percolate_Down(i);
+  for (i = (int) h.size()/2-1; i &gt;= 0; i--) Percolate_Down(i);
 }
 </pre></td></table></center><p>
 
@@ -706,21 +720,21 @@ That was simple, wasn't it?  We test performance below:
 <hr> 
 <h3> Performance Testing</h3>
 
-For our first performance test, let's use <b>pq_sort</b>.  I have written
-a very simple program called <b>genrandom.cpp</b> that prints a specified number
-of random doubles.   My thought is to use <b>genrandom</b> to generate test cases
-for <b>pq_sort</b>.  We'll pipe <b>genrandom</b> into <b>pq_sort</b> and then 
-redirect the standard output of <b>pq_sort</b> to <b>/dev/null</b>, which deletes it:
+For our first performance test, let's use <b>bin/pq_sort</b>.  I have written
+a very simple program called <b>src/genrandom.cpp</b> that prints a specified number
+of random doubles.   My thought is to use <b>bin/genrandom</b> to generate test cases
+for <b>bin/pq_sort</b>.  We'll pipe <b>bin/genrandom</b> into <b>bin/pq_sort</b> and then 
+redirect the standard output of <b>bin/pq_sort</b> to <b>/dev/null</b>, which deletes it:
 
 <pre>
-UNIX> <font color=darkred><b>./genrandom 1000 | ./pq_sort s > /dev/null</b></font>
+UNIX> <font color=darkred><b>bin/genrandom 1000 | bin/pq_sort s > /dev/null</b></font>
 UNIX>
 </pre>
 
-If we try to time this with <b>time</b>, you see no output:
+If we try to time this with <b>time</b>, we see no output:
 
 <pre>
-UNIX> <font color=darkred><b>time ./genrandom 1000 | ./pq_sort s > /dev/null</b></font>
+UNIX> <font color=darkred><b>time bin/genrandom 1000 | bin/pq_sort s > /dev/null</b></font>
 UNIX> <font color=darkred><b></b></font>
 </pre>
 
@@ -728,17 +742,17 @@ That's because <b>time's</b> output is also going to <b>/dev/null</b>.  To fix t
 <b>time</b> execute a subshell:
 
 <pre>
-UNIX> <font color=darkred><b>time sh -c "./genrandom 1000 | ./pq_sort s > /dev/null"</b></font>
+UNIX> <font color=darkred><b>time sh -c "bin/genrandom 1000 | bin/pq_sort s > /dev/null"</b></font>
 0.009u 0.005s 0:00.01 0.0%	0+0k 0+0io 0pf+0w
 UNIX> <font color=darkred><b></b></font>
 </pre>
 
 Great -- now we can write a shell script called 
-<b><a href=bigtest_1.sh>bigtest_1.sh</a></b>, which calls all three implementations with
+<b><a href=scripts/bigtest_1.sh>scripts/bigtest_1.sh</a></b>, which calls all three implementations with
 input sizes ranging from 1000 to 100,000:
 
 <pre>
-UNIX> <font color=darkred><b>sh bigtest_1.sh | head</b></font>
+UNIX> <font color=darkred><b>sh scripts/bigtest_1.sh | head</b></font>
 s 1000 0.00
 s 2000 0.01
 s 3000 0.02
@@ -754,10 +768,10 @@ UNIX> <font color=darkred><b></b></font>
 
 It prints out the implementation, the number of doubles and the wall clock time in 
 seconds (MacBook Pro in 2018).  The full data is in 
-<b><a href=test-data1.txt>test-data1.txt</a></b>.  I graph it below (using 
-jgraph - <b><a href=sort_test1.jgr>sort_test1.jgr</a></b>):
+<b><a href=txt/test-data1.txt>txt/test-data1.txt</a></b>.  I graph it below (using 
+jgraph - <b><a href=scripts/sort_test1.jgr>scripts/sort_test1.jgr</a></b>):
 
-<p><center><table border=3 cellpadding=3><td valign=top><IMG src=Pictures/sort_test1.jpg width=500></td></table></center><p>
+<p><center><table border=3 cellpadding=3><td valign=top><img src=img/sort_test1.jpg width=500></td></table></center><p>
 
 That graph sucks.  The main reason is the squiggly lines -- what they indicate is that 
 the individual data points have some variance, and that we should run more than one run
@@ -772,8 +786,8 @@ Is the second conclusion surprising?  Let's think about it some more.  What's go
 when we are testing 100,000 numbers?
 
 <UL>
-<LI> We are generating and printing 100,000 numbers in <b>genrandom</b>.
-<LI> These characters are sent via the operating system as standard input to <b>pq_test</b>.
+<LI> We are generating and printing 100,000 numbers in <b>bin/genrandom</b>.
+<LI> These characters are sent via the operating system as standard input to <b>bin/pq_test</b>.
 <LI> <b>pq_test</b> sorts then and prints them.
 <LI> The operating system eats the output.
 </UL>
@@ -784,7 +798,7 @@ Let's instead try timing just what we want to time -- the time to create the hea
 
 <p>
 I've written a testing program called 
-<b><a href=massive_create.cpp>massive_create.cpp</a></b>, which takes three command
+<b><a href=src/massive_create.cpp>src/massive_create.cpp</a></b>, which takes three command
 line arguments:
 
 <OL>
@@ -799,14 +813,13 @@ it.  In that way, we're only measuring the priority queue creation time.
 I won't bother showing you the code -- you can get it from the link above.
 
 <p>
-I've also changed my shell script.  For each test, it runs <b>massive_create</b> with
+I've also changed my shell script.  For each test, it runs <b>bin/massive_create</b> with
 <i>i</i> iterations, where <i>i * n = 10,000,000</i>.  That gives me running times
 on the order of .5 seconds per test.   I ran this on the Linux box in my office (so that
 I'm not timing the 500 other things that my Macbook is doing right now), and varied
 the number of elements from 10,000 to 1,000,000 (just 100,000 for the multiset).
 
-
-<p><center><table border=3 cellpadding=3><td valign=top><IMG src=Pictures/sort_test2.jpg width=500></td></table></center><p>
+<p><center><table border=3 cellpadding=3><td valign=top><img src=img/sort_test2.jpg width=500></td></table></center><p>
 
 Those jumps in the red lines are interesting, aren't they?  I'll talk about them below.
 <p>
@@ -833,18 +846,18 @@ The first question you should ask yourself is whether those jumps are due to ins
 or memory.  When I see curves like that, I think "memory."  So, I instrumented <b>pqueue_heap.cpp</b> to keep track of the times it looks at an element of <b>v</b> in <b>Push()</b>.  
 That is a rough estimate of
 instruction count.  If you take a look at a graph of that, you'll see that the curve is smooth:
-<p><center><table border=3><td><img src=Pictures/touches.jpg width=500></td></table></center><p>
+<p><center><table border=3><td><img src=img/touches.jpg width=500></td></table></center><p>
 That is a hint that it's not instruction count that is causing the jumps.
 <p>
 Take a look at the following graphs.  In these, I have instrumented the programs so that they 
 keep track of the elements of <b>v</b> that they access in each call to either <b>Percolate_Down()</b>, or <b>Push()</b>.  Here's the graph for creating the heap by repeatedly calling <b>Push()</b>.
 Time goes from top to bottom.
 
-<p><center><table border=3><td><img src=Pictures/SH.jpg width=500></td></table></center><p>
+<p><center><table border=3><td><img src=img/SH.jpg width=500></td></table></center><p>
 
 And here's the graph for creating the heap from the vector by repeatedly calling <b>Percolate_Down()</b>:
 
-<p><center><table border=3><td><img src=Pictures/SVH.jpg width=500></td></table></center><p>
+<p><center><table border=3><td><img src=img/SVH.jpg width=500></td></table></center><p>
 
 Can you see why the first graph would cause jumps with fixed-sized caches, and the second
 would not?  This would be a great exercise for a cache modeling assignment.  We can talk about

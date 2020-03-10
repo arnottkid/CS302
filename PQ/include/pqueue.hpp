@@ -1,6 +1,5 @@
 #include <vector>
 #include <set>
-using namespace std;
 
 /* The Main Priority Queue Interface. */
 
@@ -9,9 +8,9 @@ class PQueue {
     virtual ~PQueue() {};
     virtual void    Push(double d) = 0;
     virtual double  Pop()          = 0;
-    virtual int     Size()         = 0;
-    virtual bool    Empty()        = 0;
-    virtual void    Print()        = 0;
+    virtual size_t  Size() const   = 0;
+    virtual bool    Empty() const  = 0;
+    virtual void    Print() const  = 0;
 };
 
 /* PQueueSet: Implementing the priority 
@@ -21,13 +20,13 @@ class PQueueSet : public PQueue {
   public:
     void    Push(double d);
     double  Pop();
-    int     Size();
-    bool    Empty();
-    void    Print();
+    size_t  Size() const;
+    bool    Empty() const;
+    void    Print() const;
 
     PQueueSet();
   protected:
-    multiset <double> elements;
+    std::multiset <double> elements;
 };
 
 /* PQueueHeap: Implementing the priority 
@@ -40,13 +39,13 @@ class PQueueHeap : public PQueue {
   public:
     void    Push(double d);
     double  Pop();
-    int     Size();
-    bool    Empty();
-    void    Print();
+    size_t  Size() const;
+    bool    Empty() const;
+    void    Print() const;
 
     PQueueHeap();
-    PQueueHeap(vector <double> &init);
+    PQueueHeap(const std::vector <double> &init);
   protected:
-    vector <double> h;
-    void Percolate_Down(int index);
+    std::vector <double> h;
+    void Percolate_Down(size_t index);
 };

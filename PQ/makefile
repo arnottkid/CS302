@@ -1,30 +1,39 @@
-ALL = add_5 pq_sort massive_create formula genrandom 
+ALL = bin/add_5 \
+      bin/pq_sort \
+      bin/massive_create \
+      bin/formula \
+      bin/genrandom
+
+OBJS = obj/pqueue_set.o obj/pqueue_heap.o
+CFLAGS = -Iinclude -Wall -Wextra -std=c++98
 
 all: $(ALL)
 
 clean:
-	rm -f $(ALL) *.o a.out
+	rm -f a.out bin/* obj/*
 
-pqueue_set.o: pqueue.h
-pqueue_heap.o: pqueue.h
+# Object files
 
-add_5: pqueue.h add_5.cpp pqueue_set.o pqueue_heap.o 
-	g++ -O -o add_5 add_5.cpp pqueue_set.o pqueue_heap.o 
+obj/pqueue_set.o: include/pqueue.hpp src/pqueue_set.cpp
+	g++ $(CFLAGS) -O -c -o obj/pqueue_set.o src/pqueue_set.cpp
 
-pq_sort: pqueue.h pq_sort.cpp pqueue_set.o pqueue_heap.o 
-	g++ -O -o pq_sort pq_sort.cpp pqueue_set.o pqueue_heap.o 
+obj/pqueue_heap.o: include/pqueue.hpp src/pqueue_heap.cpp
+	g++ $(CFLAGS) -O -c -o obj/pqueue_heap.o src/pqueue_heap.cpp
 
-massive_create: pqueue.h massive_create.cpp pqueue_set.o pqueue_heap.o 
-	g++ -O -o massive_create massive_create.cpp pqueue_set.o pqueue_heap.o 
+# Executables 
 
-formula: formula.cpp
-	g++ -o formula formula.cpp
+bin/add_5: include/pqueue.hpp src/add_5.cpp $(OBJS)
+	g++ $(CFLAGS) -O -o bin/add_5 src/add_5.cpp $(OBJS)
 
-genrandom: genrandom.cpp
-	g++ -o genrandom genrandom.cpp
+bin/pq_sort: include/pqueue.hpp src/pq_sort.cpp $(OBJS)
+	g++ $(CFLAGS) -O -o bin/pq_sort src/pq_sort.cpp $(OBJS)
 
-.SUFFIXES: .cpp .o
+bin/massive_create: include/pqueue.hpp src/massive_create.cpp $(OBJS)
+	g++ $(CFLAGS) -O -o bin/massive_create src/massive_create.cpp $(OBJS)
 
-.cpp.o:
-	g++ -c -O $*.cpp
+bin/formula: src/formula.cpp
+	g++ $(CFLAGS) -o bin/formula src/formula.cpp
+
+bin/genrandom: src/genrandom.cpp
+	g++ $(CFLAGS) -o bin/genrandom src/genrandom.cpp
 

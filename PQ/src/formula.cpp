@@ -1,3 +1,6 @@
+/* This program prints out the summation 
+   of i/(2^i) for i from 0 to 15 */
+
 #include <iostream>
 using namespace std;
 

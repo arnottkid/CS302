@@ -1,3 +1,5 @@
+/* This program generates n random doubles. */
+
 #include <iostream>
 #include <cstdlib>
 using namespace std;

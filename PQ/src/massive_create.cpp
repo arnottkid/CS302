@@ -1,4 +1,7 @@
-#include "pqueue.h"
+/* This program tests the performance of making a heap from a vector
+   of elements. */
+
+#include "pqueue.hpp"
 #include <cstdlib>
 #include <iostream>
 using namespace std;

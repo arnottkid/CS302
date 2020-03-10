@@ -1,4 +1,8 @@
-#include "pqueue.h"
+/* This is a simple testing program for priority queues, which
+   reads five numbers from standard input, pushes them onto
+   a priority queue, and then prints the priority queue. */
+
+#include "pqueue.hpp"
 #include <iostream>
 #include <cstdlib>
 #include <cstdio>
