@@ -9,6 +9,7 @@
 #include <iostream>
 #include <vector>
 #include <cstdlib>
+#include <cstring>
 #include <stdio.h>
 #include "sorting.hpp"
 using namespace std;
@@ -21,7 +22,7 @@ void usage(const char *s)
   exit(1);
 }
 
-main(int argc, const char **argv)
+int main(int argc, const char **argv)
 {
   int size;
   int iterations, it;

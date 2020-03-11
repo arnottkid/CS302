@@ -9,6 +9,7 @@
 #include <iostream>
 #include <vector>
 #include <set>
+#include <cstdio>
 using namespace std;
 
 void sort_doubles(vector <double> &v, bool print)

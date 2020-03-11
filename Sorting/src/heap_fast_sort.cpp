@@ -11,6 +11,7 @@
 
 #include <iostream>
 #include <vector>
+#include <cstdio>
 #include "sorting.hpp"
 using namespace std;
 

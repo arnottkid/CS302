@@ -3,6 +3,7 @@
 #include "sorting.hpp"
 #include <iostream>
 #include <vector>
+#include <cstdio>
 #include <algorithm>
 using namespace std;
 

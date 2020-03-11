@@ -8,6 +8,7 @@
 #include "sorting.hpp"
 #include <iostream>
 #include <vector>
+#include <cstdio>
 using namespace std;
 
 void sort_doubles(vector <double> &v, bool print)

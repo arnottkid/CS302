@@ -7,6 +7,7 @@
 
 #include <iostream>
 #include <vector>
+#include <cstdio>
 #include "sorting.hpp"
 #include "pqueue.hpp"
 using namespace std;

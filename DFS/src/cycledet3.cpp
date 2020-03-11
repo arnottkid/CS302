@@ -71,7 +71,7 @@ int main()
 {
   Graph g;
   string s;
-  size_t nn, n1, n2, i, c;
+  size_t nn, n1, n2, i;
   Node *n;
 
   cin >> s;
@@ -94,7 +94,6 @@ int main()
     }
   }
 
-  c = 0;
   for (i = 0; i < g.nodes.size(); i++) {
     if (!g.nodes[i]->visited) {
       if (g.is_cycle(i, -1)) {

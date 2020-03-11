@@ -17,7 +17,6 @@ lab: bin/merge_1_lab_sort bin/quick_2_lab_sort
 
 private: bin/merge_1_sort \
          bin/merge_2_sort \
-         bin/quick_1_lab_sort \
          bin/quick_1_sort \
          bin/quick_1_sorted \
          bin/quick_2_sort \
@@ -87,6 +86,21 @@ obj/sort_stdin.o: include/sorting.hpp src/sort_stdin.cpp
 obj/stl_sort.o: include/sorting.hpp src/stl_sort.cpp
 	g++ $(CFLAGS) -c -o obj/stl_sort.o src/stl_sort.cpp
 
+obj/merge_1_sort.o: include/sorting.hpp src/merge_1_sort.cpp
+	g++ $(CFLAGS) -c -o obj/merge_1_sort.o src/merge_1_sort.cpp
+
+obj/merge_2_sort.o: include/sorting.hpp src/merge_2_sort.cpp
+	g++ $(CFLAGS) -c -o obj/merge_2_sort.o src/merge_2_sort.cpp
+
+obj/quick_1_sort.o: include/sorting.hpp src/quick_1_sort.cpp
+	g++ $(CFLAGS) -c -o obj/quick_1_sort.o src/quick_1_sort.cpp
+
+obj/quick_2_sort.o: include/sorting.hpp src/quick_2_sort.cpp
+	g++ $(CFLAGS) -c -o obj/quick_2_sort.o src/quick_2_sort.cpp
+
+obj/quick_3_sort.o: include/sorting.hpp src/quick_3_sort.cpp
+	g++ $(CFLAGS) -c -o obj/quick_3_sort.o src/quick_3_sort.cpp
+
 # ----------------------------------------
 # Binaries
 
@@ -131,4 +145,34 @@ bin/bucket_1_sort: obj/bucket_1_sort.o obj/sort_driver.o
 
 bin/bucket_2_sort: obj/bucket_2_sort.o obj/sort_driver.o
 	g++ $(CFLAGS) -o bin/bucket_2_sort obj/bucket_2_sort.o obj/sort_driver.o
+
+bin/merge_1_lab_sort: obj/merge_1_sort.o obj/sort_driver_lab.o
+	g++ $(CFLAGS) -o bin/merge_1_lab_sort obj/merge_1_sort.o obj/sort_driver_lab.o
+
+bin/quick_2_lab_sort: obj/quick_2_sort.o obj/sort_driver_lab.o
+	g++ $(CFLAGS) -o bin/quick_2_lab_sort obj/quick_2_sort.o obj/sort_driver_lab.o
+
+bin/merge_1_sort: obj/merge_1_sort.o obj/sort_driver.o
+	g++ $(CFLAGS) -o bin/merge_1_sort obj/merge_1_sort.o obj/sort_driver.o
+
+bin/merge_2_sort: obj/merge_2_sort.o obj/sort_driver.o
+	g++ $(CFLAGS) -o bin/merge_2_sort obj/merge_2_sort.o obj/sort_driver.o
+
+bin/quick_1_sort: obj/quick_1_sort.o obj/sort_driver.o
+	g++ $(CFLAGS) -o bin/quick_1_sort obj/quick_1_sort.o obj/sort_driver.o
+
+bin/quick_1_sorted: obj/quick_1_sort.o obj/sort_sorted.o
+	g++ $(CFLAGS) -o bin/quick_1_sorted obj/quick_1_sort.o obj/sort_sorted.o
+
+bin/quick_2_sort: obj/quick_2_sort.o obj/sort_driver.o
+	g++ $(CFLAGS) -o bin/quick_2_sort obj/quick_2_sort.o obj/sort_driver.o
+
+bin/quick_2_sorted: obj/quick_2_sort.o obj/sort_sorted.o
+	g++ $(CFLAGS) -o bin/quick_2_sorted obj/quick_2_sort.o obj/sort_sorted.o
+
+bin/quick_1_lab_sort: obj/quick_1_sort.o obj/sort_driver_lab.o
+	g++ $(CFLAGS) -o bin/quick_1_lab_sort obj/quick_1_sort.o obj/sort_driver_lab.o
+
+bin/quick_3_sort: obj/quick_3_sort.o obj/sort_driver.o
+	g++ $(CFLAGS) -o bin/quick_3_sort obj/quick_3_sort.o obj/sort_driver.o
 

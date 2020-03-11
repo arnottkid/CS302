@@ -7,6 +7,8 @@
 #include <iostream>
 #include <vector>
 #include <cstdlib>
+#include <cstdio>
+#include <cstring>
 #include "sorting.hpp"
 using namespace std;
 

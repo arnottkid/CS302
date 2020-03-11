@@ -8,6 +8,8 @@
 
 #include <iostream>
 #include <vector>
+#include <cstdio>
+#include <cstdlib>
 #include "sorting.hpp"
 using namespace std;
 
