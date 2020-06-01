@@ -1,45 +1,50 @@
-ALL = netflow_skeleton  netflow_dfs_edge_list netflow_dfs_v_no_delete makerandom  \
-      netflow_dfs_v_delete netflow_dfs_list_pf netflow_dfs_list_pb \
-      netflow_dfs_greedy netflow_dijkstra netflow_edmonds_karp
+ALL =  \
+  bin/makerandom \
+  bin/netflow_skeleton \
+  bin/netflow_dfs_edge_list \
+  bin/netflow_dfs_v_no_delete \
+  bin/netflow_dfs_v_delete \
+  bin/netflow_dfs_list_pf \
+  bin/netflow_dfs_list_pb \
+  bin/netflow_dfs_greedy \
+  bin/netflow_dijkstra \
 
 all: $(ALL)
 
+ek:  bin/netflow_edmonds_karp 
+
 clean:
-	rm -f *.o $(ALL)
+	rm -f bin/*
 
-.SUFFIXES: .cpp .o .out .hist .jgr .jps .eps .nt .bib .tab .tex .dvi .fig .txt .ps .pdf .bin .od .odh .odd .ppm .gif
+CFLAGS = -O3 -Wall -Wextra -std=c++98
 
-.cpp.o: 
-	g++ -O3 -c $*.cpp
+bin/makerandom: src/makerandom.cpp
+	g++ $(CFLAGS) -o bin/makerandom src/makerandom.cpp
 
+bin/netflow_skeleton: src/netflow_skeleton.cpp
+	g++ $(CFLAGS) -o bin/netflow_skeleton src/netflow_skeleton.cpp
 
-makerandom: makerandom.o
-	g++ -O3 -o makerandom makerandom.cpp
+bin/netflow_dfs_edge_list: src/netflow_dfs_edge_list.cpp
+	g++ $(CFLAGS) -o bin/netflow_dfs_edge_list src/netflow_dfs_edge_list.cpp
 
-netflow_skeleton: netflow_skeleton.o
-	g++ -O3 -o netflow_skeleton netflow_skeleton.cpp
+bin/netflow_dfs_v_no_delete: src/netflow_dfs_v_no_delete.cpp
+	g++ $(CFLAGS) -o bin/netflow_dfs_v_no_delete src/netflow_dfs_v_no_delete.cpp
 
-netflow_dfs_edge_list: netflow_dfs_edge_list.o
-	g++ -O3 -o netflow_dfs_edge_list netflow_dfs_edge_list.cpp
+bin/netflow_dfs_v_delete: src/netflow_dfs_v_delete.cpp
+	g++ $(CFLAGS) -o bin/netflow_dfs_v_delete src/netflow_dfs_v_delete.cpp
 
-netflow_dfs_v_no_delete: netflow_dfs_v_no_delete.o
-	g++ -O3 -o netflow_dfs_v_no_delete netflow_dfs_v_no_delete.cpp
+bin/netflow_dfs_greedy: src/netflow_dfs_greedy.cpp
+	g++ $(CFLAGS) -o bin/netflow_dfs_greedy src/netflow_dfs_greedy.cpp
 
-netflow_dfs_v_delete: netflow_dfs_v_delete.o
-	g++ -O3 -o netflow_dfs_v_delete netflow_dfs_v_delete.cpp
+bin/netflow_dfs_list_pf: src/netflow_dfs_list_pf.cpp
+	g++ $(CFLAGS) -o bin/netflow_dfs_list_pf src/netflow_dfs_list_pf.cpp
 
-netflow_dfs_greedy: netflow_dfs_greedy.o
-	g++ -O3 -o netflow_dfs_greedy netflow_dfs_greedy.cpp
+bin/netflow_dfs_list_pb: src/netflow_dfs_list_pb.cpp
+	g++ $(CFLAGS) -o bin/netflow_dfs_list_pb src/netflow_dfs_list_pb.cpp
 
-netflow_dfs_list_pf: netflow_dfs_list_pf.o
-	g++ -O3 -o netflow_dfs_list_pf netflow_dfs_list_pf.cpp
+bin/netflow_dijkstra: src/netflow_dijkstra.cpp
+	g++ $(CFLAGS) -o bin/netflow_dijkstra src/netflow_dijkstra.cpp
 
-netflow_dfs_list_pb: netflow_dfs_list_pb.o
-	g++ -O3 -o netflow_dfs_list_pb netflow_dfs_list_pb.cpp
-
-netflow_dijkstra: netflow_dijkstra.o
-	g++ -O3 -o netflow_dijkstra netflow_dijkstra.cpp
-
-netflow_edmonds_karp: netflow_edmonds_karp.o
-	g++ -O3 -o netflow_edmonds_karp netflow_edmonds_karp.cpp
+bin/netflow_edmonds_karp: src/netflow_edmonds_karp.cpp
+	g++ $(CFLAGS) -o bin/netflow_edmonds_karp src/netflow_edmonds_karp.cpp
 

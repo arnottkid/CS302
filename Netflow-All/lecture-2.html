@@ -62,10 +62,10 @@ EDGE B T 8
 EDGE A B 5
 EDGE C B 13
 </pre></td>
-<td><img src=E1-1.jpg></td></table></center><p>
+<td><img src=img/E1-1.jpg></td></table></center><p>
 
 I also have a program that generates random graphs, called
-<b><a href=makerandom.cpp>makerandom.cpp</a></b>.
+<b><a href=src/makerandom.cpp>src/makerandom.cpp</a></b>.
 This program takes one or two arguments.  The first argument is a number of nodes.
 The second number is an optional seed to <b>srand48()</b>.
 The program creates a random graph with one source, one sink, and the
@@ -102,12 +102,12 @@ EDGE n04 n02 5840
 EDGE n04 n03 4417
 EDGE s n04 8033
 </pre></td>
-<td><img src=G5-1.jpg></td></table></center><p>
+<td><img src=img/G5-1.jpg></td></table></center><p>
 
 And here's a graph showing the maximum flow of
 10,087
 
-<p><center><table border=3><td><img src=G5-2.jpg></td></table></center><p>
+<p><center><table border=3><td><img src=img/G5-2.jpg></td></table></center><p>
 
 <hr>
 <h3>The Implementations</h3>
@@ -120,7 +120,7 @@ comparison.
 <h3>The Classes in the Program</h3>
 
 I will start my implementation with the program 
-<b><a href=netflow_skeleton.cpp>netflow_skeleton.cpp</a></b>.  This
+<b><a href=src/netflow_skeleton.cpp>src/netflow_skeleton.cpp</a></b>.  This
 sets up the classes and reads the graph.  We will modify it to calculate the maximum flow.
 <p>
 My program has three basic classes: <b>Node</b>, <b>Edge</b> and <b>Graph</b>.
@@ -425,7 +425,7 @@ Again, every edge has a reverse edge, and these edges are stored on the adjacenc
 <h3>Calculating the Maximum Flow</h3>
 
 The program
-<b><a href=netflow_dfs_v_no_delete.cpp>netflow_dfs_v_no_delete.cpp</a></b>
+<b><a href=src/netflow_dfs_v_no_delete.cpp>src/netflow_dfs_v_no_delete.cpp</a></b>
 is the simplest implementation that calculates the maximum flow. 
 This program implements the three  methods that were left unimplemented
 in the skeleton program.
@@ -563,7 +563,7 @@ EDGE B T 8
 EDGE A B 5
 EDGE C B 13
 </pre></td>
-<td><img src=E1-1.jpg></td></table></center><p>
+<td><img src=img/E1-1.jpg></td></table></center><p>
 
 Because these two graph files create adjacency lists in different orders, they 
 find different paths when calculating the maximum flow.  The flow in both graphs 
@@ -627,8 +627,8 @@ harder.  I have five different implementations, and although I'm not going to go
 code specifically with you, the code is there so that you can answer your own questions:
 
 <UL>
-<LI> <a href=netflow_dfs_v_no_delete.cpp><b>netflow_dfs_v_no_delete.cpp</b></a>:  This is the version above.
-<p><LI> <a href=netflow_dfs_v_delete.cpp><b>netflow_dfs_v_delete.cpp</b></a>: In this version, I delete zero edges from the
+<LI> <a href=src/netflow_dfs_v_no_delete.cpp><b>src/netflow_dfs_v_no_delete.cpp</b></a>:  This is the version above.
+<p><LI> <a href=src/netflow_dfs_v_delete.cpp><b>src/netflow_dfs_v_delete.cpp</b></a>: In this version, I delete zero edges from the
 adjacency lists.  I don't delete the <b>Edge</b> class though, which means that 
 each edge will have a valid reverse edge.  It just so happens that if the reverse edge has
 zero residual capacity, it is not on an adjacency list.
@@ -639,7 +639,7 @@ the last edge in the node's adjacency list (adjusting that node's <b>index</b>).
 call <b>pop_back()</b> to delete the edge from the adjacency list.  I do this because it makes
 deletion constant time.  What I don't want to do is, for example, move every edge over and then
 reside the vector, because that is not a constant time action.
-<p><LI> <a href=netflow_dfs_list_pf.cpp><b>netflow_dfs_list_pf.cpp</b></a>: 
+<p><LI> <a href=src/netflow_dfs_list_pf.cpp><b>src/netflow_dfs_list_pf.cpp</b></a>: 
 In this version, I use a <b>list</b> rather than a vector for the adjacency list.  
 Instead of storing an <b>index</b>, I store the iterator to the edge on the list, in the 
 variable <b>pointer</b>.  This lets me delete easily using the <b>erase()</b> method, which is
@@ -650,18 +650,18 @@ STL.  Because <b>push_back()</b> doesn't return an iterator to the new node (lik
 and because <b>rbegin()</b> returns a <b>reverse_iterator</b>, I use <b>push_front()</b> whenever
 I put a new edge onto an adjacency list.  This is because I can now grab its iterator easily
 with <b>begin()</b>.
-<p><LI> <a href=netflow_dfs_list_pb.cpp><b>netflow_dfs_list_pb.cpp</b></a>: 
+<p><LI> <a href=src/netflow_dfs_list_pb.cpp><b>src/netflow_dfs_list_pb.cpp</b></a>: 
 This is identical to the last version, but now I am calling <b>push_back()</b>, and grabbing
 the iterator by calling <b>end()</b> and then decrementing.  This ends up being quite a
 significant change.
-<p><LI> <a href=netflow_dfs_edge_list.cpp><b>netflow_dfs_edge_list.cpp</b></a>: 
+<p><LI> <a href=src/netflow_dfs_edge_list.cpp><b>src/netflow_dfs_edge_list.cpp</b></a>: 
 Only read this code if you want to torture yourself.  Because <b>push_back()</b> and <b>erase()</b>
 have some overhead to them, what I did here was implement a class called an <b>EdgeList</b>, 
 which stores an adjacency list, but makes sure that the zero capacity edges are at the end.
 When you set an edge's capacity to zero, you swap it with the last non-zero capacity edge.
-I thought this may be more efficient than <b>netflow_dfs_v_delete.cpp</b>, because it eliminates
+I thought this may be more efficient than <b>src/netflow_dfs_v_delete.cpp</b>, because it eliminates
 all of the <b>push_back()</b> and <b>pop_backs()</b>.  Functionally, it is 
-equivalent to <b>netflow_dfs_v_delete.cpp</b>.
+equivalent to <b>src/netflow_dfs_v_delete.cpp</b>.
 </UL>
 
 When you run these on a big graph, the results are stunningly not what you'd think.  Here
@@ -714,4 +714,4 @@ Now, if you divide the running times by the number of paths, then you get
 0.000067 seconds per path with <b>netflow_dfs_list_pb</b>.  So using a vector and deleting
 is the fastest way to process paths, when you normalize by the number of paths.  We are
 therefore going to use 
-<b>netflow_dfs_v_delete.cpp</b> as our starting point for the remaining implementations.
+<b>src/netflow_dfs_v_delete.cpp</b> as our starting point for the remaining implementations.

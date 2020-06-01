@@ -3,7 +3,6 @@
 #include <cstdio>
 #include <cstdlib>
 #include <map>
-#include <list>
 #include <vector>
 #include <string>
 using namespace std;
@@ -11,8 +10,11 @@ using namespace std;
 class Node {
   public: 
     string name;
-    multimap <int, class Edge *> adj;
-    int visited;
+    vector <class Edge *> adj;
+                                             /* These are added for Dijkstra's Algorithm: */
+    int bestflow;                            /* The best flow discovered so far to this node. */
+    class Edge *backedge;                    /* The edge from which this flow came. */
+    multimap <int, Node *>::iterator qit;    /* If I'm on the queue, an iterator to my place. */
 };
 
 class Edge {
@@ -24,7 +26,7 @@ class Edge {
     Edge *reverse;
     int original;
     int residual;
-    multimap <int, class Edge *>::iterator pointer; /* Where I am on the adjacenty list. */
+    int index;     /* Where I am on the adjacenty list.  -1 if I have 0 residual */
 };
 
 class Graph {
@@ -39,7 +41,7 @@ class Graph {
      int Find_Augmenting_Path();
      int NPaths;
   
-     int DFS(Node *n);
+     int Dijkstra();
      vector <Edge *> Path;
 
      int MaxCap;
@@ -51,30 +53,68 @@ class Graph {
      map <string, Edge *> E_Map;
 };
 
-int Graph::DFS(Node *n)
+int Graph::Dijkstra()
 {
-  Edge *e;
-  multimap <int, Edge *>::reverse_iterator eit;
+  multimap <int, Node *> Q;     /* Here's the sorted list of best flow to nodes */
+  Node *n;                      /* The node that I'm processing from the back of Q. */
+  int f;                        /* When I'm processing n, this is the flow to n. */
+  Edge *e;                      /* I process each edge from n */
+  Node *t;                      /* This is the node that e goes to: e is (n,t) */
+  int nf;                       /* This is the flow to t if I go through n.  If it's better than
+                                   t's current best flow, I'll delete t from Q and put it back
+                                   on Q with this flow. */
 
-  if (n->visited) return 0;
-  if (n == Sink) return 1;
-  n->visited = 1;
+  multimap <int, Node *>::iterator qit;
+  size_t i; 
 
-  for (eit = n->adj.rbegin(); eit != n->adj.rend(); eit++) {
-    e = eit->second;
+  for (i = 0; i < Nodes.size(); i++) Nodes[i]->bestflow = 0;
+  
+  /* Start by putting the Source onto the queue with infinite flow. */
 
-/*    if (e->residual == 0) {
-      printf("Problems with:");
-      e->Print();
-      printf("\n");
-      exit(1);
-    } */
+  Source->backedge = NULL;
+  Source->bestflow = MaxCap;
+  Source->qit = Q.insert(make_pair(MaxCap, Source));
 
-    if (DFS(e->n2)) {
-      Path.push_back(e);
+  /* Now process the Queue.  
+     Always process the last element (that's the one with the most flow). */
+
+  while(!Q.empty()) {
+
+    /* Grab the last element and delete it */
+    f = Q.rbegin()->first;
+    n = Q.rbegin()->second;
+    Q.erase(n->qit);
+
+    /* If we're at the sink, we're done.  
+       Create the path by traversing backedges back to the source. */
+ 
+    if (n == Sink) {
+      while (n != Source) {
+        Path.push_back(n->backedge);
+        n = n->backedge->n1;
+      }
       return 1;
     }
+
+    /* Otherwise, process each of n's edges, and if the path through n to t
+       has better flow than t's current flow, then delete t from Q if it's
+       there, and insert t into Q with this new flow. */
+
+    for (i = 0; i < n->adj.size(); i++) {
+      e = n->adj[i];
+      t = e->n2;
+      nf = (e->residual < f) ? e->residual : f;
+      if (nf > t->bestflow) {
+        if (t->bestflow != 0) Q.erase(t->qit);
+        t->backedge = e;
+        t->bestflow = nf;
+        t->qit = Q.insert(make_pair(nf, t));
+      }
+    }
   }
+
+  /* Return 0 if there's no path to the sink. */
+
   return 0;
 }
 
@@ -94,14 +134,14 @@ int Graph::MaxFlow()
 
 int Graph::Find_Augmenting_Path()
 {
-  int i, f;
+  size_t i;
+  int f;
   Edge *e, *swap;
   Node *n;
 
-  for (i = 0; i < Nodes.size(); i++) Nodes[i]->visited = 0;
   Path.clear();
   if (Verbose.find('G') != string::npos) Print();
-  if (DFS(Source)) {
+  if (Dijkstra()) {
 
     /* Calculate the flow through the path */
 
@@ -121,15 +161,20 @@ int Graph::Find_Augmenting_Path()
     for (i = 0; i < Path.size(); i++) {
       e = Path[i];
       e->residual -= f;
-      n = e->n1;
-      n->adj.erase(e->pointer);
-      if (e->residual != 0) e->pointer = n->adj.insert(make_pair(e->residual, e));
-
-      e = e->reverse;
-      e->residual += f;
-      n = e->n1;
-      if (e->residual != f) n->adj.erase(e->pointer);
-      e->pointer = n->adj.insert(make_pair(e->residual, e));
+      if (e->residual == 0) {
+        n = e->n1;
+        swap = n->adj[n->adj.size()-1];
+        swap->index = e->index;
+        n->adj[e->index] = swap;
+        n->adj.pop_back();
+        e->index = -1;
+      }
+      e->reverse->residual += f;
+      if (e->reverse->residual == f) {
+        n = e->n2;
+        e->reverse->index = n->adj.size();
+        n->adj.push_back(e->reverse);
+      }
     }
 
     return f;
@@ -155,6 +200,7 @@ Edge *Graph::Get_Edge(Node *n1, Node *n2)
   e->n1 = n1;
   e->n2 = n2;
   e->reverse = NULL;
+  e->index = -1;
   return e;
 }
 
@@ -166,7 +212,6 @@ Node *Graph::Get_Node(string &s)
 
   n = new Node;
   n->name = s;
-  n->visited = 0;
   N_Map[s] = n;
   Nodes.push_back(n);
   return n;
@@ -180,16 +225,15 @@ void Edge::Print()
 
 void Graph::Print()
 {
-  int i;
+  size_t i, j;
   Node *n;
-  multimap <int, Edge *>::reverse_iterator eit;
 
   printf("Graph:\n");
   for (i = 0; i < Nodes.size(); i++) {
     n = Nodes[i];
     printf("  ");
     printf("Node: %s - ", n->name.c_str());
-    for (eit = n->adj.rbegin(); eit != n->adj.rend(); eit++) eit->second->Print();
+    for (j = 0; j < n->adj.size(); j++) n->adj[j]->Print();
     printf("\n");
   }
 }
@@ -197,9 +241,9 @@ void Graph::Print()
 Graph::Graph()
 {
   string s, nn, nn2, en;
-  int cap, i;
+  int cap;
   Node *n1, *n2;
-  Edge *e, *r, *tmp;
+  Edge *e, *r;
 
   MaxCap = 0;
   Source = NULL;
@@ -226,13 +270,16 @@ Graph::Graph()
       e->residual += cap;
       if (e->residual > MaxCap) MaxCap = cap + 1;
 
-      if (e->residual != cap) n1->adj.erase(e->pointer);
-      e->pointer = n1->adj.insert(make_pair(e->residual, e));
+      if (e->residual == cap) {
+        e->index = n1->adj.size();
+        n1->adj.push_back(e);  
+      }
 
       if (e->reverse == NULL) {  /* This means that the edge was just created */
         r = Get_Edge(n2, n1);
         e->reverse = r;
         r->reverse = e;
+
       }
     }
   }
@@ -243,7 +290,7 @@ Graph::Graph()
 
 Graph::~Graph()
 {
-  int i;
+  size_t i;
 
   for (i = 0; i < Nodes.size(); i++) delete Nodes[i];
   for (i = 0; i < Edges.size(); i++) delete Edges[i];

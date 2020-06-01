@@ -3,6 +3,7 @@
 #include <cstdio>
 #include <cstdlib>
 #include <map>
+#include <list>
 #include <vector>
 #include <string>
 using namespace std;
@@ -10,7 +11,7 @@ using namespace std;
 class Node {
   public: 
     string name;
-    vector <class Edge *> adj;
+    list <class Edge *> adj;
     int visited;
 };
 
@@ -23,7 +24,7 @@ class Edge {
     Edge *reverse;
     int original;
     int residual;
-    int index;     /* Where I am on the adjacenty list.  -1 if I have 0 residual */
+    list <Edge *>::iterator pointer; /* Where I am on the adjacenty list. */
 };
 
 class Graph {
@@ -52,15 +53,15 @@ class Graph {
 
 int Graph::DFS(Node *n)
 {
-  int i;
   Edge *e;
+  list <Edge *>::iterator eit;
 
   if (n->visited) return 0;
   if (n == Sink) return 1;
   n->visited = 1;
 
-  for (i = 0; i < n->adj.size(); i++) {
-    e = n->adj[i];
+  for (eit = n->adj.begin(); eit != n->adj.end(); eit++) {
+    e = *eit;
 
 /*    if (e->residual == 0) {
       printf("Problems with:");
@@ -93,8 +94,9 @@ int Graph::MaxFlow()
 
 int Graph::Find_Augmenting_Path()
 {
-  int i, f;
-  Edge *e, *swap;
+  size_t i;
+  int f;
+  Edge *e;
   Node *n;
 
   for (i = 0; i < Nodes.size(); i++) Nodes[i]->visited = 0;
@@ -122,17 +124,13 @@ int Graph::Find_Augmenting_Path()
       e->residual -= f;
       if (e->residual == 0) {
         n = e->n1;
-        swap = n->adj[n->adj.size()-1];
-        swap->index = e->index;
-        n->adj[e->index] = swap;
-        n->adj.pop_back();
-        e->index = -1;
+        n->adj.erase(e->pointer);
       }
       e->reverse->residual += f;
       if (e->reverse->residual == f) {
         n = e->n2;
-        e->reverse->index = n->adj.size();
-        n->adj.push_back(e->reverse);
+        n->adj.push_front(e->reverse);
+        e->reverse->pointer = n->adj.begin();
       }
     }
 
@@ -159,7 +157,6 @@ Edge *Graph::Get_Edge(Node *n1, Node *n2)
   e->n1 = n1;
   e->n2 = n2;
   e->reverse = NULL;
-  e->index = -1;
   return e;
 }
 
@@ -185,15 +182,16 @@ void Edge::Print()
 
 void Graph::Print()
 {
-  int i, j;
+  size_t i;
   Node *n;
+  list <Edge *>::iterator eit;
 
   printf("Graph:\n");
   for (i = 0; i < Nodes.size(); i++) {
     n = Nodes[i];
     printf("  ");
     printf("Node: %s - ", n->name.c_str());
-    for (j = 0; j < n->adj.size(); j++) n->adj[j]->Print();
+    for (eit = n->adj.begin(); eit != n->adj.end(); eit++) (*eit)->Print();
     printf("\n");
   }
 }
@@ -201,9 +199,9 @@ void Graph::Print()
 Graph::Graph()
 {
   string s, nn, nn2, en;
-  int cap, i;
+  int cap;
   Node *n1, *n2;
-  Edge *e, *r, *tmp;
+  Edge *e, *r;
 
   MaxCap = 0;
   Source = NULL;
@@ -231,15 +229,14 @@ Graph::Graph()
       if (e->residual > MaxCap) MaxCap = cap + 1;
 
       if (e->residual == cap) {
-        e->index = n1->adj.size();
-        n1->adj.push_back(e);  
+        n1->adj.push_front(e);  
+        e->pointer = n1->adj.begin();
       }
 
       if (e->reverse == NULL) {  /* This means that the edge was just created */
         r = Get_Edge(n2, n1);
         e->reverse = r;
         r->reverse = e;
-
       }
     }
   }
@@ -250,7 +247,7 @@ Graph::Graph()
 
 Graph::~Graph()
 {
-  int i;
+  size_t i;
 
   for (i = 0; i < Nodes.size(); i++) delete Nodes[i];
   for (i = 0; i < Edges.size(); i++) delete Edges[i];

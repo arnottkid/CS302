@@ -1,0 +1,2 @@
+I have put things into directories.  I've updated the links and stuff in lectures 1/2, but
+I haven't done const stuff, and I haven't done the inheritance stuff.  I should.

@@ -10,7 +10,7 @@ using namespace std;
 class EdgeList {
   public:
     EdgeList();
-    int Non_Zeros;
+    size_t Non_Zeros;
     vector <class Edge *> L;
     void Push_Back(Edge *e);
     void Change_Residual(Edge *e, int new_residual);
@@ -80,7 +80,7 @@ void EdgeList::Push_Back(Edge *e)
 void EdgeList::Change_Residual(Edge *e, int new_residual)
 {
   Edge *swap;
-  int old_residual, i;
+  int old_residual;
   int new_e_index, new_swap_index;
 
   old_residual = e->residual;
@@ -119,7 +119,7 @@ EdgeList::EdgeList()
 
 int Graph::DFS(Node *n)
 {
-  int i;
+  size_t i;
   Edge *e;
 
   if (n->visited) return 0;
@@ -158,7 +158,8 @@ int Graph::MaxFlow()
 
 int Graph::Find_Augmenting_Path()
 {
-  int i, f;
+  size_t i; 
+  int f;
   Edge *e;
 
   for (i = 0; i < Nodes.size(); i++) Nodes[i]->visited = 0;
@@ -234,7 +235,7 @@ void Edge::Print()
 
 void Graph::Print()
 {
-  int i, j;
+  size_t i, j;
   Node *n;
 
   for (i = 0; i < Nodes.size(); i++) {
@@ -248,9 +249,9 @@ void Graph::Print()
 Graph::Graph()
 {
   string s, nn, nn2, en;
-  int cap, i;
+  int cap;
   Node *n1, *n2;
-  Edge *e, *r, *tmp;
+  Edge *e, *r;
 
   MaxCap = 0;
   Source = NULL;
@@ -293,7 +294,7 @@ Graph::Graph()
 
 Graph::~Graph()
 {
-  int i;
+  size_t i;
 
   for (i = 0; i < Nodes.size(); i++) delete Nodes[i];
   for (i = 0; i < Edges.size(); i++) delete Edges[i];

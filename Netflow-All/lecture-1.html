@@ -43,10 +43,10 @@ a node has to equal the amount of flow going out of a node.</b>
 <p>
 Here's an example graph, with source <i>S</i> and sink <i>T</i> (in this and other pictures,
 you can click on the pictures, and get the full size picture):
-<p><center><table border=3><td><a href=E1-1.jpg><img src=E1-1.jpg width=200></a></td></table></center><p>
+<p><center><table border=3><td><a href=img/E1-1.jpg><img src=img/E1-1.jpg width=200></a></td></table></center><p>
 It's not hard to eyeball this graph, and determine that the maximum flow is 23.  Here's 
 a graph that shows this flow, subject to the above rules:
-<p><center><table border=3><td><a href=E1-2.jpg><img src=E1-2.jpg width=200></a></td></table></center><p>
+<p><center><table border=3><td><a href=img/E1-2.jpg><img src=img/E1-2.jpg width=200></a></td></table></center><p>
 
 <hr>
 <h3>A Related Problem: The Minimum Cut</h3>
@@ -80,9 +80,9 @@ removes five units of flow from the path <i>S-A-T</i>, then eight units of flow
 from the path <i>S-C-B-T</i>, and finally six units of flow from the path <i>S-C-D-T</i>:
 
 <p><center><table border=3>
-<td align=center>Remove 5 units of flow from <i>S-A-T</i>:<p><a href=E1-3.jpg><img src=E1-3.jpg width=200></a></td>
-<td align=center>Remove 8 units of flow from <i>S-C-B-T</i>:<p><a href=E1-4.jpg><img src=E1-4.jpg width=200></a></td>
-<td align=center>Remove 6 units of flow from <i>S-C-D-T</i>:<p><a href=E1-5.jpg><img src=E1-5.jpg width=200></a></td>
+<td align=center>Remove 5 units of flow from <i>S-A-T</i>:<p><a href=img/E1-3.jpg><img src=img/E1-3.jpg width=200></a></td>
+<td align=center>Remove 8 units of flow from <i>S-C-B-T</i>:<p><a href=img/E1-4.jpg><img src=img/E1-4.jpg width=200></a></td>
+<td align=center>Remove 6 units of flow from <i>S-C-D-T</i>:<p><a href=img/E1-5.jpg><img src=img/E1-5.jpg width=200></a></td>
 </table></center><p>
 
 You'll note that the source is no longer connected to the sink, so we can't find
@@ -114,8 +114,8 @@ Let's go back to our example above.  Below is the starting state of the flow gra
 and the residual graph:
 
 <p><center><table border=3>
-<td align=center><u>Flow Graph<u><p><a href=E1-6.jpg><img src=E1-6.jpg width=200></a></td>
-<td align=center><u>Residual Graph<u><p><a href=E1-1.jpg><img src=E1-1.jpg width=200></a></td>
+<td align=center><u>Flow Graph<u><p><a href=img/E1-6.jpg><img src=img/E1-6.jpg width=200></a></td>
+<td align=center><u>Residual Graph<u><p><a href=img/E1-1.jpg><img src=img/E1-1.jpg width=200></a></td>
 </table></center><p>
 
 Like before, we start with the path <i>S-A-T</i>.  It has a flow of 5.  So, we'll add
@@ -124,8 +124,8 @@ flow along the path <i>T-A-S</i>.  Here is the result.  I'm drawing the ``revers
 red, since this flow is usually the one that confuses students.
 
 <p><center><table border=3>
-<td align=center><u>Flow Graph<u><p><a href=E1-7.jpg><img src=E1-7.jpg width=200></a></td>
-<td align=center><u>Residual Graph<u><p><a href=E1-8.jpg><img src=E1-8.jpg width=200></a></td>
+<td align=center><u>Flow Graph<u><p><a href=img/E1-7.jpg><img src=img/E1-7.jpg width=200></a></td>
+<td align=center><u>Residual Graph<u><p><a href=img/E1-8.jpg><img src=img/E1-8.jpg width=200></a></td>
 </table></center><p>
 
 Also like before, let's choose our next path to be <i>S-C-B-T</i>, with a flow of 8.
@@ -133,8 +133,8 @@ We'll add it to the flow graph, subtract it from the residual, and add the rever
 to the residual:
 
 <p><center><table border=3>
-<td align=center><u>Flow Graph<u><p><a href=E1-9.jpg><img src=E1-9.jpg width=200></a></td>
-<td align=center><u>Residual Graph<u><p><a href=E1-A.jpg><img src=E1-A.jpg width=200></a></td>
+<td align=center><u>Flow Graph<u><p><a href=img/E1-9.jpg><img src=img/E1-9.jpg width=200></a></td>
+<td align=center><u>Residual Graph<u><p><a href=img/E1-A.jpg><img src=img/E1-A.jpg width=200></a></td>
 </table></center><p>
 
 Also like before, let's choose our third path to be <i>S-C-D-T</i>, with a flow of 6.
@@ -142,8 +142,8 @@ We'll add it to the flow graph, subtract it from the residual, and add the rever
 to the residual:
 
 <p><center><table border=3>
-<td align=center><u>Flow Graph<u><p><a href=E1-B.jpg><img src=E1-B.jpg width=200></a></td>
-<td align=center><u>Residual Graph<u><p><a href=E1-C.jpg><img src=E1-C.jpg width=200></a></td>
+<td align=center><u>Flow Graph<u><p><a href=img/E1-B.jpg><img src=img/E1-B.jpg width=200></a></td>
+<td align=center><u>Residual Graph<u><p><a href=img/E1-C.jpg><img src=img/E1-C.jpg width=200></a></td>
 </table></center><p>
 
 You'll recall that this is the point at which we were stuck above.  However, the reverse
@@ -151,8 +151,8 @@ edges have now given us another path through the graph: <i>S-A-B-C-D-T</i>, with
 flow of four.  Let's process those:
 
 <p><center><table border=3>
-<td align=center><u>Flow Graph<u><p><a href=E1-2.jpg><img src=E1-2.jpg width=200></a></td>
-<td align=center><u>Residual Graph<u><p><a href=E1-D.jpg><img src=E1-D.jpg width=200></a></td>
+<td align=center><u>Flow Graph<u><p><a href=img/E1-2.jpg><img src=img/E1-2.jpg width=200></a></td>
+<td align=center><u>Residual Graph<u><p><a href=img/E1-D.jpg><img src=img/E1-D.jpg width=200></a></td>
 </table></center><p>
 
 Now, there's no way to get from the source to the sink in the residual graph.  Therefore,
@@ -169,8 +169,8 @@ source in the residual graph.  Lets color those nodes red, and all of the other 
 green, both in the residual graph and in the original graph:
 
 <p><center><table border=3>
-<td align=center><u>Residual Graph<u><p><a href=E1-E.jpg><img src=E1-E.jpg width=200></a></td>
-<td align=center><u>Original Graph<u><p><a href=E1-F.jpg><img src=E1-F.jpg width=200></a></td>
+<td align=center><u>Residual Graph<u><p><a href=img/E1-E.jpg><img src=img/E1-E.jpg width=200></a></td>
+<td align=center><u>Original Graph<u><p><a href=img/E1-F.jpg><img src=img/E1-F.jpg width=200></a></td>
 </table></center><p>
 
 The minimum cut is composed of all edges <i>in the original graph</i>, 
@@ -183,7 +183,7 @@ are highlighted in orange above: <i>AT</i>, <i>BT</i> and <i>CD</i>.
 This is a classic example of why you need to have a smart algorithm for finding 
 each augmenting path.  Behold the following graph:
 
-<p><center><table border=3><td><img src=Path-1.jpg></td></table></center><p>
+<p><center><table border=3><td><img src=img/Path-1.jpg></td></table></center><p>
 
 It's pretty easy to eyeball this graph and see that it has a maximum flow of 1000.
 The two paths are <i>S->A->T</i> and <i>S->B->T</i>.  However, if you try to determine
@@ -192,16 +192,16 @@ it will take 1000 iterations of the algorithm.  To illustrate, suppose that the 
 path you choose is <i>S->A->B->T</i> with a flow of one.  When you process this path 
 through the residual graph, you end up with the following:
 
-<p><center><table border=3><td><img src=Path-2.jpg></td></table></center><p>
+<p><center><table border=3><td><img src=img/Path-2.jpg></td></table></center><p>
 
 At the next iteration, suppose you choose the path <i>S->B->A->T</i>, again with a 
 flow of one.  The residual looks as follows:
 
-<p><center><table border=3><td><img src=Path-3.jpg></td></table></center><p>
+<p><center><table border=3><td><img src=img/Path-3.jpg></td></table></center><p>
 
 You continue in that vein.  The pictures below show how you choose <i>S->A->B->T</i> again,
 and then <i>S->B->A->T</i>, again:
-<p><center><table border=3><td><img src=Path-4.jpg></td><td><img src=Path-5.jpg></td></table></center><p>
+<p><center><table border=3><td><img src=img/Path-4.jpg></td><td><img src=img/Path-5.jpg></td></table></center><p>
 
 Each time, you add one unit of flow, which means that this will take 1000 iterations.  Although
 this example is unlikely to happen in practice, it demonstrates a need for a smart determination
