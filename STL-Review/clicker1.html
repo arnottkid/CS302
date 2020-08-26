@@ -1,0 +1,46 @@
+<h2>Clicker Questions From This Lecture</h2>
+
+<hr>
+<h3>From 8/27/2020</h3>
+
+In the following procedure, assume that the size of <i>p</i> is </>m</i>, and the 
+size of <i>r</i> is <i>o</i>.  What is the running time of this function:
+
+<p>
+<center>
+<table><td valign=top>
+<p><center><table border=3 cellpadding=3><td><pre>
+int find_em(const vector &lt;int&gt; &r,
+            const map &lt;int, int&gt; &p,
+            int n) 
+{
+  int found;
+  int i, index;
+
+  found = 0;
+  for (i = 0; i &lt; n; i++) {
+    index = rand() % r.size();
+    if (p.find(r[index]) != p.end()) found++;
+  }
+  return found;
+}
+</pre></td></table></center><p>
+</td><td width=50><td valign=top>
+<b>Multiple Choice Answers</b>
+<p>
+<pre>
+A. <i>O(m log(m))</i>
+B. <i>O(m log(n))</i>
+C. <i>O(m log(o))</i>
+D. <i>O(n log(m))</i>
+E. <i>O(n log(n))</i>
+F. <i>O(n log(o))</i>
+G. <i>O(o log(m))</i>
+H. <i>O(o log(n))</i>
+I. <i>O(o log(o))</i>
+</pre>
+</td></table></center>
+
+<p>
+The loop iterates <i>n</i> times, and since the map is size <i>m</i>, each <b>find()</b>
+operation is <i>O(log(m))</i>.  So the answer is D: <i>O(n log(m))</i>.

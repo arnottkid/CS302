@@ -20,6 +20,7 @@ ALL = bin/car_buyer_skeleton \
       bin/glossary_3_makestrings \
       bin/glossary_4_finish \
       bin/glossary_mine \
+      bin/click1 \
 
 all: $(ALL)
 
@@ -148,4 +149,7 @@ bin/glossary_4_finish: obj/glossary_4_finish.o obj/glossary_main.o
 
 bin/glossary_mine: obj/glossary_mine.o obj/glossary_main.o
 	g++ $(CFLAGS) -o bin/glossary_mine obj/glossary_mine.o obj/glossary_main.o
+
+bin/click1: src/click1.cpp
+	g++ $(CFLAGS) -o bin/click1 src/click1.cpp
 
