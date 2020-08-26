@@ -29,14 +29,14 @@ class Keno_LL {
     double Winnings;
     double N;
     int Verbose;
-    void Pick_Balls();
+    void Do_Picking();
     void Calculate_Payout(int b);
 };
 
 /* This is new -- choosing random elements of Balls, rather than
    calling random() to pick balls.  */
 
-void Keno_LL::Pick_Balls()
+void Keno_LL::Do_Picking()
 {
   int i, j, first, last, tmp;
   set <int>::iterator pbit;
@@ -155,7 +155,7 @@ int main(int argc, char **argv)
           cout << "You must pick a ball between 1 and " << K.NB << ".\n";
         }
       } while (b <= 0 || b > K.NB);
-      K.Pick_Balls();
+      K.Do_Picking();
       K.Calculate_Payout(b);
     }
   }
@@ -163,7 +163,7 @@ int main(int argc, char **argv)
   while (K.N < K.Iterations) {
     b = random()%(K.NB)+1;
     if (K.Verbose) printf("Picked %d\n", b);
-    K.Pick_Balls();
+    K.Do_Picking();
     K.Calculate_Payout(b);
   }
   if (!K.Verbose) {

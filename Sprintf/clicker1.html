@@ -1,0 +1,95 @@
+<h2>Clicker Questions From This Lecture</h2>
+
+<hr>
+<h3>From 8/25/2020</h3>
+
+What is the output of the following program?
+(<b><a href=src/click1.cpp>src/click1.cpp</a></b>)
+
+<center>
+<p>
+<table>
+<td valign=top>
+<p><center><table border=3 cellpadding=3><td><pre>
+#include &lt;cstdio&gt;
+#include &lt;iostream&gt;
+#include &lt;string&gt;
+using namespace std;
+
+int main()
+{
+  string s1, s2;
+  const char *s;
+
+  s2 = "Fred";
+  s = s2.c_str();
+  s1 = s;
+
+  s1[1] = 'y';
+  s2[1] = 'z';
+ 
+  cout &lt;&lt; s &lt;&lt; " "
+       &lt;&lt; s1 &lt;&lt; " "
+       &lt;&lt; s2 &lt;&lt; endl;
+  return 0;
+}
+</pre></td></table></center><p>
+</td><td width=50></td>
+<td valign=top>
+<b>Multiple Choice Answers</b>:
+
+<p>
+A. Fyed Fyed Fzed <br>
+B. Fred Fzed Fzed <br>
+C. Fyed Fyed Fyed <br>
+D. Fzed Fzed Fzed <br>
+E. Fred Fyed Fzed <br>
+F. Fzed Fyed Fzed<br>
+G. Fred Fred Fred <br>
+H. Fred Fyed Fzed<br>
+</td></table></center>
+<p>
+
+Here's the answer (F):
+
+<pre>
+UNIX> <font color=darkred><b>make bin/click1</b></font>
+g++ -std=c++98 -Wall -Wextra -o bin/click1 src/click1.cpp
+UNIX> <font color=darkred><b>bin/click1</b></font>
+Fzed Fyed Fzed
+UNIX> <font color=darkred><b></b></font>
+</pre>
+
+Why?  You start with <b>s2</b> being "Fred", and <b>s</b> pointing to the underlying 
+string:
+
+<p><center><table border=3 cellpadding=3><td><pre>
+s2: "Fred"
+    ^
+    |
+s ---
+</pre></td></table></center><p>
+
+When you assign <b>s1</b> to <b>s</b>, it makes a copy -- C++ strings always make copies:
+
+<p><center><table border=3 cellpadding=3><td><pre>
+s2: "Fred"
+    ^
+    |
+s ---
+s1: "Fred"
+</pre></td></table></center><p>
+
+Now, each string changes its second character -- <b>s1</b> changes it to 'y' and 
+<b>s2</b> changes it to 'z':
+
+<p><center><table border=3 cellpadding=3><td><pre>
+s2: "Fzed"
+    ^
+    |
+s ---
+s1: "Fyed"
+</pre></td></table></center><p>
+
+Thus, the output is "Fzed Fyed Fzed".
+<hr>

@@ -27,16 +27,16 @@ class Keno_LL {
     double Winnings;              // Total winnings (yes, we could calculate from above)
     double N;                     // Iteration so far
 
-    void Pick_Balls();            // Creates Picked randomly
+    void Do_Picking();            // Creates Picked randomly
     void Calculate_Payout(int b); // Given a ball b, and set Picked, calculates the payout and updates the stats.
 };
 
-/* Procedure to pick balls randomly.  The balls are put into the 
+/* Procedure to pick the Keno balls randomly.  The balls are put into the 
    set "Picked," which is sentinelized so that the first ball is 
    at the end of the set, after the maximum numbered ball, and the 
    last ball is at the beginning of the set, before ball 1. */
 
-void Keno_LL::Pick_Balls()
+void Keno_LL::Do_Picking()
 {
   int i, j, first, last;
   set <int>::iterator pbit;
@@ -154,7 +154,7 @@ int main(int argc, char **argv)
           cout << "You must pick a ball between 1 and " << K.NB << ".\n";
         }
       } while (b <= 0 || b > K.NB);
-      K.Pick_Balls();
+      K.Do_Picking();
       K.Calculate_Payout(b);
     }
   }
@@ -162,7 +162,7 @@ int main(int argc, char **argv)
   while (K.N < K.Iterations) {
     b = random()%(K.NB)+1;
     if (K.Verbose) printf("Picked %d\n", b);
-    K.Pick_Balls();
+    K.Do_Picking();
     K.Calculate_Payout(b);
   }
   if (!K.Verbose) {

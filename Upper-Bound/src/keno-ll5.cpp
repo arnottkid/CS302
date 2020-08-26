@@ -27,13 +27,13 @@ class Keno_LL {
     double Winnings;
     double N;
     int Verbose;
-    void Pick_Balls();
-    void Pick_Balls_Array();        /* This is new, putting the balls into an array */
+    void Do_Picking();
+    void Do_Picking_Array();        /* This is new, putting the balls into an array */
     void Calculate_Payout(int b);
     void Calculate_All();
 };
 
-void Keno_LL::Pick_Balls()
+void Keno_LL::Do_Picking()
 {
   int i, j, first, last, tmp;
   set <int>::iterator pbit;
@@ -64,7 +64,7 @@ void Keno_LL::Pick_Balls()
 
 /* This puts the picked balls into an array rather than into the set */
 
-void Keno_LL::Pick_Balls_Array()
+void Keno_LL::Do_Picking_Array()
 {
   int i, j, first, last, tmp;
 
@@ -199,13 +199,13 @@ int main(int argc, char **argv)
           cout << "You must pick a ball between 1 and " << K.NB << ".\n";
         }
       } while (b <= 0 || b > K.NB);
-      K.Pick_Balls();
+      K.Do_Picking();
       K.Calculate_Payout(b);
     }
   }
 
   while (K.N < K.Iterations) {
-    K.Pick_Balls_Array();
+    K.Do_Picking_Array();
     K.Calculate_All();
   }
   if (!K.Verbose) {

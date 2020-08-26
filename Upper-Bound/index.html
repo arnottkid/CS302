@@ -125,27 +125,27 @@ class Keno_LL {
     double Winnings;              <font color=blue>// Total winnings (yes, we could calculate from above)</font>
     double N;                     <font color=blue>// Iteration so far</font>
 
-    void Pick_Balls();            <font color=blue>// Creates Picked randomly</font>
+    void Do_Picking();            <font color=blue>// Creates Picked randomly</font>
     void Calculate_Payout(int b); <font color=blue>// Given a ball b, and set Picked, calculates the payout and updates the stats.</font>
 };
 </pre></td></table></center><p>
 
-All these are straightforward.  At each iteration, we'll call <b>Pick_Balls()</b>, which will put <b>NP</b>
+All these are straightforward.  At each iteration, we'll call <b>Do_Picking()</b>, which will put <b>NP</b>
 random numbers from 1 to <b>NB</b> into <b>Picked</b>.  Then we'll get a value of <b>b</b>, either from 
 standard input or randomly, and call <b>Calculate_Payout()</b>, which will determine whether <b>b</b> is a 
 winner, loser or tie, and update all those stats accordingly.  
 I won't show the code for the <b>main()</b> -- it simply parses command line arguments, sets up an instance
-of the <b>Keno_LL</b> class, and makes the appropriate calls to <b>Pick_Balls()</b> and <b>Calculate_Payout()</b>.
+of the <b>Keno_LL</b> class, and makes the appropriate calls to <b>Do_Picking()</b> and <b>Calculate_Payout()</b>.
 <p>
 Let's take a look at those methods:
 
 <p><center><table border=3 cellpadding=3><td><pre>
-<font color=blue>/* Procedure to pick balls randomly.  The balls are put into the
+<font color=blue>/* Procedure to pick the keno balls randomly.  The balls are put into the
    set "Picked," which is sentinelized so that the first ball is  
    at the end of the set, after the maximum numbered ball, and the  
    last ball is at the beginning of the set, before ball 1. */</font>
 
-void Keno_LL::Pick_Balls()
+void Keno_LL::Do_Picking()
 {
   int i, j, first, last;
   set &lt;int&gt;::iterator pbit;
@@ -172,7 +172,7 @@ void Keno_LL::Pick_Balls()
 }
 </pre></td></table></center><p>
 
-<b>Pick_Balls()</b> puts random numbers into a set.   It takes care not to put duplicates into the
+<b>Do_Picking()</b> puts random numbers into a set.   It takes care not to put duplicates into the
 set.  If specified, it prints out the balls picked.  At the end, it sentinelizes the set.  If the 
 smallest element is <i>s</i> and the largest <i>l</i>, then it inserts <i>(l-NB)</i> and
 <i>(NB+s)</i> into the map.  This is to handle the case when the ball that the contestant picks
@@ -332,7 +332,7 @@ Balls Picked: 1 7 11 13 24 26 29 33 34 37 46 50 52 54 58 64 66 67 75 79.
 Picked 68
 Balls Picked: 4 6 8 10 12 20 23 26 28 31 33 38 43 49 58 67 71 74 76 77.
   D to higher: 3.  D to lower: 1.  -1.00: Total = 0.50.  Avg = 0.100000
-UNIX> <font color=darkred><b>binkeno-ll 80 20 1.25 5 n</b></font>
+UNIX> <font color=darkred><b>bin/keno-ll 80 20 1.25 5 n</b></font>
 Total = -2.00.  Avg = -0.400000.  W/L/T: 0 2 3
 UNIX> <font color=darkred><b></b></font>
 </pre>
@@ -390,7 +390,7 @@ UNIX> <font color=darkred><b></b></font>
 
 (BTW, the makefile compiles with -O3).
 <p>
-There are definitely a few places to work on speeding up.  First is <b>Pick_Balls()</b>.
+There are definitely a few places to work on speeding up.  First is <b>Do_Picking()</b>.
 That's a poor way to choose random numbers, since you may have to throw numbers away 
 when you choose duplicates.  Think about it -- what if <b>NP</b> is really close to
 <b>NB</b>?  Then when you get to the last balls, you're more likely to have to throw
@@ -403,10 +403,10 @@ and then don't consider it for the next pick.
 The new code is in 
 <b><a href=src/keno-ll2.cpp>src/keno-ll2.cpp</a></b>.  I've added a vector <b>Balls</b>
 to the <b>Keno_LL</b> class, and I have initialized it to hold the numbers 1 thorugh <b>NB</b>.
-Then, <b>Pick_Balls()</b> works as follows:
+Then, <b>Do_Picking()</b> works as follows:
 
 <p><center><table border=3 cellpadding=3><td><pre>
-void Keno_LL::Pick_Balls()
+void Keno_LL::Do_Picking()
 {
   int i, j, first, last, tmp;
   set &lt;int&gt;::iterator pbit;
@@ -525,10 +525,10 @@ array in <b>Calculate_All()</b> instead of the map.
 <p>
 The code is in 
 <b><a href=src/keno-ll5.cpp>src/keno-ll5.cpp</a></b>, where we write a separate
-<b>Pick_Balls_Array()</b> which puts the balls into an array <b>PBalls</b>:
+<b>Do_Picking_Array()</b> which puts the balls into an array <b>PBalls</b>:
 
 <p><center><table border=3 cellpadding=3><td><pre>
-void Keno_LL::Pick_Balls_Array()
+void Keno_LL::Do_Picking_Array()
 {
   int i, j, first, last, tmp;
 
@@ -621,7 +621,7 @@ probabilities for all 80 balls at each iteration is a much smarter and
 faster way to perform
 the evalution.
 <LI> Performing insertions/finds with a set is slower than using an vector and sorting.
-The code for <b>Pick_Balls()</b> and <b>Calculate_All()</b> is <i>O(<b>NP</b> log(<b>NP</b>))</i>
+The code for <b>Do_Picking()</b> and <b>Calculate_All()</b> is <i>O(<b>NP</b> log(<b>NP</b>))</i>
 in both cases.  However, the vector version is faster, largely because it is more memory-
 efficient.
 </OL>

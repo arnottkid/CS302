@@ -7,7 +7,9 @@ ALL = bin/c_str \
       bin/sprintf2 \
       bin/sscanf1 \
       bin/sscanf2 \
-      bin/sscanf3
+      bin/sscanf3 \
+      bin/click1 \
+      bin/click2
 
 CFLAGS ?= -std=c++98 -Wall -Wextra 
 
@@ -45,4 +47,10 @@ bin/sscanf2: src/sscanf2.cpp
 
 bin/sscanf3: src/sscanf3.cpp
 	g++ $(CFLAGS)-o bin/sscanf3 src/sscanf3.cpp
+
+bin/click1: src/click1.cpp
+	g++ $(CFLAGS)-o bin/click1 src/click1.cpp
+
+bin/click2: src/click2.cpp
+	g++ $(CFLAGS)-o bin/click2 src/click2.cpp
 

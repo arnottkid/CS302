@@ -1,0 +1,47 @@
+<h2>Clicker Questions From This Lecture</h2>
+
+<hr>
+<h3>From 8/27/2020</h3>
+
+What is the output of the following program?
+(<b><a href=src/click2.cpp>src/click2.cpp</a></b>) 
+
+<p><center><table border=3 cellpadding=3><td><pre>
+#include &lt;cstdio&gt;
+#include &lt;iostream&gt;
+using namespace std;
+
+int main()
+{
+  int x, y;
+  string s;
+ 
+  x = 5;
+  y = 10;
+  s = "15 Fred";
+
+  sscanf(s.c_str(), "%d %d", &x, &y);
+  cout &lt;&lt; x &lt;&lt; "-" &lt;&lt; y &lt;&lt; "-";
+
+  s = "Fred 20";
+
+  sscanf(s.c_str(), "%d %d", &x, &y);
+  cout &lt;&lt; x &lt;&lt; "-" &lt;&lt; y &lt;&lt; endl;
+
+  return 0;
+}
+</pre></td></table></center><p>
+
+The first <b>sscanf()</b> correctly reads 15 into <b>x</b>, but fails reading <b>y</b>, 
+because "Fred" is not an integer.  So <b>y</b> remains at 10.
+The first <b>sscanf()</b> fails reading <b>x</b>, and the <b>sscanf()</b> call exits at that
+point, so <b>y</b> remains unchanged.  The answer is:
+
+<pre>
+UNIX> <font color=darkred><b>make bin/click2</b></font>
+g++ -std=c++98 -Wall -Wextra -o bin/click2 src/click2.cpp
+UNIX> <font color=darkred><b>bin/click2</b></font>
+15-10-15-10
+UNIX> <font color=darkred><b></b></font>
+</pre>
+
