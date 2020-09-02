@@ -1,7 +1,7 @@
 <title>CS302 Lecture Notes</title>
 <h2>CS302 Lecture Notes - Using upper_bound and lower_bound with a set or map</h2>
 <UL>
-<LI> Original notes: August, 2011.  Latest modification: March, 2018
+<LI> Original notes: August, 2011.  Latest modification: August, 2020.
 <LI> James S. Plank
 <LI> Directory: <b>/home/plank/cs302/Notes/Upper_Bound</b>
 </UL>
@@ -18,7 +18,7 @@ best solution makes you use it.
 </UL>
 
 <hr>
-<h2>The upper_bound() and lower_bound() map methods</h2>
+<h2>The upper_bound() and lower_bound() sets/map methods</h2>
 
 A feature of sets and maps that often gets overlooked is the ability to 
 search for an item that may or may not be present, and return the item that
@@ -104,7 +104,7 @@ It would take some good math to figure out the closed-form probability of the Lu
 bet.  However, we can simulate, and that's just as good, at least to Mr. Thump.
 We'll go through a sequence of programs that illustrate a number of points.
 <hr>
-<h3>Program #1 - using upper_bound</h3>
+<h3>Program #1 - using lower_bound</h3>
 
 I'm not going through all of this program.  The basic version is in 
 <b><a href=src/keno-ll.cpp>src/keno-ll.cpp</a></b>.  Let's first look at 
@@ -175,7 +175,7 @@ void Keno_LL::Do_Picking()
 <b>Do_Picking()</b> puts random numbers into a set.   It takes care not to put duplicates into the
 set.  If specified, it prints out the balls picked.  At the end, it sentinelizes the set.  If the 
 smallest element is <i>s</i> and the largest <i>l</i>, then it inserts <i>(l-NB)</i> and
-<i>(NB+s)</i> into the map.  This is to handle the case when the ball that the contestant picks
+<i>(NB+s)</i> into the set.  This is to handle the case when the ball that the contestant picks
 is lower than all the picked balls, or higher than all the picked balls.  Then, you don't have to
 have any special case code in <b>Calculate_Payout()</b>.  (<i>I'll go over this in greater detail
 below.</i>)
@@ -390,6 +390,11 @@ UNIX> <font color=darkred><b></b></font>
 
 (BTW, the makefile compiles with -O3).
 <p>
+
+<hr>
+
+<h3>Better randomization</h3>
+
 There are definitely a few places to work on speeding up.  First is <b>Do_Picking()</b>.
 That's a poor way to choose random numbers, since you may have to throw numbers away 
 when you choose duplicates.  Think about it -- what if <b>NP</b> is really close to
@@ -435,6 +440,9 @@ Total = -27893.75.  Avg = -0.027894.  W/L/T: 321237 429440 249323
 UNIX> <font color=darkred><b></b></font>
 </pre>
 
+<hr>
+<h3>Better sampling</h3>
+
 Can we do better?  Well, consider this -- instead of trying one random ball on each 
 iteration, let's just look at all of them.  We'll do this in a method called
 <b>Calculate_All()</b>, which we only call when we're doing multiple iterations.
@@ -466,8 +474,12 @@ Dang, that was fast!  It's because we're iterating 1000000/80 times instead
 of 1000000.  Granted, we're doing a little more work at each iteration, but
 not much.
 <p>
+
+<hr>
+<h3>Faster sampling</h3>
+
 We can make it faster still, though.  We don't really need to calculate
-the picks for every ball.  Instead, we can just run through the map and
+the picks for every ball.  Instead, we can just run through the set and
 check each interval.  If the interval size is <i>x</i>, then there will 
 be <i>x/2</i> winners (integer division) and <i>x - x/2</i> losers.
 <p>
@@ -518,10 +530,14 @@ UNIX>
 
 0.076 vs 0.102 may not seem like much, but it is over 25 percent.
 <p>
-I ended here in class, but I mentioned that you can do this even faster.  How?
-Get rid of the map.  Instead, simply put the picked balls into an array and
+<hr>
+<h3>Using a more efficient data structure</h3>
+
+I typically end here in class, but simply talk about this section.
+We can make this faster.  How?
+Get rid of the set.  Instead, simply put the picked balls into an array and
 sort the array with the STL procedure <b>sort()</b>.  Then you traverse the
-array in <b>Calculate_All()</b> instead of the map.  
+array in <b>Calculate_All()</b> instead of the set.  
 <p>
 The code is in 
 <b><a href=src/keno-ll5.cpp>src/keno-ll5.cpp</a></b>, where we write a separate

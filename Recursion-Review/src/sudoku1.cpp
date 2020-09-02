@@ -7,10 +7,11 @@
 using namespace std;
 
 class Sudoku {
-  public:
+  protected:
     vector <string> puzzle; // Hold the puzzle in a vector of 9 strings
+  public:
     void Read();            // Read from standard input
-    void Print() const;     // Print to standard outputj
+    void Print() const;     // Print to standard output
 };
 
 void Sudoku::Read() 

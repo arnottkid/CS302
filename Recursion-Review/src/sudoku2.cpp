@@ -8,12 +8,13 @@ using namespace std;
 
 class Sudoku {
   public:
-    vector <string> puzzle;             // Hold the puzzle in a vector of 9 strings
     void Read();                        // Read from standard input
-    void Print() const;                 // Print to standard outputj
+    void Print() const;                 // Print to standard output
     int row_ok(int r) const;            // Test row r for correctness
     int column_ok(int c) const;         // Test cols r for correctness
     int panel_ok(int pr, int pc) const; // Test panel pr/pc (both 0,1,2) for correctness
+  protected:
+    vector <string> puzzle;             // Hold the puzzle in a vector of 9 strings
 };
 
 int Sudoku::row_ok(int r) const

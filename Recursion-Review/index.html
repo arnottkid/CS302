@@ -308,9 +308,10 @@ implement a <b>Print()</b> method in
 <p><center><table border=3 cellpadding=3><td valign=top><pre>
 class Sudoku {
   public:
-    vector &lt;string&gt; puzzle; <font color=blue>// Hold the puzzle in a vector of 9 strings</font>
     void Read();            <font color=blue>// Read from standard input</font>
-    void Print() const;     <font color=blue>// Print to standard outputj</font>
+    void Print() const;     <font color=blue>// Print to standard output</font>
+  protected:
+    vector &lt;string&gt; puzzle; <font color=blue>// Hold the puzzle in a vector of 9 strings</font>
 };
 
 void Sudoku::Read()        
@@ -431,12 +432,13 @@ input matrix is indeed valid.
 <p><center><table border=3 cellpadding=3><td valign=top><pre>
 class Sudoku {
   public:
-    vector &lt;string&gt; puzzle;             <font color=blue>// Hold the puzzle in a vector of 9 strings</font>
     void Read();                        <font color=blue>// Read from standard input</font>
-    void Print() const;                 <font color=blue>// Print to standard outputj</font>
+    void Print() const;                 <font color=blue>// Print to standard output</font>
     int row_ok(int r) const;            <font color=blue>// Test row r for correctness</font>
     int column_ok(int c) const;         <font color=blue>// Test cols r for correctness</font>
     int panel_ok(int pr, int pc) const; <font color=blue>// Test panel pr/pc (both 0,1,2) for correctness</font>
+  protected:
+    vector &lt;string&gt; puzzle;             <font color=blue>// Hold the puzzle in a vector of 9 strings</font>
 };
 
 int Sudoku::row_ok(int r) const
@@ -541,13 +543,14 @@ The code is in
 <p><center><table border=3 cellpadding=3><td><pre>
 class Sudoku {
   public:
-    vector &lt;string&gt; puzzle;             <font color=blue>// Hold the puzzle in a vector of 9 strings</font>
     void Read();                        <font color=blue>// Read from standard input</font>
     void Print() const;                 <font color=blue>// Print to standard output</font>
     void Solve();                       <font color=blue>// Solve the problem</font>
     int row_ok(int r) const;            <font color=blue>// Test row r for correctness</font>
     int column_ok(int c) const;         <font color=blue>// Test cols r for correctness</font>
     int panel_ok(int pr, int pc) const; <font color=blue>// Test panel pr/pc (both 0,1,2) for correctness</font>
+  protected:
+    vector &lt;string&gt; puzzle;             <font color=blue>// Hold the puzzle in a vector of 9 strings</font>
 };
 
 void Sudoku::Solve()
