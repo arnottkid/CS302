@@ -37,6 +37,7 @@ int CoinsExchange::countExchanges(int G1, int S1, int B1, int G2, int S2, int B2
 
   silver_deficit = (S2 - S1 > 0) ? S2 - S1 : 0;
   silver_excess  = (S1 - S2 > 0) ? S1 - S2 : 0;
+  (void) silver_excess;        // We actually never use this, so this silences the compiler.
 
   bronze_deficit = (B2 - B1 > 0) ? B2 - B1 : 0;
   bronze_excess  = (B1 - B2 > 0) ? B1 - B2 : 0;
