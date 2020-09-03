@@ -1,0 +1,88 @@
+This was a four question quiz:
+
+<hr>
+<h3>Question 1</h3>
+
+What is the output of the following program?
+
+<p><center><table border=3 cellpadding=3><td><pre>
+
+#include &lt;iostream&gt;
+using namespace std;
+
+int s(int i)
+{
+  if (i == 0) return 0;
+  return i + s(i-1);
+}
+
+int main()
+{
+  cout &lt;&lt; s(10) &lt;&lt; endl;
+}
+</pre></td></table></center><p>
+
+<UL>
+<LI> s(10) returns 10 + s(9).
+<LI> s(9) returns 9 + s(8).
+<LI> s(8) returns 8 + s(7).
+<LI> And so on
+<LI> s(0) returns 0
+</UL>
+
+So, <b>s(n)</b> returns <i>n + (n-1) + .. + 2 + 1 </i>, which is <i>n(n+1)/2</i>.  The answer is 55.  <hr>
+<h3>Question 2</h3>
+
+What is the running time of <i>s(n)</i>?
+<p>
+Answer: It makes <i>n</i> recursive calls, and each call does <i>O(1)</i> work (besides the recursion).
+So the answer is <i>O(n)</i>.
+
+<hr>
+<h3>Question 3</h3>
+
+What is the output of the following program?
+
+<p><center><table border=3 cellpadding=3><td><pre>
+
+#include &lt;iostream&gt;
+using namespace std;
+
+string s(string v)
+{
+  string tmp;
+  if (v.size() == 0) return "";
+  tmp.push_back(v[0]);
+  return s(v.substr(1)) + tmp;
+}
+
+int main()
+{
+  cout &lt;&lt; s("Fred") &lt;&lt; endl;
+}
+</pre></td></table></center><p>
+
+<UL>
+<LI> s("Fred") sets <b>tmp</b> to "F" and calls s("red").  It returns s("red") + "F".
+<LI> s("red") sets <b>tmp</b> to "r" and calls s("ed").  It returns s("ed") + "r".
+<LI> s("ed") sets <b>tmp</b> to "e" and calls s("d").  It returns s("d") + "e".
+<LI> s("d") sets <b>tmp</b> to "d" and calls s("").  It returns s("") + "d".
+<LI> s("") returns "".
+<LI> So, s("d") returns "d".
+<LI> So, s("ed") returns "de".
+<LI> So, s("red") returns "der".
+<LI> So, s("Fred") returns "derF".
+</UL>
+
+In other words it reverses the string: "derF".
+
+
+<hr>
+<h3>Question 4</h3>
+
+What is the running time of <i>s(n)</i>?
+<p>
+Answer: It makes <i>n</i> recursive calls; However each recursive call creates a substring of size
+<i>(n-1)</i> and then copies it when calling <b>s()</b> on the substring.  So the running time
+of this is <i>n + (n-1) + (n-2) + ... + 2 + 1</i>, which is <i>O(n<sup>2</sup))</i>.
+

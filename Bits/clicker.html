@@ -1,0 +1,34 @@
+<h3>Clicker Question</h3>
+
+What is the output of the following program if I call it with:
+
+<pre>
+UNIX> <font color=darkred><b>echo 0xa5 | ./a.out a b c d e f g h </b></font>
+</pre>
+
+<p><center><table border=3 cellpadding=3><td><pre>
+#include &lt;vector&gt;
+#include &lt;iostream&gt;
+using namespace std;
+
+int main(int argc, char **argv)
+{
+  vector &lt;string&gt; args;
+  int set;
+  int i;
+
+  for (i = 1; i &lt; argc; i++) args.push_back(argv[i]);
+  cin &gt;&gt; hex &gt;&gt; set;
+
+  for (i = 0; i &lt; args.size(); i++) {
+     if (set & (1 &lt;&lt; i)) cout &lt;&lt; args[i];
+  }
+  cout &lt;&lt; endl;
+  return 0;
+}
+</pre></td></table></center><p>
+
+Answer: <tt>0xa5</tt> is 1010 0101 in binary, so this will print entries 0, 2, 5 and 7 from the vector:
+<pre>
+acfh
+</pre>
