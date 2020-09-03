@@ -1,0 +1,103 @@
+<pre>
+UNIX> <font color=darkred><b>echo 0 0 110    0 10 0  | bin/coins_exchange_print -</b></font>
+We have:  G1:   0   S1:   0   B1: 110
+We want:  G2:   0   S2:  10   B2:   0
+
+We can convert 110 bronze to 10 silver.  Returning 10.
+
+10
+UNIX> <font color=darkred><b>echo 0 0 109    0 10 0  | bin/coins_exchange_print -</b></font>
+We have:  G1:   0   S1:   0   B1: 109
+We want:  G2:   0   S2:  10   B2:   0
+
+We need 10 silver but only have 109 bronze.  Return -1.
+
+-1
+UNIX> <font color=darkred><b>echo 0 0 121    1 0 0  | bin/coins_exchange_print -</b></font>
+We have:  G1:   0   S1:   0   B1: 121
+We want:  G2:   1   S2:   0   B2:   0
+
+Our gold deficit is 1 and we need 11 silver.  Making a recursive call.
+
+We have:  G1:   0   S1:   0   B1: 121
+We want:  G2:   0   S2:  11   B2:   0
+
+We can convert 121 bronze to 11 silver.  Returning 11.
+
+We recursively got 11 silver to convert to 1 gold.  RV=11.  Returning 11+1 = 12
+
+12
+UNIX> <font color=darkred><b>echo 0 0 120    1 0 0  | bin/coins_exchange_print -</b></font>
+We have:  G1:   0   S1:   0   B1: 120
+We want:  G2:   1   S2:   0   B2:   0
+
+Our gold deficit is 1 and we need 11 silver.  Making a recursive call.
+
+We have:  G1:   0   S1:   0   B1: 120
+We want:  G2:   0   S2:  11   B2:   0
+
+We need 11 silver but only have 120 bronze.  Return -1.
+
+-1
+UNIX> <font color=darkred><b>bin/coins_exchange_print 0</b></font>
+We have:  G1:   1   S1:   0   B1:   0
+We want:  G2:   0   S2:   0   B2:  81
+
+Our bronze deficit is 81 and we need 9 silver.  Making a recursive call.
+
+We have:  G1:   1   S1:   0   B1:   0
+We want:  G2:   0   S2:   9   B2:   0
+
+We can satisfy 9 silver with 1 gold.  Returning 1.
+
+We recursively got 9 silver to convert to 81 gold.  RV=1.  Returning 1+9 = 10
+
+10
+UNIX> <font color=darkred><b>bin/coins_exchange_print 1</b></font>
+We have:  G1:   1   S1: 100   B1:  12
+We want:  G2:   5   S2:  53   B2:  33
+
+Our gold deficit is 4 and we need 44 silver.  Making a recursive call.
+
+We have:  G1:   0   S1: 100   B1:  12
+We want:  G2:   0   S2:  97   B2:  33
+
+Our bronze deficit is 21 and we need 3 silver.  Making a recursive call.
+
+We have:  G1:   0   S1: 100   B1:   0
+We want:  G2:   0   S2: 100   B2:   0
+
+Our needs are met -- returning 0
+
+We recursively got 3 silver to convert to 21 gold.  RV=0.  Returning 0+3 = 3
+
+We recursively got 44 silver to convert to 4 gold.  RV=3.  Returning 3+4 = 7
+
+7
+UNIX> <font color=darkred><b>bin/coins_exchange_print 2</b></font>
+We have:  G1:   1   S1: 100   B1:  12
+We want:  G2:   5   S2:  63   B2:  33
+
+Our gold deficit is 4 and we need 44 silver.  Making a recursive call.
+
+We have:  G1:   0   S1: 100   B1:  12
+We want:  G2:   0   S2: 107   B2:  33
+
+Our bronze deficit is 21 and we need 3 silver.  Making a recursive call.
+
+We have:  G1:   0   S1: 100   B1:   0
+We want:  G2:   0   S2: 110   B2:   0
+
+We need 10 silver but only have 0 bronze.  Return -1.
+
+-1
+UNIX> <font color=darkred><b>bin/coins_exchange_print 3</b></font>
+We have:  G1:   5   S1:  10   B1:  12
+We want:  G2:   3   S2:   7   B2:   9
+
+Our needs are met -- returning 0
+
+0
+UNIX> <font color=darkred><b></b></font>
+
+</pre>

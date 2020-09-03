@@ -1,0 +1,43 @@
+<pre>
+UNIX> <font color=darkred><b>echo 0 5 0   0 0 44 | bin/coins_exchange_print -</b></font>
+We have:  G1:   0   S1:   5   B1:   0
+We want:  G2:   0   S2:   0   B2:  44
+
+Our bronze deficit is 44 and we need 5 silver.  Making a recursive call.
+
+We have:  G1:   0   S1:   5   B1:   0
+We want:  G2:   0   S2:   5   B2:   0
+
+Our needs are met -- returning 0
+
+We recursively got 5 silver to convert to 44 gold.  RV=0.  Returning 0+5 = 5
+
+5
+UNIX> <font color=darkred><b>echo 0 5 0   0 0 45 | bin/coins_exchange_print -</b></font>
+We have:  G1:   0   S1:   5   B1:   0
+We want:  G2:   0   S2:   0   B2:  45
+
+Our bronze deficit is 45 and we need 5 silver.  Making a recursive call.
+
+We have:  G1:   0   S1:   5   B1:   0
+We want:  G2:   0   S2:   5   B2:   0
+
+Our needs are met -- returning 0
+
+We recursively got 5 silver to convert to 45 gold.  RV=0.  Returning 0+5 = 5
+
+5
+UNIX> <font color=darkred><b>echo 0 5 0   0 0 46 | bin/coins_exchange_print -</b></font>
+We have:  G1:   0   S1:   5   B1:   0
+We want:  G2:   0   S2:   0   B2:  46
+
+Our bronze deficit is 46 and we need 6 silver.  Making a recursive call.
+
+We have:  G1:   0   S1:   5   B1:   0
+We want:  G2:   0   S2:   6   B2:   0
+
+It's impossible
+-1
+UNIX> <font color=darkred><b></b></font>
+
+</pre>

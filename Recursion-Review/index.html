@@ -2,7 +2,7 @@
 <h2>CS302 Lecture Notes - Recursion Review</h2>
 <UL>
 <LI> September, 2011
-<LI> Latest Revision: September, 2013
+<LI> Latest Revision: September, 2020
 <LI> James S. Plank
 <LI> Directory: <b>/home/plank/cs302/Notes/Recursion-Review</b>
 </UL>
@@ -176,7 +176,7 @@ Example   G1  S1  B1    G2  S2  B2   Answer
 <h3>Header and Driver</h3>
 
 As with the other topcoder problems in these lectures, I have a header
-and driver.  THe header is in 
+and driver.  The header is in 
 <b><a href=include/coins_exchange.hpp>include/coins_exchange.hpp</a></b>:
 
 <p><center><table border=3 cellpadding=3><td><pre>
@@ -198,96 +198,267 @@ And the driver is
 it the coins on standard input if you give it a dash on the command line.  Otherwise, you 
 can give it example numbers on the command line.
 
-<h3>Solution</h3>
+<h3>Working Up To A Solution</h3>
 
+In 2020, I messed up this program for something like the 10th time in the 13 times that I
+have taught this lecture.  So, yet another rewrite -- I vow never to mess this program
+up again!!!  
 <p>
-This is a problem where you break it into sub-problems and solve them recursively.
+I have two versions of this program.  The version in
+<b><a href=src/coins_exchange.cpp>src/coins_exchange.cpp</a></b> is commented, but
+doesn't print out anything.  The version in 
+<b><a href=src/coins_exchange_print.cpp>src/coins_exchange_print.cpp</a></b> prints
+out what it's doing.  I suggest, when you are studying this program, you work up to a solution
+with me in the way I'm doing below.  You can assure yourself of what's going on with the
+version that prints information.
+<p>
+The approach that I take is to 
+break the problem into sub-problems and then use recursion to solve the sub problems.
+Each time I do so, I make the sub-problems easier.
 That's a lot easier than trying to think things like: "If <b>G2</b> is greater than <b>G1</b> 
 but 11*<b>(G2-G1)</b> is greater than <b>(S1-S2)</b>, then.....".
 <p>
-Instead, concentrate on how to convert the problem into easier recursive problems.
-Start with gold.  If <b>G2</b> is greater than <b>G1</b>, then you need 11*<b>(G2-G1)</b> extra
-silver.  So, simply solve the recursive problem where <b>G1</b> and <b>G2</b> equal
-zero, and <b>S2</b> is increased by 11*<b>(G2-G1)</b>.  Let that solution be <i>s</i>.
-If <i>s</i> is -1, then there's no solution.  Otherwise, return <i>s</i> plus 
-<b>(G2-G1)</b> exchanges.
-<p>
-Similarly, now that we're done with gold, let's concentrate on bronze.
-If <b>B2</b> is greater than <b>B1</b>, then you need enough silver to get
-<b>(B2-B1)</b> bronze.  Let that amount be <i>x</i>.  You solve the recursive problem
-with <b>B1</b> and <b>B2</b> equal to
-zero, and <b>S2</b> is increased by <i>x</i>.  Let that solution be <i>s</i>.
-then the final solution is <b>s</b>+<i>x</i>.
-<p>
-Now we're done with gold and bronze.  Let's concentrate on silver.  
-If <b>S2</b> is less than or equal to <b>S1</b>, then we're done -- return zero.
-Otherwise, we get the most bang for our buck by converting gold to silver.  See
-if there's enough gold.  If so, return how many conversions are necessary.
-If not, convert as much gold as you can and do the rest from bronze.  If that's impossible,
-return -1.  
-<p>
-That solves all cases.  For the code, see 
-<b><a href=src/coins_exchange.cpp>src/coins_exchange.cpp</a></b>.
-I have annotated the code to print out what it's doing, in case you find this
-a little confusing.  It is worth the effort to trace through the recursion:
+I'm going to show you here how I solve the problem.  To start with, I'm going to declare
+some extra variables which help me think through the problem.  These are the excess gold,
+silver and bronze that I have, and the deficits of gold, silver and bronze that I have.
+I'm going to start by calculating them, and if I have no deficits, then I'm already done --
+I'll return zero.  Otherwise, I'll return -1.
+
+<p><center><table border=3 cellpadding=3><td><pre>
+int CoinsExchange::countExchanges(int G1, int S1, int B1, int G2, int S2, int B2)
+{
+  int gold_excess, silver_excess, bronze_excess;      <font color=blue>// Excess coins</font>
+  int gold_deficit, silver_deficit, bronze_deficit;   <font color=blue>// Coins where I have a deficit</font>
+
+  <font color=blue>/* Determine our deficit coins and our excess coins. */</font>
+
+  gold_deficit = (G2 - G1 &gt; 0) ? G2 - G1 : 0;
+  gold_excess  = (G1 - G2 &gt; 0) ? G1 - G2 : 0;
+
+  silver_deficit = (S2 - S1 &gt; 0) ? S2 - S1 : 0;
+  silver_excess  = (S1 - S2 &gt; 0) ? S1 - S2 : 0;
+
+  bronze_deficit = (B2 - B1 &gt; 0) ? B2 - B1 : 0;
+  bronze_excess  = (B1 - B2 &gt; 0) ? B1 - B2 : 0;
+
+  <font color=blue>/* Base case -- if there are no deficits, then return 0. */</font>
+
+  if (gold_deficit == 0 && silver_deficit == 0 && bronze_deficit == 0) {
+    printf("Our needs are met -- returning 0\n");
+    return 0;
+  }
+
+  <font color=blue>/* If we have reached this point, then it's impossible, or we haven't implemented it. */</font>
+
+  return -1;
+}
+</pre></td></table></center><p>
+
+We'll test this four times -- comments inline:
 
 <pre>
-UNIX> <font color=darkred><b>make clean</b></font>
-rm -f a.out obj/* bin/*
-UNIX> <font color=darkred><b>make bin/coins_exchange</b></font>
-g++ -std=c++98 -O3 -Wall -Wextra -Iinclude -c -o obj/coins_exchange_main.o src/coins_exchange_main.cpp
-g++ -std=c++98 -O3 -Wall -Wextra -Iinclude -c -o obj/coins_exchange.o src/coins_exchange.cpp
-g++ -std=c++98 -O3 -Wall -Wextra -Iinclude -o bin/coins_exchange obj/coins_exchange_main.o obj/coins_exchange.o
-UNIX> <font color=darkred><b>bin/coins_exchange 0</b></font>
- We have:  G1:   1   S1:   0   B1:   0
- We want:  G2:   0   S2:   0   B2:  81
- Recursively trying to get 81 bronze from 9 silver
-
-**** We have:  G1:   1   S1:   0   B1:   0
-**** We want:  G2:   0   S2:   9   B2:   0
-**** We can satisfy silver from gold, returning 1
-
- After recursively trying to get bronze, returning 10
-
-10
-UNIX> <font color=darkred><b>bin/coins_exchange 1</b></font>
- We have:  G1:   1   S1: 100   B1:  12
- We want:  G2:   5   S2:  53   B2:  33
- Recursively trying to get 4 gold from 44 silver
-
-**** We have:  G1:   0   S1: 100   B1:  12
-**** We want:  G2:   0   S2:  97   B2:  33
-**** Recursively trying to get 21 bronze from 3 silver
-
-******** We have:  G1:   0   S1: 100   B1:   0
-******** We want:  G2:   0   S2: 100   B2:   0
-******** We have enough silver, returning 0
-
-**** After recursively trying to get bronze, returning 3
-
- After recursively trying to get gold, returning 7
-
-7
-UNIX> <font color=darkred><b>bin/coins_exchange 2</b></font>
- We have:  G1:   1   S1: 100   B1:  12
- We want:  G2:   5   S2:  63   B2:  33
- Recursively trying to get 4 gold from 44 silver
-
-**** We have:  G1:   0   S1: 100   B1:  12
-**** We want:  G2:   0   S2: 107   B2:  33
-**** Recursively trying to get 21 bronze from 3 silver
-
-******** We have:  G1:   0   S1: 100   B1:   0
-******** We want:  G2:   0   S2: 110   B2:   0
-******** We don't have enough gold and bronze to get silver: returning -1
-
-**** After recursively trying to get bronze, returning -1
-
- After recursively trying to get gold, returning -1
-
+UNIX> <font color=darkred><b>echo 10 20 30   5 5 30 | bin/coins_exchange -      <font color=blue> # We have enough of everything</b></font></font>
+0
+UNIX> <font color=darkred><b>echo 10 20 30   11 5 30 | bin/coins_exchange -     <font color=blue> # Too little gold</b></font></font>
+-1
+UNIX> <font color=darkred><b>echo 10 20 30   5 21 30 | bin/coins_exchange -     <font color=blue> # Too little silver</b></font></font>
+-1
+UNIX> <font color=darkred><b>echo 10 20 30   5 5 31 | bin/coins_exchange -      <font color=blue> # Too little bronze</b></font></font>
 -1
 UNIX> <font color=darkred><b></b></font>
 </pre>
+
+<h4>Start with Gold</h4>
+
+Now, we'll start with gold.  If we have a deficit of gold, then we'll need to get it from
+silver.  We'll introduce a new variable, <b>need_silver</b> to represent how much silver
+we need (it will be 11 times our gold deficit).  And we'll call <b>countExchanges()</b>
+recursively, removing gold from the equation and adding <b>need_silver</b> to our silver
+needs.  That will return how many transactions were needed to make sure we have enough
+silver (or that it was impossible).  We add <b>gold_deficit</b> to that to account for
+the exchanges of silver to gold, and return the sum.  
+<p>
+Here's the code:
+
+<p><center><table border=3 cellpadding=3><td><pre>
+  <font color=blue>/* First issue -- if we need gold, we have to get it from silver.
+     So, calculate how much silver we need, and make a recursive call to
+     see how many transactions are needed to get it.  If it's possible,
+     then add the number of transactions for the gold (which is the number of
+     gold we need) and return it.  */</font>
+
+  if (gold_deficit &gt; 0) {
+    need_silver = 11 * gold_deficit;
+    rv = countExchanges(0, S1, B1, 0, S2+need_silver, B2);
+    if (rv == -1) return -1;
+    return rv+gold_deficit;
+  }
+}
+</pre></td></table></center><p>
+
+Let's test:
+
+<pre>
+UNIX> <font color=darkred><b>echo 10 111 0   20 0 0 | bin/coins_exchange -   <font color=blue> # We have enough silver.</b></font></font>
+10
+UNIX> <font color=darkred><b>echo 10 109 0   20 0 0 | bin/coins_exchange -   <font color=blue> # We don't have enough silver.</b></font></font>
+-1
+UNIX> <font color=darkred><b></b></font>
+</pre>
+
+If you want more detail on the recursion, call <b>bin/count_exchanges_print</b>.  This
+tells you about the recursive calls:
+
+<pre>
+UNIX> <font color=darkred><b>echo 10 111 0   20 0 0 | bin/coins_exchange_print -</b></font>
+We have:  G1:  10   S1: 111   B1:   0
+We want:  G2:  20   S2:   0   B2:   0
+
+Our gold deficit is 10 and we need 110 silver.  Making a recursive call.
+
+We have:  G1:   0   S1: 111   B1:   0   <font color=blue> # The recursive call removes all of the gold.</font>
+We want:  G2:   0   S2: 110   B2:   0   <font color=blue> # and add's the silver needed to the silver</font>
+
+Our needs are met -- returning 0        <font color=blue> # Since we have enough silver, we can return with zero exchanges</font>
+
+We recursively got 110 silver to convert to 10 gold.  RV=0.  Returning 0+10 = 10
+
+10
+UNIX> <font color=darkred><b>echo 10 109 0   20 0 0 | bin/coins_exchange_print -</b></font>
+We have:  G1:  10   S1: 109   B1:   0
+We want:  G2:  20   S2:   0   B2:   0
+
+Our gold deficit is 10 and we need 110 silver.  Making a recursive call.
+
+We have:  G1:   0   S1: 109   B1:   0    <font color=blue> # Now, in the recursive call, we don't have enough silver.</font>
+We want:  G2:   0   S2: 110   B2:   0
+
+It's impossible
+-1
+UNIX> <font color=darkred><b></b></font>
+</pre>
+
+<h4>Bronze</h4>
+
+Let's do the same thing with bronze -- if we have a deficit of bronze, then we need
+to get it from silver.  Integer division helps us here.  Since we get 9 bronze for
+each silver, we need:
+
+<UL>
+<LI> 1 silver to get between 1 and 9 bronze.
+<LI> 2 silver to get between 10 and 18 bronze.
+<LI> 3 silver to get between 19 and 27 bronze.
+<LI> And so on.
+</UL>
+
+If you think about it a bit, you calculate your silver needs, by adding 8 to the bronze and
+dividing by nine using integer division.  The bronze code looks similar to the gold code,
+except the number of transactions is the number of silver that you convert:
+
+<p><center><table border=3 cellpadding=3><td><pre>
+  <font color=blue>/* Second issue -- if we need bronze, then we also have to get it from silver.
+     So, calculate how much silver we need, and make a recursive call to
+     see how many transactions are needed to get it.  If it's possible,
+     then add the number of transactions for the bronze (which is the number of
+     silver that we exchanged) and return it.  */</font>
+
+  if (bronze_deficit &gt; 0) {
+    need_silver = (bronze_deficit + 8) / 9;
+    rv = countExchanges(G1, S1, 0, G2, S2+need_silver, 0);
+    if (rv == -1) return -1;
+    return rv+need_silver;
+  }
+</pre></td></table></center><p>
+
+Test.  If you want more detail, 
+<a href=html/bronze_test.html>This link has the calls with printing.</a>
+
+<pre>
+UNIX> <font color=darkred><b>echo 0 5 0   0 0 44 | bin/coins_exchange -    <font color=blue> # We get 45 bronze for 5 silver.</b></font></font>
+5
+UNIX> <font color=darkred><b>echo 0 5 0   0 0 45 | bin/coins_exchange -    <font color=blue> # This works, too</b></font></font>
+5
+UNIX> <font color=darkred><b>echo 0 5 0   0 0 46 | bin/coins_exchange -    <font color=blue> # Now, we need 6 silver.</b></font></font>
+-1
+UNIX> <font color=darkred><b></b></font>
+</pre>
+
+<h4>Silver</h4>
+
+Now we need to work on silver.  This is a little more subtle.  Since we can get more silver
+with gold, we first see if we can satisfy silver with gold.  If we can, we're done.
+If we can't, then we need to get more silver from bronze.  We do that recursively:
+
+<p><center><table border=3 cellpadding=3><td><pre>
+  <font color=blue>/* If we have reached this point, we need silver.  If we have excess gold,
+     let's get as much silver as we can from gold.  If that solves the problem,
+     then we return.  If it doesn't then we recursively solve it, taking gold
+     out of the equation. */</font>
+
+  if (gold_excess &gt; 0) {
+    need_gold = (silver_deficit + 8) / 9;
+    if (need_gold &lt;= gold_excess) return need_gold;
+    rv = countExchanges(0, S1, B1, 0, S2-gold_excess*9, B2);
+    if (rv == -1) return -1;
+    return gold_excess+rv;
+  }
+}
+</pre></td></table></center><p>
+
+Test (with printing is in <a href=html/silver_1_test.html>this link</a>):
+
+<pre>
+UNIX> <font color=darkred><b>echo 10 0 0   0 90 0 | bin/coins_exchange -        <font color=blue> # Get 90 silver from 10 gold.</b></font></font>
+10
+UNIX> <font color=darkred><b>echo 10 0 0   0 0 810 | bin/coins_exchange -       <font color=blue> # Bronze makes a recursive call for</b></font></font>
+100 <b>                                                     <font color=blue> # 90 silver, which takes 10 gold.</font></b>
+UNIX> <font color=darkred><b>echo 10 0 0   0 91 0 | bin/coins_exchange -        <font color=blue> # This one is impossible</b></font></font>
+-1
+UNIX> <font color=darkred><b>echo 10 0 0   0 0 811 | bin/coins_exchange -       <font color=blue> # As is this one.</b></font></font>
+-1
+UNIX> <font color=darkred><b></b></font>
+</pre>
+
+And finally, the last case is getting silver from bronze.  If we don't have enough bronze,
+then we fail.
+
+<p><center><table border=3 cellpadding=3><td><pre>
+  <font color=blue>/* Now, if we have reached this point, we need silver and we have no gold.  We have
+     to get it from bronze. */</font>
+
+
+  need_bronze = silver_deficit * 11;
+  if (need_bronze &lt;= bronze_excess) return silver_deficit;
+
+  <font color=blue>/* If we have reached this point, then it's impossible. */</font>
+  return -1;
+}
+</pre></td></table></center><p>
+
+Test -- we'll do all of the topcoder tests, too! (with printing <a href=html/silver_2_test.html>here)</a>.
+
+<pre>
+UNIX> <font color=darkred><b>echo 0 0 110    0 10 0  | bin/coins_exchange -</b></font>
+10
+UNIX> <font color=darkred><b>echo 0 0 109    0 10 0  | bin/coins_exchange -</b></font>
+-1
+UNIX> <font color=darkred><b>echo 0 0 121    1 0 0  | bin/coins_exchange -</b></font>
+12
+UNIX> <font color=darkred><b>echo 0 0 120    1 0 0  | bin/coins_exchange -</b></font>
+-1
+UNIX> <font color=darkred><b>bin/coins_exchange 0</b></font>
+10
+UNIX> <font color=darkred><b>bin/coins_exchange 1</b></font>
+7
+UNIX> <font color=darkred><b>bin/coins_exchange 2</b></font>
+-1
+UNIX> <font color=darkred><b>bin/coins_exchange 3</b></font>
+0
+UNIX> <font color=darkred><b></b></font>
+</pre>
+
+We're done -- my goal here was to show you how recursion can help you break a problem
+into subproblems that you can solve recursively.  
 
 <hr>
 <h3>#3: Solving Sudoku Puzzles</h3>

@@ -1,5 +1,6 @@
 ALL = bin/no_eights \
       bin/coins_exchange \
+      bin/coins_exchange_print \
       bin/sudoku1 \
       bin/sudoku2 \
       bin/sudoku3 \
@@ -29,6 +30,9 @@ obj/coins_exchange_main.o: src/coins_exchange_main.cpp include/coins_exchange.hp
 
 obj/coins_exchange.o: src/coins_exchange.cpp include/coins_exchange.hpp
 	g++ $(CFLAGS) -c -o obj/coins_exchange.o src/coins_exchange.cpp
+
+obj/coins_exchange_print.o: src/coins_exchange_print.cpp include/coins_exchange.hpp
+	g++ $(CFLAGS) -c -o obj/coins_exchange_print.o src/coins_exchange_print.cpp
 
 # ------ Executables
 
@@ -61,3 +65,6 @@ bin/no_eights: obj/no_eights_main.o obj/no_eights.o
 
 bin/coins_exchange: obj/coins_exchange_main.o obj/coins_exchange.o
 	g++ $(CFLAGS) -o bin/coins_exchange obj/coins_exchange_main.o obj/coins_exchange.o
+
+bin/coins_exchange_print: obj/coins_exchange_main.o obj/coins_exchange_print.o
+	g++ $(CFLAGS) -o bin/coins_exchange_print obj/coins_exchange_main.o obj/coins_exchange_print.o
