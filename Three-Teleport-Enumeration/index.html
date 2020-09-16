@@ -6,6 +6,58 @@ September, 2016
 <hr>
 Problem description: <a href=http://community.topcoder.com/stat?c=problem_statement&pm=11554&rd=14544>http://community.topcoder.com/stat?c=problem_statement&pm=11554&rd=14544</a>.
 <p>
+<h3>In case Topcoder's servers are down</h3>
+
+<UL>
+<LI> You are flying through space, trying to get from a location labeled "Me" to a location
+labeled "Home".  
+<LI> Locations are defined by (x,y) coordinates, which are integers between 0 and 1,000,000,000.
+<LI> You may only move horizontally or vertically, so, for example, the distance between
+(3,5) and (10,10) is 12.
+<LI> There are three teleports in your universe.  They are each defined by a string of the 
+form:
+<p><center><table border=3 cellpadding=3><td><pre>
+"x1 y1 x2 y2"
+</pre></td></table></center><p>
+<LI> The teleports are special -- if you are at (x1,y1), then you can travel to (x2,y2) with 
+a distance of 10.  The same is true for traveling from (x2,y2) to (x1,y1).
+<LI> Your goal is to return the shortest distance from "Me" to "Home"
+</UL>
+
+The method signature for this problem is:
+
+<p><center><table border=3 cellpadding=3><td><pre>
+class ThreeTeleports {
+  public:
+    int shortestDistance(int xMe, int yMe,               <font color=blue>// "Me" is (xMe,yMe)</font>
+                             int xHome, int yHome,       <font color=blue>// "Home" is (xHome,yHome)</font>
+                             vector &lt;string&gt; teleports); <font color=blue>// Each teleport is "x1 y1 x2 y2"</font>
+};
+</pre></td></table></center><p>
+
+<hr>
+<h3>Examples</h3>
+
+<pre>
+#  Me             Home        Teleports                                                                              Answer
+- ----- --------------------- -------------------------------------------------------------------------------------- ------
+0  3  3          4          5 {"1000 1001 1000 1002", "1000 1003 1000 1004", "1000 1005 1000 1006"}                       3
+1  0  0         20         20 {"1 1 18 20", "1000 1003 1000 1004", "1000 1005 1000 1006"}                                14
+2  0  0         20         20 {"1000 1003 1000 1004", "18 20 1 1", "1000 1005 1000 1006"}                                14
+3 10 10      10000      20000 {"1000 1003 1000 1004", "3 3 10004 20002", "1000 1005 1000 1006"}                          30
+4  3  7      10000      30000 {"3 10 5200 4900", "12212 8699 9999 30011", "12200 8701 5203 4845"}                       117
+5  0  0 1000000000 1000000000 {"0 1 0 999999999", "1 1000000000 999999999 0", "1000000000 1 1000000000 999999999"}       36
+</pre>
+
+Here's a picture of example 0.  The shortest path goes directly from "Me" to "Home".
+
+<p><center><table border=3><td><img src=img/TT-EX0.jpg></td></table></center><p>
+
+Here's a picture of example 1.  The shortest path is shaded in yellow.
+
+<p><center><table border=3><td><img src=img/TT-EX1.jpg></td></table></center><p>
+
+<hr>
 <h3>Solving this problem with enumeration</h3>
 
 Our driver code is in <b>Teleport-Main.cpp</b>, which includes
@@ -384,7 +436,7 @@ The procedure is below, and it's slightly tricky -- I'm using a C-style string i
 a C++ string, because I'm going to include the NULL character in my enumeration.  And
 I'm going to do the same "permutation" enumeration as in the 
 <a href=http://web.eecs.utk.edu/~jplank/plank/classes/cs302/Notes/Enumeration/>CS302
-lecture notes on enumeration.</a>, except when I swap the NULL character, I don't 
+lecture notes on enumeration</a>, except when I swap the NULL character, I don't 
 make any recursive calls -- that's when I'm done.
 <p>
  
