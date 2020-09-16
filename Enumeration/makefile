@@ -1,4 +1,5 @@
-All = bin/balls-in-boxes-1 \
+All = bin/balls-in-boxes-0 \
+      bin/balls-in-boxes-1 \
       bin/balls-in-boxes-2 \
       bin/balls-in-boxes-3 \
       bin/balls-in-boxes-4 \
@@ -13,6 +14,9 @@ all: $(All)
 CFLAGS = -Wall -Wextra
 clean:
 	rm -f $(All)
+
+bin/balls-in-boxes-0: src/balls-in-boxes-0.cpp
+	g++ $(CFLAGS) -o bin/balls-in-boxes-0 src/balls-in-boxes-0.cpp
 
 bin/balls-in-boxes-1: src/balls-in-boxes-1.cpp
 	g++ $(CFLAGS) -o bin/balls-in-boxes-1 src/balls-in-boxes-1.cpp

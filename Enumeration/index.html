@@ -521,7 +521,7 @@ UNIX> <font color=darkred><b></b></font>
 <h3>Balls in Boxes</h3>
 
 The last two programs above are what I call "balls in boxes" problems.  The general
-form of this problem is that you have <i>n</i> different colored balls.  There are <i>c</i>
+form of these problems is that you have <i>n</i> different colored balls.  There are <i>c</i>
 distinct colors, labeled
 <i>c<sub>0</sub>, c<sub>1</sub> ...  c<sub>c-1</sub></i>.  For
 each color, <i>c<sub>i</sub></i>, there are <i>b<sub>i</sub></i> identical balls 
@@ -542,9 +542,83 @@ In the permutation example, <i>b<sub>i</sub></i> equals one for all <i>i</i>.  T
 and boxes gives you permutations.
 <p>
 In my last example, I'll write a general balls-in-boxes program.  As with the others,
-it is recursive.  At each call, there is a vector (which represents the boxes)
-that has been partially filled in, and a map that contains the balls that have not
-been placed yet.  For each color in the map, we place a ball into the next element of
+it is recursive.  To start with the explanation, here is the scaffolding -- a class named
+<b>BallsInBoxes</b> that has the definition of the balls, a vector to hold the boxes, and
+a method called <b>GenInstances()</b> that will do the enumeration.  Its main simply reads in the
+ball colors from standard input and prints them out.  The program is in 
+<b><a href=src/balls-in-boxes-0.cpp>src/balls-in-boxes-0.cpp</a></b>:
+
+<p><center><table border=3 cellpadding=3><td><pre>
+#include &lt;vector&gt;
+#include &lt;map&gt;
+#include &lt;iostream&gt;
+#include &lt;cstdio&gt;
+#include &lt;cstdlib&gt;
+using namespace std;
+
+<font color=blue>/* Our class definition for the "Balls in Boxes" problem. */</font>
+
+class BallsInBoxes {
+  public:
+    map &lt;string,int&gt; balls;           <font color=blue>// Key = color of the ball.  Val =<font color=blue> # of balls with that color</font></font>
+    vector &lt;string&gt; boxes;            <font color=blue>// We will put the colors into each of the boxes.</font>
+    void GenInstances(size_t index);  <font color=blue>// Recursive method to solve the problem.</font>
+};
+
+<font color=blue>/* Recursive method to solve the problem.  We'll write this later. */</font>
+
+void BallsInBoxes::GenInstances(size_t index)
+{
+  (void) index;
+}
+
+int main()
+{
+  BallsInBoxes B;                    <font color=blue>/* The instance of the BallsInBoxes class. */</font>
+  string s;                          <font color=blue>/* This is for reading in the color of each ball. */</font>
+  int nb;                            <font color=blue>/* This stores the number of balls/boxes while reading */</font>
+  map &lt;string, int&gt;::iterator mit;
+
+  nb = 0;               <font color=blue>/* Read the balls as strings on standard input. */</font>
+  while (cin &gt;&gt; s) { 
+    B.balls[s]++; 
+    nb++; 
+  }
+  B.boxes.resize(nb);
+
+  <font color=blue>/* Print general info. */</font>
+
+  printf("Total balls & boxes: %d\n", nb);
+  for (mit = B.balls.begin(); mit != B.balls.end(); mit++) {
+    printf("Color: %-10s   <font color=blue> # Balls: %d\n", mit-&gt;first.c_str(), mit-&gt;second);</font>
+  }
+  
+  B.GenInstances(0);  <font color=blue>// This does nothing for now.</font>
+  return 0;
+}
+</pre></td></table></center><p>
+
+Let's verify that it works as anticipated:
+
+<pre>
+UNIX> <font color=darkred><b>echo red red blue yellow red blue | bin/balls-in-boxes-0</b></font>
+Total balls & boxes: 6
+Color: blue          # Balls: 2
+Color: red           # Balls: 3
+Color: yellow        # Balls: 1
+UNIX> <font color=darkred><b>echo a b c d a b a a a a a | bin/balls-in-boxes-0</b></font>
+Total balls & boxes: 11
+Color: a             # Balls: 7
+Color: b             # Balls: 2
+Color: c             # Balls: 1
+Color: d             # Balls: 1
+UNIX> <font color=darkred><b></b></font>
+</pre>
+
+Now, we write <b>GenInstances()</b>.
+At each call, there is a vector (which represents the boxes)
+that has been partially filled in with <b>index</b> boxes, and a map that contains the balls 
+that have not been placed yet.  For each color in the map, we place a ball into the next element of
 the vector, remove the ball from the map, and call the procedure recursively.  After
 the recursive call, we replace the ball in the map.
 <p>
@@ -552,13 +626,6 @@ Here it is, in
 <b><a href=src/balls-in-boxes-1.cpp>src/balls-in-boxes-1.cpp</a></b>:
 
 <p><center><table border=3 cellpadding=3><td><pre>
-class BallsInBoxes {
-  public:
-    map &lt;string,int&gt; balls;
-    vector &lt;string&gt; boxes;
-    void GenInstances(int index);
-};
-
 void BallsInBoxes::GenInstances(int index)
 {
   int i;
@@ -587,22 +654,6 @@ void BallsInBoxes::GenInstances(int index)
          of the loop, or subsequent recursive calls will overwrite boxes[index]. */</font>
     }
   }
-}
-
-int main()
-{
-  BallsInBoxes B;
-  string s;
-  int nb;
-
-  nb = 0;
-  while (cin &gt;&gt; s) { 
-    B.balls[s]++; 
-    nb++; 
-  }
-  B.boxes.resize(nb);
-  
-  B.GenInstances(0);
 }
 </pre></td></table></center><p>
 
