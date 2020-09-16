@@ -1,0 +1,94 @@
+<h3>Writing Is_Row_Ok()</h3>
+
+The method <b>Is_Row_Ok()</b> takes the index of a row, and returns a boolean to
+say whether the row is valid for a Sudoku puzzle.  To be valid, each entry
+of the row should be either a dash or a number, and no number should be repeated.
+The <b>Read()</b> method error checks the dash or number part.  So all that
+<b>Is_Row_Ok()</b> needs to do is check for duplicate entries.
+<p>
+I take a minute in class and ask you to write it.  Here's my solution:
+
+<p><center><table border=3 cellpadding=3><td><pre>
+bool Sudoku::Is_Row_Ok(int r) const
+{
+  vector &lt;int&gt; checker;     /* Use this to make sure no digit is set twice. */
+  int c;
+
+  checker.clear();
+  checker.resize(10, 0);
+  for (c = 0; c &lt; 9; c++) {
+    if (puzzle[r][c] != '-') {
+      if (checker[puzzle[r][c]-'0']) return 0;
+      checker[puzzle[r][c]-'0'] = 1;
+    }
+  }
+  return 1;
+}
+</pre></td></table></center><p>
+
+The solution uses a 10-element vector to keep track of whether we've seen a number before.
+The running time complexity of this is simple -- <i>O(n)</i> where <i>n</i> is the number
+of elements in the row.  That's as well as you can do.
+<p>
+Let's look at some worse solutions:
+
+<p><center><table border=3 cellpadding=3><td><pre>
+bool Sudoku::Is_Row_Ok(int r) const
+{
+  int i, j;
+
+  for (i = 0; i &lt; puzzle[r].size(); i++) {
+    if (puzzle[r][i] != '-') {
+      for (j = i+1; j &lt; puzzle[r].size(); j++) {
+        if (puzzle[r][i] == puzzle[r][j]) return false;
+      }
+    }
+  }
+  return true;
+}
+</pre></td></table></center><p>
+
+This is <i>O(n<sup>2</sup>)</i> because in the first iteration, the <b>j</b> loop can
+go <i>n-1</i> elements.  The next iteration is <i>n-2</i> and so on.  That's 
+<i>O(n<sup>2</sup>)</i>.
+
+<p>
+Here's another one:
+
+<p><center><table border=3 cellpadding=3><td><pre>
+bool Sudoku::Is_Row_Ok(int r) const
+{
+  char i;
+
+  for (i = '1'; i &lt;= '9'; i++) {
+    if (puzzle[i].find(i) != puzzle[i].find_last_of(i)) return false;
+  }
+  return true;
+}
+</pre></td></table></center><p>
+
+While this is clever, it's also <i>O(n<sup>2</sup>)</i> because
+<b>find()</b> and <b>find_last_of()</b> both can run through the
+entire string.
+
+<p>
+And a last one:
+
+<p><center><table border=3 cellpadding=3><td><pre>
+vector &lt;string&gt; puzzle;
+
+bool Is_Row_Ok(int r)
+{
+  char i;
+
+  for (i = '1'; i &lt;= '9'; i++) {
+    if (puzzle[r].count(i) > 1) return false;
+  }
+  return true;
+}
+</pre></td></table></center><p>
+
+Well, first, there's no <b>count()</b> method of strings.  And second, even if there were, 
+it would be <i>O(n<sup>2</sup>)</i> again, because it would go through the entire string
+for each character.
+

@@ -473,7 +473,9 @@ I assume everyone knows what sudoku is, but if you don't, read
 <a href=http://en.wikipedia.org/wiki/Sudoku>Wikipedia's page</a>.  
 Since the problems are pretty small, it's very easy to write a brain-dead
 recursive Sudoku solver, and for hard problems, it's easier to write the
-program than it is to solve the puzzle by hand!
+program than it is to solve the puzzle by hand!  I go over this program
+rather quickly, because we've done Sudoku in CS140 as well.
+It's a nice use of recursion.
 <p>
 We'll build a solution.  First have to read a problem in -- I'll do that from 
 standard input -- numbers are '1' through '9', empty cells are '-' and everything else is
@@ -542,7 +544,7 @@ int main()
 I have the example from the Wikipedia page in two files:
 <b><a href=txt/sudex1.txt>txt/sudex1.txt</a></b> and
 <b><a href=txt/sudex2.txt>txt/sudex2.txt</a></b>.  They differ in the amount of whitespace.
-However, when the program reads them in, the produce the same output:
+However, when the program reads them in, they produce the same output:
 
 <p><center><table border=3><td valign=top><pre>
 UNIX> <font color=darkred><b>make bin/sudoku1</b></font>
@@ -605,6 +607,11 @@ As a next step, we implement methods to check whether rows, columns or
 panels are valid.   They are straightforward.  In 
 <b><a href=src/sudoku2.cpp>src/sudoku2.cpp</a></b>, we check to see whether the 
 input matrix is indeed valid.
+
+<p>
+In class, I pause here and ask you to write the <b>row_ok()</b> method.
+Read <a href=html/row_ok.html>this page</a> for a discussion of various
+bad ways to write <b>row_ok()</b>.
 
 <p><center><table border=3 cellpadding=3><td valign=top><pre>
 class Sudoku {
@@ -711,9 +718,13 @@ solver.  What it does is the following:
 <LI> It tests every value from 1 to 9 in the cell.
 <LI> If the value yields a legal row, column and panel, it calls itself
 recursively.
+<LI> If the recursive call reports that it failed, then it will remove the
+value from the cell, and test the next value.  If there is no "next value",
+then it returns failure.
 </UL>
 
-If it is called on a filled puzzle, we're done -- we print it and exit.
+If it is called on a filled puzzle, we're done -- we print it and exit, and
+don't return to our callers.
 The code is in 
 <b><a href=src/sudoku3.cpp>src/sudoku3.cpp</a></b>
 
