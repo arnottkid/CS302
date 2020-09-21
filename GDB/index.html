@@ -3,11 +3,21 @@
 <UL>
 <LI> September, 2020
 <LI> Latest Revision: 
-Wed Sep 16 23:28:59 EDT 2020
+Mon Sep 21 17:58:57 EDT 2020
 <LI> James S. Plank
 <LI> Directory: <b>/home/plank/cs302/Notes/GDB</b>
 </UL>
 <hr>
+
+<h3>If you're going through this as a lab</h3>
+
+Log into a lab machine, and do:
+
+<pre>
+UNIX> <font color=darkred><b>cp -r /home/jplank/cs302/Notes/GDB .</b></font>
+UNIX> <font color=darkred><b>cd GDB</b></font>
+UNIX> <font color=darkred><b>make clean ; make</b></font>
+</pre>
 
 <h3>Debuggers</h3>
 
@@ -39,6 +49,7 @@ is a good tool to help you, so you should have some basic weapons in your arsena
 
 <p>
 I'll go over <b>gdb</b>, as it's a basic, largely ubiquitous command line debugger.
+Here's a good source of reference material for <b>gdb</b>: <a href=https://sourceware.org/gdb/current/onlinedocs/gdb/index.html>https://sourceware.org/gdb/current/onlinedocs/gdb/index.html</a>.
 <p>
 Before I do so, let me quote some text from Dr. Ruoti, who finds great value in 
 GUI-based debuggers:
@@ -59,6 +70,544 @@ debugger.
 My core critique of GDB is in regards to using it directly from the command line. While GDB is still the debugger, I think learning how to use GUI wrappers for GDB best represents how students will use debuggers in practice—i.e., most developer use IDEs and their built in debuggers. 
 </i></UL>
 
-<h3>
-Compiling for 
+I include this because it's good to hear from someone who thinks that debuggers are valuable,
+and to get some recommendations from them.  Also, if you feel as though <b>gdb</b> is clunky,
+you have support for that feeling above, and can attempt to move on to a GUI-based debugger
+if you want.
 
+<hr>
+<h3> Compiling for GDB</h3>
+
+To compile for <b>gdb</b>, use the <b>-g</b> flag.  This puts a bunch of scaffolding into your
+code, which the debugger uses to help you debug.  It also makes your code slower, so once you're
+done debugging, you should compile again without the flag (and with optimization) to make your
+code fast.
+
+<hr>
+<h3>Where's my seg fault happening?</h3>
+
+I have a buggy program in 
+<b><a href=src/sf1.cpp>src/sf1.cpp</a></b>.  This program reads "events" into a multimap,
+sorted on time.  It treats events that are termed "Arrival" differently from the other
+events, counting them in addition to putting them onto the multimap.  At the end of the program,
+it prints out the multimap.
+
+<p><center><table border=3 cellpadding=3><td valign=top><pre>
+#include &lt;iostream&gt;
+#include &lt;map&gt;
+#include &lt;cstdio&gt;
+#include &lt;cstdlib&gt;
+using namespace std;
+
+class Event {
+  public: 
+    string type;
+    double time;
+};
+
+int main()
+{
+  multimap &lt;double, Event *&gt; events;
+  multimap &lt;double, Event *&gt;::iterator eit;
+  Event *e;
+  string type;
+  double time;
+  int arrival_events;
+
+  arrival_events = 0;
+</pre></td><td valign=top><pre>
+  while (cin &gt;&gt; type &gt;&gt; time) {
+    if (type != "Arrival") {
+      e = new Event;
+      e-&gt;type = type;
+      e-&gt;time = time;
+      events.insert(make_pair(time, e));
+    } else {
+      arrival_events++;
+      e-&gt;type = "Arrival";
+      e-&gt;time = time;
+      events.insert(make_pair(time, e));
+    }
+  }
+
+  for (eit = events.begin(); eit != events.end(); eit++) {
+    e = eit-&gt;second;
+    printf("%7.4lf %s\n", e-&gt;time, e-&gt;type.c_str());
+  }
+  printf("Arrival events: %d\n", arrival_events);
+
+  return 0;
+}
+</pre></td></table></center><p>
+
+The makefile compiles it with the debugging flag:
+
+<pre>
+UNIX> <font color=darkred><b>make clean</b></font>
+rm -f a.out bin/*
+UNIX> <font color=darkred><b>make bin/sf1</b></font>
+g++ -g -o bin/sf1 src/sf1.cpp
+UNIX> <font color=darkred><b></b></font>
+</pre>
+
+When we run it on
+<b><a href=txt/input0.txt>txt/input0.txt</a></b>, it seg faults:
+
+<pre>
+UNIX> <font color=darkred><b>bin/sf1 < txt/input0.txt </b></font>
+Segmentation fault (core dumped)
+UNIX> <font color=darkred><b></b></font>
+</pre>
+
+Here's a common use for <b>gdb</b>.  First, you run the program under the control of <b>gdb</b>:
+
+<pre> 
+UNIX> <font color=darkred><b>gdb bin/sf1</b></font>
+GNU gdb (GDB) Red Hat Enterprise Linux 7.6.1-119.el7
+Copyright (C) 2013 Free Software Foundation, Inc.
+<font color=blue># ...</font>
+Reading symbols from /home/jplank/cs302/Notes/GDB/bin/sf1...done.
+(gdb) <font color=darkred><b>run < txt/input0.txt</b></font>
+Starting program: /home/jplank/cs302/Notes/GDB/bin/sf1 < txt/input0.txt
+
+Program received signal SIGSEGV, Segmentation fault.
+std::string::assign (this=0x400bd0 <_start>, __s=0x401b00 "Arrival", __n=7)
+    at /usr/src/debug/gcc-4.8.5-20150702/obj-x86_64-redhat-linux/x86_64-redhat-linux/libstdc++-v3/include/bits/basic_string.tcc:262
+262       _M_check_length(this->size(), __n, "basic_string::assign");
+(gdb)
+</pre>
+
+The output is a little noisy, but you can see that there has been a segmentation violation.
+It appears to be in line 262 of the file <b>basic_string.tcc</b>, which of course is a file
+that you don't use directly, but is part of the C++ string library.  There won't be a bug there --
+however, where it means is that you've made a bug which causes a segmentation violation in 
+their code.  The command <b>backtrace</b> will tell you what procedures have been called in 
+the execution path to the segmentation violation:
+
+<pre> 
+(gdb) <font color=darkred><b>backtrace</b></font>
+#0  std::string::assign (this=0x400bd0 <_start>, __s=0x401b00 "Arrival", __n=7)
+    at /usr/src/debug/gcc-4.8.5-20150702/obj-x86_64-redhat-linux/x86_64-redhat-linux/libstdc++-v3/include/bits/basic_string.tcc:262
+#1  0x0000000000400dd7 in main () at src/sf1.cpp:32
+(gdb)
+</pre>
+
+This is the number one helpful thing about <b>gdb</b> -- your segmentation violation is happening
+in line 32 of <b>src/sf1.cpp</b>.  You can go to your favorite editor and see line 32, but you 
+can also see it in <b>gdb</b>.  Your procedure call stack is partitioned into <i>frames</i>, which
+are numbered in the output to <b>backtrace</b>.  Frame 0 is in <b>std::string::assign()</b>.
+Frame 1 is in your <b>main()</b>.  You are currently "at" frame 0.  To "go" to frame 1, type
+"up", or perhaps more clearly, "frame 1".
+
+<pre> 
+(gdb) <font color=darkred><b>frame 1</b></font>
+#1  0x0000000000400dd7 in main () at src/sf1.cpp:32
+32            e->type = "Arrival";
+(gdb) <font color=darkred><b></b></font>
+</pre>
+
+You'll note, it shows you line 32, which looks pretty harmless.  How can that line cause a
+segmentation violation?  There is really only one way -- <b>e</b> must be a bad pointer.
+Often that's all you need to find your bug.  You don't need to muck around with a debugger --
+figure out why <b>e</b> is a bad pointer.  
+<p>
+It shouldn't be hard to realize that you forgot to make <b>e</b> a new Event.  But let's 
+have the debugger help us.  Maybe.  First, you can print the local variables in your frame with
+"info locals":
+
+<pre> 
+(gdb) <font color=darkred><b>info locals</b></font>
+e = 0x400bd0 <_start>
+type = "Arrival"
+events = std::multimap with 0 elements
+eit = <error reading variable eit (Cannot access memory at address 0x20)>
+time = 80.213791000000001
+arrival_events = 1
+(gdb) <font color=darkred><b>print e->type</b></font>
+</pre>
+
+That address for <b>e</b> looks suspicious, doesn't it?  Of course, hex digits can be anything.
+You can print individual variables -- that will help us see that <b>e</b> is a bad address:
+
+<pre>
+(gdb) <font color=darkred><b>print e</b></font>
+$2 = (Event *) 0x400bd0 <_start>
+(gdb) <font color=darkred><b>print e->type</b></font>
+$3 = <error reading variable: Cannot access memory at address 0x89485ed18949ed19>
+(gdb) <font color=darkred><b></b></font>
+</pre>
+
+Bingo!  Something's wrong with <b>e</b>.
+
+<hr>
+<h3>Setting breakpoints and setting variables to take a look at what's going on</h3>
+
+Let's confirm that <b>e</b> is being used uninitialized.  To do that, we're going to do
+the following:
+
+<UL>
+<LI> We're going to set breakpoints so that our program stops before the main while loop,
+and again when it sees an "Arrival" event.
+<LI> Before the main loop, we're going to set <b>e</b> to NULL.
+<LI> Then, when we see the first "Arrival" event, we'll print <b>e</b> to confirm that it's
+NULL, and that we're about to have a seg fault.
+<LI> Then we'll generate the seg fault.
+</UL>
+
+First, we'll use the "list" command to see numbered lines of <b>main()</b>:
+
+<pre>
+(gdb) <font color=darkred><b>list main</b></font>
+9     string type;
+10      double time;
+11  };
+12  
+13  int main()
+14  {
+15    multimap <double, Event *> events;
+16    multimap <double, Event *>::iterator eit;
+17    Event *e;
+18    string type;
+(gdb) <font color=darkred><b>list</b></font>
+19    double time;
+20    int arrival_events;
+21  
+22    arrival_events = 0;
+23  
+24    while (cin >> type >> time) {
+25      if (type != "Arrival") {
+26        e = new Event;
+27        e->type = type;
+28        e->time = time;
+(gdb) <font color=darkred><b>list</b></font>
+29        events.insert(make_pair(time, e));
+30      } else {
+31        arrival_events++;
+32        e->type = "Arrival";
+33        e->time = time;
+34        events.insert(make_pair(time, e));
+35      }
+36    }
+37  
+38    for (eit = events.begin(); eit != events.end(); eit++) {
+(gdb) <font color=darkred><b></b></font>
+</pre>
+
+Then, we'll put "breakpoints" at lines 22 and 31:
+
+<pre>
+(gdb) <font color=darkred><b>b 22</b></font>
+Breakpoint 1 at 0x400cf5: file src/sf1.cpp, line 22.
+(gdb) <font color=darkred><b>b 31</b></font>
+Breakpoint 2 at 0x400dc2: file src/sf1.cpp, line 31.
+(gdb) <font color=darkred><b></b></font>
+</pre>
+
+And run the program on <b>txt/input0.txt</b> again.  You'll note that the previous
+run hasn't completed, so we restart it.  That will throw away the current run of the program:
+
+<pre>
+(gdb) <font color=darkred><b>run < txt/input0.txt</b></font>
+The program being debugged has been started already.
+Start it from the beginning? (y or n) y
+
+Starting program: /home/jplank/cs302/Notes/GDB/bin/sf1 < txt/input0.txt
+
+Breakpoint 1, main () at src/sf1.cpp:22
+22    arrival_events = 0;
+(gdb) <font color=darkred><b></b></font>
+</pre>
+
+It has stopped at our breakpoint.  We can examine <b>e</b>, which is uninitialized:
+
+<pre>
+(gdb) <font color=darkred><b>print e</b></font>
+$4 = (Event *) 0x400bd0 <_start>
+(gdb) <font color=darkred><b></b></font>
+</pre>
+
+Let's set it to NULL -- you can do that with "set".  Of course, the debugger doesn't recognize
+NULL, but we're smart enough to know that NULL is zero:
+
+<pre>
+(gdb) <font color=darkred><b>set var e=0</b></font>
+(gdb) <font color=darkred><b>print e</b></font>
+$6 = (Event *)</font> 0x0                          <font color=blue> # The dollars sign numbers may differ for you.</font>
+(gdb) <font color=darkred><b>print e->type</b></font>
+Cannot access memory at address 0x0
+(gdb) <font color=darkred><b></b></font>
+</pre>
+
+We type "cont" to continue to the next breakpoint, which is where we get the first "Arrival"
+event.  You'll note that <b>events</b> has 0 elements, so this is the first line of input.
+That means that <b>e</b> is still NULL (which you can see in the "info locals" command):
+
+<pre>
+(gdb) <font color=darkred><b>cont</b></font>
+Continuing.
+
+Breakpoint 2, main () at src/sf1.cpp:31
+31        arrival_events++;
+(gdb) <font color=darkred><b>info locals</b></font>
+e = 0x0
+type = "Arrival"
+events = std::multimap with 0 elements
+eit = <error reading variable eit (Cannot access memory at address 0x20)>
+time = 80.213791000000001
+arrival_events = 0
+(gdb) <font color=darkred><b></b></font>
+</pre>
+
+Typing "cont" will now generate the segmentation violation, as you try to set <b>e->type</b>
+on line 32:
+
+<pre>
+(gdb) <font color=darkred><b>cont</b></font>
+Continuing.
+
+Program received signal SIGSEGV, Segmentation fault.
+std::string::assign (this=0x0, __s=0x401b00 "Arrival", __n=7)
+    at /usr/src/debug/gcc-4.8.5-20150702/obj-x86_64-redhat-linux/x86_64-redhat-linux/libstdc++-v3/include/bits/basic_string.tcc:262
+262       _M_check_length(this->size(), __n, "basic_string::assign");
+(gdb) <font color=darkred><b></b></font>
+</pre>
+
+The segfault made finding that bug easier, didn't it?  A corollary to this is that you may
+want to initialize your pointers to NULL, even though a correct program will never read them.
+The reason is that if you have a bug, where the pointer gets read uninitialized, you'll 
+find it easier with the segmentation violation.
+<p>
+<hr>
+<h3>Setting watchpoints</h3>
+
+Now, let's try to find the same bug, but in a more difficult scenario.  The input file
+in <b><a href=txt/input1.txt>txt/input1.txt</a></b> doesn't start with an "Arrival" event.
+That means that when you do get to an "Arrival" event, you're going to modify a previous
+event which is already on the map.  The map will print out too many "Arrival" events, and
+some non-arrival events will be eaten.  In particular, the "Ava-Rafael" event on line 6
+will be turned into an Arrival event.  Let's confirm all of that with some standard Unix
+command line tools:
+
+<pre>
+UNIX> <font color=darkred><b>cat -n txt/input1.txt | grep Arrival</b></font>
+     7  Arrival 66.629794
+    13  Arrival 82.201580
+    24  Arrival 77.338365
+    39  Arrival 84.262522
+    69  Arrival 20.367907
+UNIX> <font color=darkred><b>cat -n txt/input1.txt | sed -n 6p                    <font color=blue> # This line is one before an Arrival event.</b></font></font>
+     6  Ava-Rafael 62.063342
+UNIX> <font color=darkred><b>bin/sf1 < txt/input1.txt > txt/output1-wrong.txt     </b></font>
+UNIX> <font color=darkred><b>bin/sf2 < txt/input1.txt > txt/output1-correct.txt   <font color=blue> # sf2 is the correct version of the program</b></font></font>
+UNIX> <font color=darkred><b>cat -n txt/output1-correct.txt | grep Ava-R          <font color=blue> # In the correct output, Ava-Rafael is on line 64.</b></font></font>
+    64  62.0633 Ava-Rafael
+UNIX> <font color=darkred><b>cat -n txt/output1-wrong.txt | sed -n 64p            <font color=blue> # In the incorrect output, this has been turned into the Arrival event from line 7.</b></font></font>
+    64  66.6298 Arrival
+UNIX> <font color=darkred><b>cat -n txt/output1-correct.txt | grep 66.6298        <font color=blue> # Looking at this in another way, the Arrival event is line 69 of the correct output.</b></font></font>
+    69  66.6298 Arrival
+UNIX> <font color=darkred><b>cat -n txt/output1-wrong.txt | grep 66.6298          <font color=blue> # In the incorrect output, it's on both lines 69 and 64.</b></font></font>
+    64  66.6298 Arrival
+    69  66.6298 Arrival
+UNIX> <font color=darkred><b></b></font>
+</pre>
+
+Great.  All of this makes sense, because we already know about the bug.  Now, let's suppose that we
+didn't know about the bug.  We've written our program, and it's getting a gradescript
+wrong, because your output is not matching the correct output:
+
+<pre> 
+UNIX> <font color=darkred><b>openssl md5 txt/output1*              <font color=blue> # This confirms that the two outputs differ.</b></font></font>
+MD5(txt/output1-correct.txt)= 8e7d6cb48c0a5891955254337826f3b1
+MD5(txt/output1-wrong.txt)= bee14bd84a63482581997c3b148a6852  
+UNIX> <font color=darkred><b>diff -y txt/output1* | grep '|'       <font color=blue> # This shows the lines where they differ.</b></font></font>                   
+61.8246 Gabriel-Writeup                                       | 20.3679 Arrival
+62.0633 Ava-Rafael                                            | 66.6298 Arrival
+87.8991 Sophia-Whiz                                           | 84.2625 Arrival
+91.0791 Riley-Inception                                       | 77.3384 Arrival
+92.9222 Zoe-Checkerberry                                      | 82.2016 Arrival
+UNIX> <font color=darkred><b></b></font>
+</pre>
+
+So, there are five lines in the output where the correct output is being turned into an "Arrival".
+Let's use a watchpoint to figure out where this is happening.  First, here are the first
+ten lines of the input file.  As you can see, the "Ava-Rafael" event is on line 6, and there's
+an "Arrival" event on line 7.
+
+<pre>
+UNIX> <font color=darkred><b>cat -n txt/input1.txt | head</b></font>
+     1  Abigail-Johnson 80.213791
+     2  Bailey-Concordant 93.932086
+     3  Grace-Pentagon 94.684299
+     4  Riley-Disposal 57.560029
+     5  Jack-Goer 84.855482
+     6  Ava-Rafael 62.063342
+     7  Arrival 66.629794
+     8  Joseph-Nostalgic 19.156007
+     9  Nicholas-Deneb 99.282122
+    10  Cameron-Impunity 16.390366
+UNIX> <font color=darkred><b></b></font>
+</pre>
+
+What we want to do is have the debugger stop when we see "Ava-Rafael".  We'll do that by 
+putting a breakpoint at line 27, and then going to the 6th time that we get to that
+line.  At that point, <b>type</b> should equal "Ava-Rafael":
+
+<pre>
+(gdb) <font color=darkred><b>cat -n src/sf1.cpp | sed -n 25,29p</b></font>
+    25      if (type != "Arrival") {
+    26        e = new Event;
+    27        e->type = type;
+    28        e->time = time;
+    29        events.insert(make_pair(time, e));
+(gdb) <font color=darkred><b>gdb bin/sf1</b></font>
+<font color=blue># .......</font>
+Reading symbols from /home/jplank/cs302/Notes/GDB/bin/sf1...done.
+(gdb) <font color=darkred><b>break 27</b></font>                   <font color=blue> # Set a breakpoint at line 27</font>
+Breakpoint 1 at 0x400d36: file src/sf1.cpp, line 27.
+(gdb) <font color=darkred><b>run < txt/input1.txt</b></font>       <font color=blue> # Run this on the input file.</font>
+Starting program: /home/jplank/cs302/Notes/GDB/bin/sf1 < txt/input1.txt
+
+Breakpoint 1, main () at src/sf1.cpp:27
+27        e->type = type;
+(gdb) <font color=darkred><b>print type</b></font>                 <font color=blue> # It stops on line 27.</font>
+$1 = "Abigail-Johnson"           <font color=blue> # We see it's on the "Abigail-Johnson" event.</font>
+(gdb) <font color=darkred><b>cont 5</b></font>                     <font color=blue> # This says to run, but skip the next 4 breakpoints</font>
+Will ignore next 4 crossings of breakpoint 1.  Continuing.
+
+Breakpoint 1, main () at src/sf1.cpp:27
+27        e->type = type;
+(gdb) <font color=darkred><b>print type</b></font>                 <font color=blue> # This is the 6th iteration, so type = "Ava-Rafael"</font>
+$2 = "Ava-Rafael"
+(gdb) <font color=darkred><b></b></font>
+</pre>
+
+The "next" command performs the next line.  If the line is a procedure or method call, it will make
+the call and resume control after the call is done.  The "step" command is the same as "next", but
+it goes "into" functions and lets you step through them.  We won't call "step" here -- just "next":
+
+<pre>
+(gdb) <font color=darkred><b>info locals</b></font>
+e = 0x604430
+type = "Ava-Rafael"
+events = std::multimap with 5 elements = {[57.560029] = 0x6042f0, [80.213791000000001] = 0x604100, 
+  [84.855481999999995] = 0x604390, [93.932085999999998] = 0x6041f0, 
+  [94.684298999999996] = 0x604250}
+eit = <error reading variable eit (Cannot access memory at address 0x20)>
+time = 62.063341999999999
+arrival_events = 0
+(gdb) <font color=darkred><b>next</b></font>
+28        e->time = time;
+(gdb) <font color=darkred><b>next</b></font>
+29        events.insert(make_pair(time, e));
+(gdb) <font color=darkred><b>next</b></font>
+24    while (cin >> type >> time) {
+(gdb) <font color=darkred><b>info locals</b></font>
+e = 0x604430
+type = "Ava-Rafael"
+events = std::multimap with 6 elements = {[57.560029] = 0x6042f0, [62.063341999999999] = 0x604430, 
+  [80.213791000000001] = 0x604100, [84.855481999999995] = 0x604390, 
+  [93.932085999999998] = 0x6041f0, [94.684298999999996] = 0x604250}
+eit = <error reading variable eit (Cannot access memory at address 0x20)>
+time = 62.063341999999999
+arrival_events = 0
+(gdb) <font color=darkred><b></b></font>
+</pre>
+
+As you can see, we've put <b>e</b> onto the multimap, and that added an element to the multimap.
+Now, what I want to do is have the debugger tell me when something happens to "Ava-Rafael"'s
+event.  That's harder than I'd like it to be.  What I'm going to do is "watch" the address
+of <b>e->time</b>.  If it gets overwritten, the debugger will tell me.  Here we go, 
+with commentary inline:
+
+<pre>
+(gdb) <font color=darkred><b>print &(e->time)</b></font>   <font color=blue> # Show me the address of e->time</font>
+$5 = (double *)</font> 0x604438
+(gdb) <font color=darkred><b>watch *0x604438</b></font>    <font color=blue> # Tell the debugger to watch it.</font>
+Hardware watchpoint 2: *0x604438
+(gdb) <font color=darkred><b>delete 1</b></font>           <font color=blue> # Delete the breakpoint on line 27</font>
+(gdb) <font color=darkred><b>cont</b></font>               <font color=blue> # Continue running</font>
+Continuing.
+Hardware watchpoint 2: *0x604438                           <font color=blue> # The hardware has detected that e->time has changed.</font>
+
+Old value = -1758119093
+New value = -1954656796
+main () at src/sf1.cpp:34
+34        events.insert(make_pair(time, e));
+(gdb) <font color=darkred><b>info locals</b></font>        <font color=blue> # Where are we?  We have just read an "Arrival" event, and as you can see,</font>
+e = 0x604430            <font color=blue> # e is the same as it was before, so we've overwritten "Ava-Rafael"</font>
+type = "Arrival"
+events = std::multimap with 6 elements = {[57.560029] = 0x6042f0, [62.063341999999999] = 0x604430, 
+  [80.213791000000001] = 0x604100, [84.855481999999995] = 0x604390, 
+  [93.932085999999998] = 0x6041f0, [94.684298999999996] = 0x604250}
+eit = <error reading variable eit (Cannot access memory at address 0x20)>
+time = 66.629794000000004
+arrival_events = 1
+(gdb) <font color=darkred><b>next</b></font>          <font color=blue> # I call next, which inserts e into the map</font>
+24    while (cin >> type >> time) {
+(gdb) <font color=darkred><b>print events</b></font>  <font color=blue> # The map now has two events at 0x604430.  That's a bug!</font>
+$6 = std::multimap with 7 elements = {[57.560029] = 0x6042f0, [62.063341999999999] = <font color=red>0x604430</font>, 
+  [66.629794000000004] = <font color=red>0x604430</font>, [80.213791000000001] = 0x604100, 
+  [84.855481999999995] = 0x604390, [93.932085999999998] = 0x6041f0, 
+  [94.684298999999996] = 0x604250}
+(gdb) <font color=darkred><b></b></font>
+</pre>
+
+Why did I watch the address of <b>e->time</b> and not <b>e</b> or <b>e->type</b>?  The reason is
+that <b>e->type</b> is a C++ string, and its semantics are a little different.  The time is
+simply 8 bytes, so it's easy to watch. 
+<p>
+<hr>
+<h3>Commentary</h3>
+
+I hope this gives you a little of the flavor of using a command-line debugger.  As Dr. Ruoti
+says above, there are better debuggers with much better features.  Whenever you use an IDE,
+you should explore its features for debuggin.
+
+<hr>
+<h3>Lab Project1</h3>
+
+I have taken the program <b>sudoku5.cpp</b> from the
+<a href=http://web.eecs.utk.edu/~jplank/plank/classes/cs302/Notes/Recursion-Review/>Recursion Review</a> lecture notes, and annotated it so that it prints out the number of times <b>Solve()</b>
+is called.  When you run it on the puzzle in 
+<b><a href=txt/s_test.txt>txt/s_test.txt</a></b>, it takes 7,789 calls.
+
+<p><center><table border=3 cellpadding=3><td><pre>
+-7- --5 ---
+-2- --- -35
+--- 74- 9--
+
+--8 -1- 3--
+7-- 5-3 --8
+--5 -6- 1--
+
+--3 -72 ---
+19- --- -6-
+--- 9-- -8-
+</pre></td></table></center><p>
+
+<pre>
+UNIX> <font color=darkred><b>bin/sudoku5 < txt/s_test.txt </b></font>
+976 235 814
+824 196 735
+351 748 926
+
+268 417 359
+719 523 648
+435 869 172
+
+583 672 491
+192 384 567
+647 951 283
+
+# of calls to Solve: 7789
+UNIX> <font color=darkred><b></b></font>
+</pre>
+
+Your job is to run <b>bin/sudoku5</b> under the control of <b>gdb</b>, and within
+<b>gdb</b>, after you've read in the puzzle, but before you call <b>Solve</b>, 
+set the first element of the puzzle to '9'.  Then see how many calls
+to <b>Solve()</b> it takes to solve the puzzle.  The answer is 1956.  
+<p>
+Show your TA how you did it to get credit for the lab.  At the end of lab, if you
+didn't get it, your TA will show you.
+<p>
