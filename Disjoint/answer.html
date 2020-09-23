@@ -1,0 +1,24 @@
+<h3>Answers to Disjoint Sets Clicker Questions, Set 1</h3>
+
+<p><center><table border=3><td><a href=img/C1.jpg><img src=img/C1.jpg width=1000></a></td></table></center><p>
+
+Links go from low to high.
+
+<OL>
+<LI> How many disjoint sets are there?  <p><i>There are 20 nodes with no links going up from them: 20.</i>
+<LI> If I say <b>Union(46,9)</b> why will there be an error?  <p><i>You can't call <b>Union()</b>
+     on a non-root node, like 46.</i>
+<p><LI> If I'm using Union-by-size, and I call <b>Union(90,52)</b>, what link will change?
+     <p><i>The tree rooted at 90 has more elements than the tree rooted at 52, so we will add a link
+        from node 52 to 90</i>.
+<p><LI> If I'm using Union-by-height, and I call <b>Union(90,52)</b>, what link will change?
+     <p><i>The tree rooted at 52 has a greater depth than the tree rooted at 90, so we will add a link
+        from node 90 to 52</i>.
+<p><LI> If I'm using Union-by-rank-with-path-compression, how many links change when I call <b>Find(8)</b>  (look at the nodes on the bottom of the figure)?
+     <p><i>Nodes 8 and 86 will have their links change to 73 with path compression.  The anwer 
+       is two.</i>
+<p><LI> If I'm using Union-by-rank-with-path-compression, how is it possible that <b>Ranks[128]</b>
+     could be three?
+     <p><i>For example, node 129 could have been the child of 100, and then <b>Find(129)</b> was
+     called, and path compression changed node 129's link to 128.</i>
+</UL>
