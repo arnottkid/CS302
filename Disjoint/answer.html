@@ -20,5 +20,30 @@ Links go from low to high.
 <p><LI> If I'm using Union-by-rank-with-path-compression, how is it possible that <b>Ranks[128]</b>
      could be three?
      <p><i>For example, node 129 could have been the child of 100, and then <b>Find(129)</b> was
-     called, and path compression changed node 129's link to 128.</i>
+     called, and path compression changed node 129's link to 128.  Here's a concrete example:</i>
+<p>
+<UL>
+<LI> Do Union(128,143) and it returns 128.
+<LI> Do Union(100,129) and it returns 129.
+<LI> Do Union(128,129) and it returns 128.  The data structure now looks like:
+<pre>
+              128   --- Rank = 3 (Equals the height because there has been no path compression.
+              / \
+             /   \
+            /     \
+          143     129
+                   |
+                   |
+                   |
+                  100
+</pre>
+<LI> Do Find(100).  That does path compression, and the data structure looks as in the picture:
+<pre>
+              128   --- Rank = 3 (It is unchanged, and now doesn't equal the height)
+              /|\
+             / | \
+            /  |  \
+           /   |   \
+         143  100  129
+</pre>
 </UL>
