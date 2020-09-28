@@ -5,6 +5,8 @@ ALL = bin/add_5 \
       bin/massive_create \
       bin/formula \
       bin/genrandom \
+
+IMAGES = \
       img/vector-1.jpg \
       img/vector-2.jpg \
       img/vector-3.jpg \
@@ -20,6 +22,8 @@ OBJS = obj/pqueue_set.o obj/pqueue_heap.o
 CFLAGS = -Iinclude -Wall -Wextra -std=c++98
 
 all: $(ALL)
+
+images: $(IMAGES)
 
 clean:
 	rm -f a.out bin/* obj/*
