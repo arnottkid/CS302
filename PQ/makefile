@@ -2,6 +2,7 @@ ALL = bin/add_5 \
       bin/pq_sort \
       bin/pq_print \
       bin/pq_jgraph \
+      bin/pq_v_jgraph \
       bin/massive_create \
       bin/formula \
       bin/genrandom \
@@ -49,6 +50,9 @@ bin/pq_print: include/pqueue.hpp src/pq_print.cpp $(OBJS)
 
 bin/pq_jgraph: src/pq_jgraph.cpp
 	g++ $(CFLAGS) -O -o bin/pq_jgraph src/pq_jgraph.cpp
+
+bin/pq_v_jgraph: src/pq_v_jgraph.cpp
+	g++ $(CFLAGS) -O -o bin/pq_v_jgraph src/pq_v_jgraph.cpp
 
 bin/massive_create: include/pqueue.hpp src/massive_create.cpp $(OBJS)
 	g++ $(CFLAGS) -O -o bin/massive_create src/massive_create.cpp $(OBJS)
