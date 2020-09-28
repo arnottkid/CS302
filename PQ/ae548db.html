@@ -1,0 +1,80 @@
+<h3>Priority Queue Clicker Questions, Set 2, With answers</h3>
+
+In all of these questions, it may be helpful to know that:
+
+<UL>
+<LI> If a node of the heap is at index <i>i</i> of the vector, its left child is index <i>2i+1</i>.
+<LI> If a node of the heap is at index <i>i</i> of the vector, its right child is index <i>2i+2</i>.
+<LI> If a node of the heap is at index <i>i</i> of the vector, its parent is index <i>floor((i-1)/2)</i>.
+</UL>
+
+<hr>
+1. Suppose you have the following priority queue:
+
+<p><center><table border=3><td><img src=img/clicker-2a.jpg width=800></td></table></center><p>
+
+Suppose I call <b>Push(36)</b>.  When that's done, what is the index of the vector element
+that equals 36?
+<p>
+<i>Answer: You place 36 into a new node, which is the child of 88, and percolate up.  It
+will swap places with 88 and 45, and then stop, because it is greater than its parent (30).
+The index of that node is 6.
+<p>
+Why 6?  The root's index is 0.  The nodes at level 1 are indices 1-2.
+The nodes at level 2 are indices 3-6, and this is the last of those.
+</i>
+
+<hr>
+2. Suppose you have the following priority queue:
+
+<p><center><table border=3><td><img src=img/clicker-2b.jpg width=800></td></table></center><p>
+
+Suppose I call <b>Pop()</b>.  When that's done, what is the index of the vector element
+that equals 30?
+<p>
+<i>Answer: You will return 0.  You delete the node with 30 and put it at the root, and
+percolate down.  This will swap 30 and 4, then 30 and 10, then 30 and 12.  It will stop
+there.  The 
+The index of that node is 11.</i>
+
+<hr>
+3. Suppose you have the following vector representation of a priority queue:
+
+<p><center><table border=3><td><img src=img/clicker-2c.jpg width=800></td></table></center><p>
+
+Suppose I call <b>Push(44)</b>.  When that's done, what is the index of the vector element
+that equals 44?  
+<p>
+<i>Answer: You don't need to draw pictures -- just use the equations at the top of this page:
+<UL>
+<LI> The new element goes at index 25.  
+<LI> 25's parent is 12, whose value is 57: Swap.
+<LI> 12's parent is 5, whose value is 52.  Swap.
+<LI> 5's parent is 2, whose value is 19.  You're done, and the answer is 5.
+</UL>
+</i>
+
+<hr>
+4. Suppose you have the following vector representation of a priority queue:
+
+<p><center><table border=3><td><img src=img/clicker-2d.jpg width=800></td></table></center><p>
+
+Suppose I call <b>Pop()</b>.  When that's done, what is the index of the vector element
+that equals 85?
+
+<p>
+<i>Answer: Again, you don't need to draw pictures -- just use the equations at the top of this page:
+<UL>
+<LI> You will return 1.  You delete the last node, and put its value, 85, into the root.
+<LI> You compare the root with its children, which are in indices 1 and 2.  The smallest is
+     5, which is less than 85, so you swap 85 with 5.  85's index is now 1.
+<LI> You now compare 85 with its children, which are in indices 3 and 4.  The smallest is
+     8, which is less than 85, so you swap 85 with 8.  85's index is now 4.
+<LI> You now compare 85 with its children, which are in indices 9 and 10.  The smallest is
+     25, which is less than 85, so you swap 85 with 25.  85's index is now 10.
+<LI> You now compare 85 with its children, which are in indices 21 and 22.  The smallest is
+     45, which is less than 85, so you swap 85 with 45.  85's index is now 21.
+<LI> 85 now has no children, so you're done.  The answer is 21.
+</UL>
+</i>
+
