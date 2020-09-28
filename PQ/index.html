@@ -641,7 +641,9 @@ Thus, all of the <b>Percolate_Down()</b>'s take <i>(1)(n/2)</i> = <i>n/2</i> ope
 At the next level, there are <i>n/4</i> nodes, whose <b>Percolate_Down()</b>'s take 2 operations each.
 Thus, all of them take <i>2n/4</i>.  At the next level, there are <i>n/8</i> nodes whose
 <b>Percolate_Down()</b>'s take 3 operations each.  Thus, all of them take <i>3n/8</i>.  Do you see the
-pattern? 
+pattern?   To help you, try the animated gif in 
+<a href=img/vector.gif>img/vector.gif</a>, which shows the percolate down's for a 
+heap with 511 elements.
 <p>
 The creation of the heap can be converted into a summation:
 <p><center><table border=0 cellpadding=3><td valign=top><img src=img/Eq1.png></td></table></center><p>
@@ -653,7 +655,7 @@ value for the first 15 values of <i>n</i>.  The code is below
 #include &lt;iostream&gt;
 using namespace std;
 
-main()
+int main()
 {
   double num, den, total, n;
 
