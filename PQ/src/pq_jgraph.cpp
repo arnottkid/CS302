@@ -69,7 +69,7 @@ int main()
 
   for (i = 0; i < h.size(); i++) printf("  %lg %lg\n", x[i], y[i]);
 
-  if (h.size() < 32) {
+  if (h.size() < 64) {
     printf("newstring hjc vjc fontsize 9\n");
     for (i = 0; i < h.size(); i++) printf("copystring x %lg y %lg : %lg\n", x[i], y[i], h[i]);
   }

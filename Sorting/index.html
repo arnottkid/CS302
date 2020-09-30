@@ -45,7 +45,8 @@ and I compile it with each implementation separately to make a different executa
 for each implementation. 
 <p>
 All of this works with <b>make</b>, so that if you grab this directory using the Git
-repo on bitbucket, you should be able to type <b>"make clean; make"</b>, and everything
+repo on bitbucket, or you scp it from the lab machines,
+you should be able to type <b>"make clean; make"</b>, and everything
 will be compiled for you.  In your sorting lab, you will implement the procedure in two
 different ways, which will result in two more sorting executables.
 <p>
@@ -56,7 +57,7 @@ different ways, which will result in two more sorting executables.
 In 
 <b><a href=src/sorting.hpp>src/sorting.hpp</a></b> we define a procedure <b>sort_doubles</b>, which takes 
 a vector of doubles (reference parameter) and a boolean parameter called <b>print</b>.  When it returns,
-the elements of the vector should be sorted.  If <b>print</b> is one, intermediate sorting states
+the elements of the vector should be sorted.  If <b>print</b> is <b>true</b>, intermediate sorting states
 should be printed.  Otherwise, nothing should be printed.
 
 <p><center><table border=3 cellpadding=3><td><pre>
@@ -74,7 +75,7 @@ size iterations seed double-check(yes|no) print(yes|no)
 
 This will run <i>iterations</i> tests where it sorts a randomly created vector of size <i>size</i>
 by calling <b>sort_doubles()</b>.  It will use the given <i>seed</i> as a seed for <b>srand48()</b>.
-The elements of the vector will be numbers between 0 and 10 (i.e. we multiply <b>drand48()</b> by 10).
+The elements of the vector will be floating point numbers between 0 and 10 (i.e. we multiply <b>drand48()</b> by 10).
 If <i>double-check</i> is "yes", then it will double check the results of <b>sort_doubles()</b> to 
 make sure that it sorted correctly.  The last command line argument specifies 
 whether to set the <b>print</b> parameter to <b>true</b> or <b>false</b>.

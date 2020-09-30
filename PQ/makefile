@@ -1,6 +1,7 @@
 ALL = bin/add_5 \
       bin/pq_sort \
       bin/pq_print \
+      bin/pq_tool \
       bin/pq_jgraph \
       bin/pq_v_jgraph \
       bin/massive_create \
@@ -44,6 +45,9 @@ bin/add_5: include/pqueue.hpp src/add_5.cpp $(OBJS)
 
 bin/pq_sort: include/pqueue.hpp src/pq_sort.cpp $(OBJS)
 	g++ $(CFLAGS) -O -o bin/pq_sort src/pq_sort.cpp $(OBJS)
+
+bin/pq_tool: include/pqueue.hpp src/pq_tool.cpp $(OBJS)
+	g++ $(CFLAGS) -O -o bin/pq_tool src/pq_tool.cpp $(OBJS)
 
 bin/pq_print: include/pqueue.hpp src/pq_print.cpp $(OBJS)
 	g++ $(CFLAGS) -O -o bin/pq_print src/pq_print.cpp $(OBJS)

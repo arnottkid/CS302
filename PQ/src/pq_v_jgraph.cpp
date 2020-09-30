@@ -20,7 +20,7 @@ int main()
   while (cin >> d) h.push_back(d);
 
   printf("newgraph xaxis min 0 max %lg nodraw size %lg\n", 
-         (double) h.size(), (double) h.size() * 0.25);
+         (double) h.size(), (double) h.size() * 0.17);
   printf("yaxis min 0 max 1 size .25 nodraw\n");
 
   printf("newcurve marktype box fill 1 marksize 1 1 pts\n");
