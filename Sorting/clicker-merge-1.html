@@ -1,0 +1,48 @@
+<h3>Merge Sort Clicker Questions</h3>
+
+You are sorting the string <b>s</b> = "YQDPASOLRJHZMVKBU" using merge sort.  The prototype for
+your recursive merge sort procedure is:
+
+<p><center><table border=3 cellpadding=3><td><pre>
+void recursive_sort(string &v, string &temp, int start, int size);
+</pre></td></table></center><p>
+
+The initial call to <tt>recursive_sort()</b></tt> will be:
+
+<p><center><table border=3 cellpadding=3><td><pre>
+recursive_sort(s, temp, 0, 17);
+</pre></td></table></center><p>
+
+<b>Question 1</b>: What two calls to <b>recursive_sort()</b> will this initial call make?
+
+<UL>
+<LI> <b>A</b>: <tt>recursive_sort(s, temp, 0, 17)</tt> and <tt>recursive_sort(s, temp, 8, 17)</tt>.
+<LI> <b>B</b>: <tt>recursive_sort(s, temp, 0, 8)</tt> and <tt>recursive_sort(s, temp, 8, 8)</tt>.
+<LI> <b>C</b>: <tt>recursive_sort(s, temp, 0, 8)</tt> and <tt>recursive_sort(s, temp, 8, 9)</tt>.
+<LI> <b>D</b>: <tt>recursive_sort(s, temp, 0, 8)</tt> and <tt>recursive_sort(s+8, temp, 0, 9)</tt>.
+</UL>
+
+<b>Question 2</b>: When those two calls return, what is <b>s</b>?
+
+<hr>
+In case you want to copy and paste the string, here it is:
+
+<pre>
+Y
+Q
+D
+P
+A
+S
+O
+L
+R
+J
+H
+Z
+M
+V
+K
+B
+U
+</pre>

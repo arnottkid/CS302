@@ -1,4 +1,4 @@
-ALL = bin/example bin/maze-gen bin/maze_ppm bin/example-exam
+ALL = bin/example bin/maze-gen bin/maze_ppm bin/example-exam bin/dj_tool
 
 all: $(ALL)
 
@@ -39,6 +39,9 @@ bin/example-exam: obj/example-exam.o $(OBJS)
 
 bin/maze-gen: obj/maze-gen.o $(OBJS)
 	g++ -O -o bin/maze-gen obj/maze-gen.o $(OBJS)
+
+bin/dj_tool: src/dj_tool.cpp $(OBJS)
+	g++ -O $(CFLAGS) -o bin/dj_tool src/dj_tool.cpp $(OBJS)
 
 bin/maze_ppm: src/maze_ppm.cpp 
 	g++ -O -o bin/maze_ppm src/maze_ppm.cpp
