@@ -1,0 +1,78 @@
+<h3>Answers To Quicksort Clicker Questions</h3>
+
+You are sorting the following vector with quicksort.
+
+<pre>
+38.60
+52.97
+73.54
+20.54
+62.94
+15.22
+32.80
+49.89
+68.65
+94.99
+39.10
+</pre>
+
+<b>Question 1</b>:
+What are the first two numbers that are swapped in the partitioning (answer with the
+two numbers separated by a single space)?
+<p>
+<i>Answer: The pivot is 38.60, regarless of whether you are using the "median-of-three"
+pivot selection algorithm or not.
+The first number in the "left" set is 52.97, which is greater than the pivot, so it will
+be swapped into the "right" set.  We will look at elements in the "right" set from back to
+front.  We skip over those that are greater than the pivot: 39.10, 94.99, 68.65, and 49.89.
+We stop at 32.80, and swap it with 52.97.  That is the answer.</i>
+
+<hr>
+<p>
+<b>Question 2</b>:
+What will be the index of 38.60 after the partitioning?
+<p>
+<i>Answer: Continuing, we'll swap 15.22 and 73.54.  After that, the "left" and "right"
+pointers will cross -- the "left" one stopping at 62.94, and the right one stopping
+at  20.54.  We'll swap the pivot with the last element of the "left" set, so it is swapped
+with 20.54.  The answer is 3.</i>
+
+<hr>
+<b>Question 3</b>: If we are using the median-of-three pivot selection algorithm, what will
+the pivot be if we're sorting the vector below:
+
+<pre>
+69.10
+36.00
+63.88
+96.50
+46.32
+83.16
+09.39
+10.59
+61.34
+42.57
+96.47
+</pre>
+<p>
+<i>Answer: The median of 69.10, 83.16 and 96.47 is 83.16.</i>
+
+<hr>
+<b>Question 4</b>: If we are using the median-of-three pivot selection algorithm, what will
+the pivot be if we're sorting the vector below:
+
+<pre>
+51.80
+38.59
+06.85
+01.70
+62.44
+16.53
+26.70
+24.43
+85.15
+52.94
+23.13
+</pre>
+
+<i>Answer: The median of 51.80, 16.53 and 23.13 is 23.13.</i>
