@@ -1,0 +1,59 @@
+<h3>Answer to DFS Clicker Question</h3>
+
+Here are the adjacency lists for a directed graph:
+
+<UL>
+<LI> Node A: { C, D, J }
+<LI> Node B: { E, G, H }
+<LI> Node C: { I, J }
+<LI> Node D: { F, I, J }
+<LI> Node E: { G, I }
+<LI> Node F: { }
+<LI> Node G: { H, I }
+<LI> Node H: { I }
+<LI> Node I: { }
+<LI> Node J: { }
+</UL>
+
+Suppose I call <b>DFS(A)</b>.  Suppose the DFS's action is to print the character of the node 
+before and after visiting its children.  What are the characters printed in the order in 
+which they are printed (just enter a single string with no spaces)?
+<hr>
+Let's simply walk through it, and we'll indent each time there is a recursive call:
+
+<pre>
+Call                  Printing          Visiting (calling DFS recursively)
+--------------------  --------          ---------------------------------
+DFS(A)                Print A
+DFS(A)                                  Visit C
+  DFS(C)              Print C
+  DFS(C)                                Visit I
+    DFS(I)            Print I  
+    DFS(I)                              No children to visit
+    DFS(I)            Print I  
+  DFS(C)                                Visit J
+    DFS(J)            Print J  
+    DFS(J)                              No children to visit
+    DFS(J)            Print J  
+  DFS(C)                                No more children to visit
+  DFS(C)              Print C
+DFS(A)                                  Visit D
+  DFS(D)              Print D
+  DFS(D)                                Visit F
+    DFS(F)            Print F                    
+    DFS(F)                              No children to visit
+    DFS(F)            Print F                    
+  DFS(D)                                Visit I
+    DFS(I)                              Already visited -- return
+  DFS(D)                                Visit J
+    DFS(J)                              Already visited -- return
+  DFS(D)                                No more children to visit
+  DFS(D)              Print D
+DFS(A)                                  Visit J
+  DFS(J)                              Already visited -- return
+DFS(A)                                No more children to visit
+DFS(A)                Print A
+</pre>
+
+So the answer is "ACIIJJCDFFDA".
+ 

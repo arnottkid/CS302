@@ -1,0 +1,35 @@
+<h3> General Graph Clicker Questions</h3>
+
+An undirected graph is defined as follows:
+<p>
+<i>V = { i | 0 <= i < 10 }</i><br>
+<i>E = { (0,1), (0,3), (1,9), (3,5), (3,7), (4,6), (5,9), (6,8) }</i>
+<p>
+<OL>
+1. How many connected components are in the graph?
+<p>
+<i>Answer</i>:
+The easiest way to answer this is to draw the graph:
+
+<pre>
+0 ------- 1           2
+|          \_______
+|                  \
+3 ------- 5 -------- 9
+|
+|
+7       4---6---8
+</pre>
+
+<i>The answer is three.</i>
+<p>
+2. Which nodes are in the one cycle in this graph?
+<p>
+<i>Answer</i>:
+Look at the graph above: 0, 1, 3, 5, 9.
+
+<p>
+3. Is this graph bipartite? 
+<p>
+No -- it has an odd cycle, and if you think about it, an odd cycle
+cannot be in a bitpartite graph.
