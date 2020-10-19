@@ -1,0 +1,72 @@
+<h3>Clicker Question on Doing BFS with a Queue</h3>
+
+Here's the same undirected graph as in the DFS clicker question:
+
+<p><center><table border=3><td><img src=img/click-DFS-ans.jpg></td></table></center><p>
+
+Please answer the following three questions.  They are related, so you should answer
+all of them, and then put your answers into the clicker at the end.
+<p>
+What I want to you do is a BFS from node J.  In doing the BFS, I want you to maintain
+four things:
+
+<UL>
+<LI> The queue of nodes that is central to the BFS.
+<LI> The order in which nodes were visited.
+<LI> The shortest distance from J to each node.
+<LI> For each node <i>n</i>, which node put <i>n</i> onto the queue?  In the lecture notes,
+     I use a backedge for this -- if node <i>y</i> put node <i>n</i> onto the queue, then
+     we store edge <i>(y,n)</i> on the queue.  Instead of a backedge, we're simply going to 
+     store the <i>y</i> nodes for each node <i>n</i>.   For node J, since we use it to start
+     the BFS, we'll just store an "X" here.
+</UL>
+
+I want to you return three things, one in each clicker question:
+
+<hr>
+1. Print out the order in which the nodes were visited, as a single 10-character word.
+<p>
+<hr>
+2. Print out the distance vector.  For example, 
+For example, we'll start by processing nodes J and C.  At this point,
+the distance vector will be:
+
+<pre>
+A B C D F G H J K M N 
+- - 1 - - - - 0 - - - 
+</pre>
+
+If we printed out the vector, we would print: <tt>"--1----0---"</tt>.
+For this question, please print the final distance vector (again, as a single 10-character word).
+<p>
+<hr>
+3. What is the "backedge" vector.  Again, we're storing nodes in that vector.
+For example, when we start by pushing node J on the queue, we'll put an "X" there to represent
+its backedge, because the BFS starts with J.  Here's what it will look like:
+
+<pre>
+A B C D F G H J K M N 
+- - - - - - - X - - - 
+</pre>
+
+Node J will push nodes C and B onto the queue, and now our backedge vector will be:
+
+<pre>
+A B C D F G H J K M N 
+- J J - - - - X - - - 
+</pre>
+
+At the end of the BFS, what is this vector.  Again, print a 10-character string.
+
+<hr>
+The following is a nice thing to cut-and-paste into your editor to help you work through
+the problem.  
+
+<pre>
+Order: 
+Queue: 
+
+           A B C D F G J K M N 
+Distances: - - - - - - - - - -
+Backedges: - - - - - - - - - -
+</pre>
