@@ -1,0 +1,29 @@
+<h3>Clicker Question on Doing DFS with a Stack</h3>
+
+Here's the graph with the edges drawn:
+
+<p><center><table border=3><td><img src=img/click-DFS-ans.jpg></td></table></center><p>
+
+<p>
+1. Suppose I call DFS(J).  Which node is visited first:
+K or B?
+<p>
+<i>Answer: The simplest thing is to draw in the edges as above.  Then, you can see from
+adjacency lists that J will visit C first.  And you can see that the DFS will wind its
+way from C to B via node K.  So the answer is K.  See the DFS below if you need to walk
+through it more slowly.
+</i>
+
+<p>
+2. Suppose I print out the name of each node, the first time
+that it is visited after I call <b>DFS(J)</b>.  What will
+be printed (print a 10-character word, with no spaces, like 
+"JBFNCKMGAD")?   I suggest that you maintain a stack
+and a "visited" vector.  You don't even have to draw
+the graph for this problem.
+<p>
+<i>Answer: The cleanest way to work through the DFS is to maintain a stack, and
+we'll push our children on in reverse order.  We'll also maintain a vector
+of visited nodes, and our answer.  I have a video of the process
+here.  As you'll see, the answer is <b>JCGKBFNMAD</b>.
+
