@@ -32,11 +32,11 @@ For example, we'll start by processing nodes J and C.  At this point,
 the distance vector will be:
 
 <pre>
-A B C D F G H J K M N 
-- - 1 - - - - 0 - - - 
+A B C D F G J K M N 
+- - 1 - - - 0 - - - 
 </pre>
 
-If we printed out the vector, we would print: <tt>"--1----0---"</tt>.
+If we printed out the vector, we would print: <tt>"--1---0---"</tt>.
 For this question, please print the final distance vector (again, as a single 10-character word).
 <p>
 <hr>
@@ -45,15 +45,15 @@ For example, when we start by pushing node J on the queue, we'll put an "X" ther
 its backedge, because the BFS starts with J.  Here's what it will look like:
 
 <pre>
-A B C D F G H J K M N 
-- - - - - - - X - - - 
+A B C D F G J K M N 
+- - - - - - X - - - 
 </pre>
 
 Node J will push nodes C and B onto the queue, and now our backedge vector will be:
 
 <pre>
-A B C D F G H J K M N 
-- J J - - - - X - - - 
+A B C D F G J K M N 
+- J J - - - X - - - 
 </pre>
 
 At the end of the BFS, what is this vector.  Again, print a 10-character string.
